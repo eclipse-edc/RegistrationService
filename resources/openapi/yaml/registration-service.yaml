@@ -1,0 +1,15 @@
+openapi: 3.0.1
+info:
+  title: Eclipse Dataspace Connector Registration Service
+  version: 0.0.1
+paths:
+  /health:
+    get:
+      tags:
+      - Health
+      operationId: healthy
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
