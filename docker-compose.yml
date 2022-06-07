@@ -8,6 +8,10 @@ services:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
       EDC_API_AUTH_KEY: ApiKeyDefaultValue
+      NODES_JSON_FILES_PREFIX: registry-
+      NODES_JSON_DIR: /resources/registry
     ports:
       - "8181:8181"
       - "5005:5005"
+    volumes:
+      - ./system-tests/resources:/resources

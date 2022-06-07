@@ -3,13 +3,31 @@ info:
   title: Eclipse Dataspace Connector Registration Service
   version: 0.0.1
 paths:
-  /health:
+  /registry/participants:
     get:
       tags:
-      - Health
-      operationId: healthy
+      - Registry
+      description: Gets all dataspace participants.
+      operationId: listParticipants
       responses:
         default:
-          description: default response
+          description: Dataspace participants.
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+components:
+  schemas:
+    Participant:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        supportedProtocols:
+          type: array
+          items:
+            type: string
