@@ -19,6 +19,7 @@
 plugins {
     java
     id("org.openapi.generator") version "5.4.0"
+    `maven-publish`
 }
 
 // Configure OpenAPI Generator
@@ -68,4 +69,13 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.openapitools:jackson-databind-nullable:0.2.1")
     implementation("jakarta.annotation:jakarta.annotation-api:1.3.5")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("registration-service-client") {
+            artifactId = "registration-service-client"
+            from(components["java"])
+        }
+    }
 }
