@@ -57,3 +57,18 @@ jobs:
         run: docker-compose logs
         if: always()
 
+  Checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # lets run Checkstyle explicitly (as opposed to within gradle) due to better reporting capabilities
+      - name: Run Checkstyle
+        if: github.event_name == 'pull_request'
+        uses: nikitasavinov/checkstyle-action@0.4.0
+        with:
+          checkstyle_config: DataSpaceConnector/resources/edc-checkstyle-config.xml
+          level: error
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: 'checkstyle'
+          checkstyle_version: '9.0'
