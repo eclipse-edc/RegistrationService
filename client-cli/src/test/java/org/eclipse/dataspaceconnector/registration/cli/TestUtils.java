@@ -4,10 +4,10 @@ import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 
 public class TestUtils {
+    static final Faker FAKER = new Faker();
+
     private TestUtils() {
     }
-
-    static final Faker FAKER = new Faker();
 
     public static Participant createParticipant() {
         return new Participant()
