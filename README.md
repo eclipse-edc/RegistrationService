@@ -1,2 +1,5 @@
 # RegistrationService
-Temporary repository to get started with the registration service for the MVD
+
+## Contributing
+
+See [how to contribute](./CONTRIBUTING.md) for details.
