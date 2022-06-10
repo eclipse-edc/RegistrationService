@@ -17,11 +17,15 @@ public class RegistrationServiceCli {
     RegistryApi registryApiClient;
 
     public static void main(String... args) {
-        var command = new RegistrationServiceCli();
-        var exitCode = new CommandLine(command)
-                .setExecutionStrategy(command::executionStrategy)
-                .execute(args);
+        CommandLine commandLine = getCommandLine();
+        var exitCode = commandLine.execute(args);
         System.exit(exitCode);
+    }
+
+    public static CommandLine getCommandLine() {
+        var command = new RegistrationServiceCli();
+        return new CommandLine(command)
+                .setExecutionStrategy(command::executionStrategy);
     }
 
     private int executionStrategy(CommandLine.ParseResult parseResult) {

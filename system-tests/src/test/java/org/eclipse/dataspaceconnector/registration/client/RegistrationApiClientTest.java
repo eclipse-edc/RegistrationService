@@ -38,20 +38,8 @@ public class RegistrationApiClientTest {
     Participant participant = createParticipant();
 
     @Test
-    void listParticipants() {
-        assertThat(api.listParticipants())
-                .doesNotContain(participant);
-
-        api.addParticipant(participant);
-
-        assertThat(api.listParticipants())
-                .contains(participant);
-    }
-
-    @Test
-    void listParticipantsFromCLIClient() throws Exception {
-        RegistrationServiceCli app = new RegistrationServiceCli();
-        CommandLine cmd = new CommandLine(app);
+    void listParticipants() throws Exception {
+        CommandLine cmd = RegistrationServiceCli.getCommandLine();
 
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
@@ -64,5 +52,16 @@ public class RegistrationApiClientTest {
         });
         assertThat(participants).hasSize(3);
         assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
+    }
+
+    @Test
+    void listParticipants() {
+        assertThat(api.listParticipants())
+                .doesNotContain(participant);
+
+        api.addParticipant(participant);
+
+        assertThat(api.listParticipants())
+                .contains(participant);
     }
 }
