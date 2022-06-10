@@ -72,3 +72,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tool_name: 'checkstyle'
           checkstyle_version: '9.0'
+          # Filtering does not work on github-check, needs github-pr-check
+          reporter: 'github-pr-check'
+          filter_mode: 'nofilter'
