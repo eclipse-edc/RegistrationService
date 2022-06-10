@@ -1,17 +1,17 @@
-package org.eclipse.dataspaceconnector.registration.api;
+package org.eclipse.dataspaceconnector.registration.store.memory;
 
-import org.eclipse.dataspaceconnector.registration.api.model.Participant;
+import org.eclipse.dataspaceconnector.registration.TestUtils;
+import org.eclipse.dataspaceconnector.registration.store.model.Participant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.api.TestUtils.createParticipant;
 
 class InMemoryParticipantStoreTest {
 
     InMemoryParticipantStore store = new InMemoryParticipantStore();
-    Participant participant1 = createParticipant().build();
-    Participant participant1OtherEntry = createParticipant().name(participant1.getName()).build();
-    Participant participant2 = createParticipant().build();
+    Participant participant1 = TestUtils.createParticipant().build();
+    Participant participant1OtherEntry = TestUtils.createParticipant().name(participant1.getName()).build();
+    Participant participant2 = TestUtils.createParticipant().build();
 
     @Test
     void addAndListParticipants() {

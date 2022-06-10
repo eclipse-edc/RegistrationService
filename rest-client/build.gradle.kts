@@ -18,6 +18,7 @@
 
 plugins {
     java
+    `java-test-fixtures`
     id("org.openapi.generator") version "5.4.0"
     `maven-publish`
 }
@@ -58,9 +59,10 @@ sourceSets {
 }
 
 val jacksonVersion: String by project
+val faker: String by project
 
-// Dependencies copied from build/generate-resources/main/build.gradle
 dependencies {
+    // Dependencies copied from build/generate-resources/main/build.gradle
     implementation("io.swagger:swagger-annotations:1.5.22")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
@@ -69,6 +71,9 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.openapitools:jackson-databind-nullable:0.2.1")
     implementation("jakarta.annotation:jakarta.annotation-api:1.3.5")
+
+    // Other dependencies
+    testFixturesImplementation("com.github.javafaker:javafaker:${faker}")
 }
 
 publishing {

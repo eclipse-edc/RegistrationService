@@ -1,7 +1,7 @@
-package org.eclipse.dataspaceconnector.registration.api;
+package org.eclipse.dataspaceconnector.registration;
 
 import com.github.javafaker.Faker;
-import org.eclipse.dataspaceconnector.registration.api.model.Participant;
+import org.eclipse.dataspaceconnector.registration.store.model.Participant;
 
 public class TestUtils {
     private TestUtils() {
