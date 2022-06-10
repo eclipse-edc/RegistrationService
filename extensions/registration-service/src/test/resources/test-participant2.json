@@ -1,0 +1,7 @@
+{
+  "name": "participant2",
+  "url": "http://localhost:8283",
+  "supportedProtocols": [
+    "ids-multipart"
+  ]
+}

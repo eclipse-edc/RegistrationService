@@ -1,0 +1,47 @@
+openapi: 3.0.1
+info:
+  title: Eclipse Dataspace Connector Registration Service
+  version: 0.0.1
+paths:
+  /registry/participant:
+    post:
+      tags:
+      - Registry
+      description: Asynchronously request to add a dataspace participant.
+      operationId: addParticipant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participant'
+      responses:
+        "204":
+          description: No content
+  /registry/participants:
+    get:
+      tags:
+      - Registry
+      description: Gets all dataspace participants.
+      operationId: listParticipants
+      responses:
+        default:
+          description: Dataspace participants.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+components:
+  schemas:
+    Participant:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        supportedProtocols:
+          type: array
+          items:
+            type: string
