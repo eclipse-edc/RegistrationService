@@ -9,6 +9,6 @@ import picocli.CommandLine.Command;
                 ListParticipantsCommand.class
         })
 class ParticipantsCommand {
-        @CommandLine.ParentCommand
-        RegistrationServiceCli parent;
+    @CommandLine.ParentCommand
+    RegistrationServiceCli parent;
 }
