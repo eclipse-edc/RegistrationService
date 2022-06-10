@@ -12,6 +12,7 @@ val faker: String by project
 
 dependencies {
     implementation("${edcGroup}:core:${edcVersion}")
+    implementation("${edcGroup}:state-machine-lib:${edcVersion}")
 
     implementation(project(":extensions:participant-store-spi"))
     testImplementation("org.assertj:assertj-core:${assertj}")
