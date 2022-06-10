@@ -11,5 +11,3 @@ services:
     ports:
       - "8181:8181"
       - "5005:5005"
-    volumes:
-      - ./system-tests/resources:/resources
