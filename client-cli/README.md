@@ -12,15 +12,12 @@ cd RegistrationService
 java -jar client-cli/build/libs/registration-service-cli.jar --help
 ```
 
-For example, to register a dataspace participant:
+For example, to list dataspace participants:
 
 ```
 java -jar client-cli/build/libs/registration-service-cli.jar \
   -s=http://localhost:8181/api \
-  participants register \
-  "-n=company1" \
-  "-p=ids-multipart" \
-  "-u=$PROVIDER_IDS_URL"
+  participants list
 ```
 
 The client can also be run from a local Maven repository:
