@@ -37,7 +37,3 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true' # only on cache miss
       shell: bash
       working-directory: DataSpaceConnector
-
-    - name: Delete EDC packages
-      run: rm -r DataSpaceConnector
-      shell: bash
