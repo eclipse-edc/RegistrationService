@@ -29,7 +29,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.registration.client.IntegrationTestUtils.createParticipant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.eclipse.dataspaceconnector.registration.client.IntegrationTestUtils.createParticipant;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
@@ -40,7 +39,18 @@ public class RegistrationApiClientTest {
     Participant participant = createParticipant();
 
     @Test
-    void listParticipants() throws Exception {
+    void listParticipants() {
+        assertThat(api.listParticipants())
+                .doesNotContain(participant);
+
+        api.addParticipant(participant);
+
+        assertThat(api.listParticipants())
+                .contains(participant);
+    }
+
+    @Test
+    void listParticipantsCommandLine() throws Exception {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
 
         StringWriter sw = new StringWriter();
@@ -54,16 +64,5 @@ public class RegistrationApiClientTest {
         });
         assertThat(participants).hasSize(3);
         assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
-    }
-
-    @Test
-    void listParticipants() {
-        assertThat(api.listParticipants())
-                .doesNotContain(participant);
-
-        api.addParticipant(participant);
-
-        assertThat(api.listParticipants())
-                .contains(participant);
     }
 }
