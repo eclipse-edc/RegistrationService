@@ -22,7 +22,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import org.eclipse.dataspaceconnector.registration.api.model.Participant;
+import org.eclipse.dataspaceconnector.registration.store.model.Participant;
 
 import java.util.List;
 
