@@ -1,0 +1,77 @@
+name: Test Code (Style, Tests)
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+
+  OpenAPI-Definitions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/gradle-setup
+
+      - name: Generate OpenAPI definition from code
+        run: ./gradlew resolve
+
+      - name: Check OpenAPI definition match code
+        run: git diff --exit-code
+
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./.github/actions/gradle-setup
+
+      - name: 'Build launcher'
+        run: ./gradlew :launcher:shadowJar
+
+      - name: 'Upgrade docker-compose (for --wait option)'
+        run: |
+          sudo curl -L https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: 'Run application in docker-compose'
+        run: docker-compose up --build --wait
+        timeout-minutes: 10
+
+      - name: 'Unit and system tests'
+        run: ./gradlew test
+        timeout-minutes: 10
+        env:
+          INTEGRATION_TEST: true
+
+      - name: 'Publish Test Results'
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "**/test-results/**/*.xml"
+
+      - name: 'docker-compose logs'
+        run: docker-compose logs
+        if: always()
+
+  Checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # run Checkstyle explicitly (as opposed to within gradle) due to better reporting capabilities
+      - name: Run Checkstyle
+        if: github.event_name == 'pull_request'
+        uses: nikitasavinov/checkstyle-action@0.6.0
+        with:
+          checkstyle_config: resources/checkstyle-config.xml
+          level: error
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: 'checkstyle'
+          checkstyle_version: '9.0'
+          reporter: 'github-pr-check'
+          # Include only violations on added or modified files
+          filter_mode: 'file'
