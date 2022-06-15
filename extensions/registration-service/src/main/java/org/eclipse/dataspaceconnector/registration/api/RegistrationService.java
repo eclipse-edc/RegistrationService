@@ -14,7 +14,8 @@
 
 package org.eclipse.dataspaceconnector.registration.api;
 
-import org.eclipse.dataspaceconnector.registration.api.model.Participant;
+import org.eclipse.dataspaceconnector.registration.store.model.Participant;
+import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 
 import java.util.ArrayList;
@@ -26,9 +27,9 @@ import java.util.List;
 public class RegistrationService {
 
     private final Monitor monitor;
-    private final InMemoryParticipantStore participantStore;
+    private final ParticipantStore participantStore;
 
-    public RegistrationService(Monitor monitor, InMemoryParticipantStore participantStore) {
+    public RegistrationService(Monitor monitor, ParticipantStore participantStore) {
         this.monitor = monitor;
         this.participantStore = participantStore;
     }

@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.api.model;
+package org.eclipse.dataspaceconnector.registration.store.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
