@@ -21,11 +21,8 @@ val jupiterVersion: String by project
 val assertj: String by project
 val jacksonVersion: String by project
 val faker: String by project
-val edcVersion: String by project
-val edcGroup: String by project
 
 dependencies {
-    testImplementation("${edcGroup}:junit-extension:${edcVersion}:test-fixtures")
     testImplementation(project(":rest-client"))
     testImplementation(project(":client-cli"))
     testRuntimeOnly(project(":launcher"))

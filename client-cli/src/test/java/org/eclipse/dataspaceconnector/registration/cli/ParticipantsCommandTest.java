@@ -43,11 +43,11 @@ class ParticipantsCommandTest {
 
     @Test
     void list() throws Exception {
-        List<Participant> participants = List.of(this.participant1, participant2);
+        var participants = List.of(this.participant1, participant2);
         when(app.registryApiClient.listParticipants())
                 .thenReturn(participants);
 
-        int exitCode = cmd.execute("-s", serverUrl, "participants", "list");
+        var exitCode = cmd.execute("-s", serverUrl, "participants", "list");
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
 
@@ -60,11 +60,11 @@ class ParticipantsCommandTest {
 
     @Test
     void add() throws Exception {
-        ArgumentCaptor<Participant> participantArgCaptor = ArgumentCaptor.forClass(Participant.class);
+        var participantArgCaptor = ArgumentCaptor.forClass(Participant.class);
         doNothing().when(app.registryApiClient).addParticipant(participantArgCaptor.capture());
         var request = MAPPER.writeValueAsString(participant1);
 
-        int exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request=" + request);
+        var exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request", request);
 
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
@@ -77,7 +77,7 @@ class ParticipantsCommandTest {
     void invalidRequest_Add_Failure() throws Exception {
         var request = "Invalid json";
 
-        int exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request=" + request);
+        var exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request", request);
 
         assertThat(exitCode).isNotEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
