@@ -45,8 +45,8 @@ public class RegistrationApiCommandLineClientTest {
     @Test
     void listParticipants() throws Exception {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
+        StringWriter writer = new StringWriter();
+        cmd.setOut(new PrintWriter(writer));
 
         var request = MAPPER.writeValueAsString(participant);
 
@@ -56,8 +56,8 @@ public class RegistrationApiCommandLineClientTest {
         int listCmdExitCode = cmd.execute("participants", "list");
         assertThat(listCmdExitCode).isEqualTo(0);
 
-        String s = sw.toString();
-        var participants = MAPPER.readValue(s, new TypeReference<List<Participant>>() {
+        String output = writer.toString();
+        var participants = MAPPER.readValue(output, new TypeReference<List<Participant>>() {
         });
 
         assertThat(participants).contains(participant);
