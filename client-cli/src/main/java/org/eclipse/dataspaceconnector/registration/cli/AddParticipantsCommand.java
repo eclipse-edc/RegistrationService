@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 class AddParticipantsCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private final static Logger LOGGER = Logger.getLogger(AddParticipantsCommand.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AddParticipantsCommand.class.getName());
 
     @ParentCommand
     private ParticipantsCommand parent;
