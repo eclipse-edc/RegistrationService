@@ -17,7 +17,6 @@ package org.eclipse.dataspaceconnector.registration.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
-import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -29,15 +28,17 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.registration.client.IntegrationTestUtils.createParticipant;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
     static final String API_URL = "http://localhost:8181/api";
 
-//    ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
+    //    ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
 //    RegistryApi api = new RegistryApi(apiClient);
-//    Participant participant = createParticipant();
+    Participant participant = createParticipant();
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Disabled
     void listParticipants() throws Exception {
@@ -46,11 +47,11 @@ public class RegistrationApiCommandLineClientTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int exitCode = cmd.execute("participants", "add");
-        assertEquals(0, exitCode);
+        int exitCode = cmd.execute("participants", "list");
+        assertThat(exitCode).isEqualTo(0);
 
         String s = sw.toString();
-        var participants = new ObjectMapper().readValue(s, new TypeReference<List<Participant>>() {
+        var participants = MAPPER.readValue(s, new TypeReference<List<Participant>>() {
         });
         assertThat(participants).hasSize(3);
         assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
@@ -63,13 +64,13 @@ public class RegistrationApiCommandLineClientTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int exitCode = cmd.execute("participants", "add");
-        assertEquals(0, exitCode);
+        var request = MAPPER.writeValueAsString(participant);
+
+        int exitCode = cmd.execute("participants", "add", "--request=" + request);
+
+        assertThat(exitCode).isEqualTo(0);
 
         String s = sw.toString();
-        var participants = new ObjectMapper().readValue(s, new TypeReference<List<Participant>>() {
-        });
-        assertThat(participants).hasSize(3);
-        assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
+        System.out.println(s);
     }
 }

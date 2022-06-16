@@ -19,9 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParentCommand;
-import picocli.CommandLine.Spec;
 
 import java.util.concurrent.Callable;
 
@@ -34,9 +32,6 @@ class AddParticipantsCommand implements Callable<Integer> {
     @ParentCommand
     private ParticipantsCommand parent;
 
-    @Spec
-    private CommandSpec spec;
-
     @CommandLine.Option(names = "--request", required = true, description = "Add Participant Request in JSON")
     private String requestJson;
 
@@ -44,11 +39,7 @@ class AddParticipantsCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var participant = MAPPER.readValue(requestJson, Participant.class);
         parent.parent.registryApiClient.addParticipant(participant);
-//        var out = spec.commandLine().getOut();
-//        MAPPER.writeValue(out, participant.getName());
-//        MAPPER.writeValue(out, participant.getUrl());
-//        MAPPER.writeValue(out, participant.getSupportedProtocols());
-//        out.println();
+
         return 0;
     }
 }

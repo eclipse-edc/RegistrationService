@@ -7,6 +7,7 @@ import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
@@ -15,8 +16,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.registration.cli.TestUtils.createParticipant;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ParticipantsCommandTest {
@@ -45,13 +49,28 @@ class ParticipantsCommandTest {
                 .thenReturn(participants);
 
         int exitCode = cmd.execute("-s", serverUrl, "participants", "list");
-        assertEquals(0, exitCode);
-        assertEquals(app.service, serverUrl);
+        assertThat(exitCode).isEqualTo(0);
+        assertThat(serverUrl).isEqualTo(app.service);
 
         var parsedResult = MAPPER.readValue(sw.toString(), new TypeReference<List<Participant>>() {
         });
         assertThat(parsedResult)
                 .usingRecursiveFieldByFieldElementComparator()
                 .isEqualTo(participants);
+    }
+
+    @Test
+    void add() throws Exception {
+        ArgumentCaptor<Participant> participantArgCaptor = ArgumentCaptor.forClass(Participant.class);
+        doNothing().when(app.registryApiClient).addParticipant(participantArgCaptor.capture());
+        var request = MAPPER.writeValueAsString(participant1);
+
+        int exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request=" + request);
+
+        assertThat(exitCode).isEqualTo(0);
+        assertThat(serverUrl).isEqualTo(app.service);
+        verify(app.registryApiClient).addParticipant(isA(Participant.class));
+        assertThat(participantArgCaptor.getValue())
+                .usingRecursiveComparison().isEqualTo(participant1);
     }
 }
