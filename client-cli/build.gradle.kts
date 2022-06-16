@@ -5,8 +5,6 @@ plugins {
     `maven-publish`
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
 val jacksonVersion: String by project
 val jupiterVersion: String by project
 val assertj: String by project

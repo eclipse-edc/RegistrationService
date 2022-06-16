@@ -73,4 +73,14 @@ class ParticipantsCommandTest {
         assertThat(participantArgCaptor.getValue())
                 .usingRecursiveComparison().isEqualTo(participant1);
     }
+
+    @Test
+    void invalidRequest_Add_Failure() throws Exception {
+        var request = "Invalid json";
+
+        int exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request=" + request);
+
+        assertThat(exitCode).isNotEqualTo(0);
+        assertThat(serverUrl).isEqualTo(app.service);
+    }
 }
