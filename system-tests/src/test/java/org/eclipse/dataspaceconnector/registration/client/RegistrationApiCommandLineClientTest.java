@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -34,12 +35,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RegistrationApiCommandLineClientTest {
     static final String API_URL = "http://localhost:8181/api";
 
-    ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
-    RegistryApi api = new RegistryApi(apiClient);
-    Participant participant = createParticipant();
+//    ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
+//    RegistryApi api = new RegistryApi(apiClient);
+//    Participant participant = createParticipant();
+
+    @Disabled
+    void listParticipants() throws Exception {
+        CommandLine cmd = RegistrationServiceCli.getCommandLine();
+
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int exitCode = cmd.execute("participants", "add");
+        assertEquals(0, exitCode);
+
+        String s = sw.toString();
+        var participants = new ObjectMapper().readValue(s, new TypeReference<List<Participant>>() {
+        });
+        assertThat(participants).hasSize(3);
+        assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
+    }
 
     @Test
-    void listParticipantsCommandLine() throws Exception {
+    void addParticipants() throws Exception {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
 
         StringWriter sw = new StringWriter();

@@ -14,8 +14,8 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ParentCommand;
 
 @Command(name = "participants", mixinStandardHelpOptions = true,
         description = "Manage dataspace participants.",
@@ -24,6 +24,6 @@ import picocli.CommandLine.Command;
                 AddParticipantsCommand.class
         })
 class ParticipantsCommand {
-    @CommandLine.ParentCommand
+    @ParentCommand
     RegistrationServiceCli parent;
 }
