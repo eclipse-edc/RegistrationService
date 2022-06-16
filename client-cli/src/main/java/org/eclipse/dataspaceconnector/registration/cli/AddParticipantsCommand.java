@@ -16,15 +16,16 @@ package org.eclipse.dataspaceconnector.registration.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParentCommand;
-import picocli.CommandLine.Spec;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "list")
-class ListParticipantsCommand implements Callable<Integer> {
+import static picocli.CommandLine.Parameters;
+
+@Command(name = "add")
+class AddParticipantsCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -32,14 +33,13 @@ class ListParticipantsCommand implements Callable<Integer> {
     @ParentCommand
     private ParticipantsCommand parent;
 
-    @Spec
-    private CommandSpec spec;
+    @Parameters(index = "0", arity = "1", paramLabel = "participantJson", description = "Participant JSON")
+    private String participantJson;
 
     @Override
     public Integer call() throws Exception {
-        var out = spec.commandLine().getOut();
-        MAPPER.writeValue(out, parent.parent.registryApiClient.listParticipants());
-        out.println();
+        var participant = MAPPER.readValue(participantJson, Participant.class);
+        parent.parent.registryApiClient.addParticipant(participant);
         return 0;
     }
 }

@@ -31,7 +31,7 @@ import static org.eclipse.dataspaceconnector.registration.client.IntegrationTest
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @IntegrationTest
-public class RegistrationApiClientTest {
+public class RegistrationApiCommandLineClientTest {
     static final String API_URL = "http://localhost:8181/api";
 
     ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
@@ -39,13 +39,19 @@ public class RegistrationApiClientTest {
     Participant participant = createParticipant();
 
     @Test
-    void listParticipants() {
-        assertThat(api.listParticipants())
-                .doesNotContain(participant);
+    void listParticipantsCommandLine() throws Exception {
+        CommandLine cmd = RegistrationServiceCli.getCommandLine();
 
-        api.addParticipant(participant);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
 
-        assertThat(api.listParticipants())
-                .contains(participant);
+        int exitCode = cmd.execute("participants", "add");
+        assertEquals(0, exitCode);
+
+        String s = sw.toString();
+        var participants = new ObjectMapper().readValue(s, new TypeReference<List<Participant>>() {
+        });
+        assertThat(participants).hasSize(3);
+        assertThat(participants).extracting(Participant::getName).contains("consumer-eu");
     }
 }
