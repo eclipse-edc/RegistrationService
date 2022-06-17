@@ -22,14 +22,11 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Command(name = "add", description = "Add a participant to dataspace")
 class AddParticipantCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Logger LOGGER = Logger.getLogger(AddParticipantCommand.class.getName());
 
     @ParentCommand
     private ParticipantsCommand command;
@@ -43,7 +40,6 @@ class AddParticipantCommand implements Callable<Integer> {
         try {
             participant = MAPPER.readValue(requestJson, Participant.class);
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, "Error while processing request json", e);
             throw new CliException("Error while processing request json.");
         }
         command.cli.registryApiClient.addParticipant(participant);
