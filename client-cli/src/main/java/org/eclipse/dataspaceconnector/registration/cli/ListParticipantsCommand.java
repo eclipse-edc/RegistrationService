@@ -23,7 +23,7 @@ import picocli.CommandLine.Spec;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "list")
+@Command(name = "list", description = "List dataspace participants")
 class ListParticipantsCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper()

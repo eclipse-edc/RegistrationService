@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Command(name = "add")
+@Command(name = "add", description = "Add a participant to dataspace")
 class AddParticipantCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
