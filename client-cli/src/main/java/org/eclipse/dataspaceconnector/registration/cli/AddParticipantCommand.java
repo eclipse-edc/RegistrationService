@@ -26,10 +26,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Command(name = "add")
-class AddParticipantsCommand implements Callable<Integer> {
+class AddParticipantCommand implements Callable<Integer> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Logger LOGGER = Logger.getLogger(AddParticipantsCommand.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AddParticipantCommand.class.getName());
 
     @ParentCommand
     private ParticipantsCommand parent;
