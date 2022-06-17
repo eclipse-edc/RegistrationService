@@ -30,7 +30,7 @@ class ListParticipantsCommand implements Callable<Integer> {
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     @ParentCommand
-    private ParticipantsCommand parent;
+    private ParticipantsCommand command;
 
     @Spec
     private CommandSpec spec;
@@ -38,7 +38,7 @@ class ListParticipantsCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         var out = spec.commandLine().getOut();
-        MAPPER.writeValue(out, parent.parent.registryApiClient.listParticipants());
+        MAPPER.writeValue(out, command.cli.registryApiClient.listParticipants());
         out.println();
         return 0;
     }

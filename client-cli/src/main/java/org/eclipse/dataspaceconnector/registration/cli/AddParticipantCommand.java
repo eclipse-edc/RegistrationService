@@ -32,7 +32,7 @@ class AddParticipantCommand implements Callable<Integer> {
     private static final Logger LOGGER = Logger.getLogger(AddParticipantCommand.class.getName());
 
     @ParentCommand
-    private ParticipantsCommand parent;
+    private ParticipantsCommand command;
 
     @CommandLine.Option(names = "--request", required = true, description = "Add Participant Request as JSON")
     private String requestJson;
@@ -46,7 +46,7 @@ class AddParticipantCommand implements Callable<Integer> {
             LOGGER.log(Level.SEVERE, "Error while processing request json", e);
             throw new CliException("Error while processing request json.");
         }
-        parent.parent.registryApiClient.addParticipant(participant);
+        command.cli.registryApiClient.addParticipant(participant);
 
         return 0;
     }

@@ -25,5 +25,5 @@ import picocli.CommandLine.ParentCommand;
         })
 class ParticipantsCommand {
     @ParentCommand
-    RegistrationServiceCli parent;
+    RegistrationServiceCli cli;
 }
