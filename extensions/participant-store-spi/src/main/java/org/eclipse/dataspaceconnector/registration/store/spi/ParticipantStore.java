@@ -14,12 +14,16 @@
 
 package org.eclipse.dataspaceconnector.registration.store.spi;
 
-import org.eclipse.dataspaceconnector.registration.store.model.Participant;
+import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
+import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ParticipantStore {
     List<Participant> listParticipants();
 
-    void addParticipant(Participant participant);
+    void save(Participant participant);
+
+    Collection<Participant> listParticipantsWithStatus(ParticipantStatus state);
 }

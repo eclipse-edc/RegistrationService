@@ -22,7 +22,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import org.eclipse.dataspaceconnector.registration.store.model.Participant;
+import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 
 import java.util.List;
 
@@ -30,8 +30,8 @@ import java.util.List;
  * Registration Service API controller to manage dataspace participants.
  */
 @Tag(name = "Registry")
-@Produces({"application/json"})
-@Consumes({"application/json"})
+@Produces({ "application/json" })
+@Consumes({ "application/json" })
 @Path("/registry")
 public class RegistrationApiController {
 

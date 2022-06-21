@@ -5,8 +5,6 @@ info:
 paths:
   /registry/participant:
     post:
-      tags:
-      - Registry
       description: Asynchronously request to add a dataspace participant.
       operationId: addParticipant
       requestBody:
@@ -17,21 +15,23 @@ paths:
       responses:
         "204":
           description: No content
-  /registry/participants:
-    get:
       tags:
       - Registry
+  /registry/participants:
+    get:
       description: Gets all dataspace participants.
       operationId: listParticipants
       responses:
         default:
-          description: Dataspace participants.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Participant'
+          description: Dataspace participants.
+      tags:
+      - Registry
 components:
   schemas:
     Participant:
@@ -39,9 +39,16 @@ components:
       properties:
         name:
           type: string
-        url:
+        status:
           type: string
+          enum:
+          - ONBOARDING_INITIATED
+          - AUTHORIZING
+          - AUTHORIZED
+          - DENIED
         supportedProtocols:
           type: array
           items:
             type: string
+        url:
+          type: string

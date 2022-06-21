@@ -16,9 +16,13 @@ package org.eclipse.dataspaceconnector.registration;
 
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
+import org.eclipse.dataspaceconnector.registration.authority.DummyCredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.WebService;
+import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
@@ -35,11 +39,32 @@ public class RegistrationServiceExtension implements ServiceExtension {
     @Inject
     private ParticipantStore participantStore;
 
+    @Inject
+    private CredentialsVerifier credentialsVerifier;
+
+    @Inject
+    private ExecutorInstrumentation executorInstrumentation;
+
+    private ParticipantManager participantManager;
+
     @Override
     public void initialize(ServiceExtensionContext context) {
         var monitor = context.getMonitor();
+
+        participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
+
         var registrationService = new RegistrationService(monitor, participantStore);
         webService.registerResource(new RegistrationApiController(registrationService));
+    }
+
+    @Override
+    public void start() {
+        participantManager.start();
+    }
+
+    @Override
+    public void shutdown() {
+        participantManager.stop();
     }
 
     @Provider(isDefault = true)
@@ -47,4 +72,8 @@ public class RegistrationServiceExtension implements ServiceExtension {
         return new InMemoryParticipantStore();
     }
 
+    @Provider(isDefault = true)
+    public CredentialsVerifier credentialsVerifier() {
+        return new DummyCredentialsVerifier();
+    }
 }
