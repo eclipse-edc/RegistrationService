@@ -14,9 +14,8 @@
 
 package org.eclipse.dataspaceconnector.registration.api;
 
-import org.eclipse.dataspaceconnector.registration.store.model.Participant;
+import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
-import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +29,10 @@ import static org.mockito.Mockito.when;
 
 class RegistrationServiceTest {
 
-    Monitor monitor = new ConsoleMonitor();
+    Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
     RegistrationService service = new RegistrationService(monitor, participantStore);
-    Participant participant = createParticipant().build();
+    Participant.Builder participantBuilder = createParticipant();
 
     @Test
     void listParticipants_empty() {
@@ -42,13 +41,15 @@ class RegistrationServiceTest {
 
     @Test
     void listParticipants() {
+        var participant = participantBuilder.build();
         when(participantStore.listParticipants()).thenReturn(List.of(participant));
         assertThat(service.listParticipants()).containsExactly(participant);
     }
 
     @Test
     void addParticipant() {
+        var participant = participantBuilder.build();
         service.addParticipant(participant);
-        verify(participantStore).addParticipant(participant);
+        verify(participantStore).save(participant);
     }
 }

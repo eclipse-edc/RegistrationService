@@ -14,7 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.api;
 
-import org.eclipse.dataspaceconnector.registration.store.model.Participant;
+import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 
@@ -44,8 +44,13 @@ public class RegistrationService {
         return new ArrayList<>(participantStore.listParticipants());
     }
 
+    /**
+     * Add a participant to a dataspace.
+     *
+     * @param participant the dataspace participant to add.
+     */
     public void addParticipant(Participant participant) {
         monitor.info("Adding a participant in the dataspace.");
-        participantStore.addParticipant(participant);
+        participantStore.save(participant);
     }
 }
