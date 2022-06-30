@@ -22,6 +22,7 @@ import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.WebService;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
@@ -32,6 +33,11 @@ import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
  * EDC extension to boot the services used by the Registration Service.
  */
 public class RegistrationServiceExtension implements ServiceExtension {
+
+    public static final String CONTEXT_ALIAS = "authority";
+
+    @Inject
+    private Monitor monitor;
 
     @Inject
     private WebService webService;
@@ -49,12 +55,11 @@ public class RegistrationServiceExtension implements ServiceExtension {
 
     @Override
     public void initialize(ServiceExtensionContext context) {
-        var monitor = context.getMonitor();
 
         participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
 
         var registrationService = new RegistrationService(monitor, participantStore);
-        webService.registerResource(new RegistrationApiController(registrationService));
+        webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
     }
 
     @Override

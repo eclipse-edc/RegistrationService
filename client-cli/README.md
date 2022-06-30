@@ -16,7 +16,7 @@ For example, to list dataspace participants:
 
 ```
 java -jar client-cli/build/libs/registration-service-cli.jar \
-  -s=http://localhost:8181/api \
+  -s=http://localhost:8182/authority \
   participants list
 ```
 

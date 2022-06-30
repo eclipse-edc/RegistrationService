@@ -12,10 +12,10 @@ RUN apt update \
 WORKDIR /app
 COPY ./build/libs/app.jar /app
 
-EXPOSE 8181
+EXPOSE 8182
 
 # health status is determined by the availability of the /health endpoint
-HEALTHCHECK --interval=5s --timeout=5s --retries=10 CMD curl -H "X-Api-Key: $EDC_API_AUTH_KEY" --fail http://localhost:8181/api/check/health
+HEALTHCHECK --interval=5s --timeout=5s --retries=10 CMD curl --fail http://localhost:8181/api/check/health
 
 ENV WEB_HTTP_PORT="8181"
 ENV WEB_HTTP_PATH="/api"

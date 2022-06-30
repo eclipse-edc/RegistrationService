@@ -8,6 +8,8 @@ services:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
       EDC_API_AUTH_KEY: ApiKeyDefaultValue
+      WEB_HTTP_AUTHORITY_PORT: 8182
+      WEB_HTTP_AUTHORITY_PATH: /authority
     ports:
-      - "8181:8181"
+      - "8182:8182"
       - "5005:5005"

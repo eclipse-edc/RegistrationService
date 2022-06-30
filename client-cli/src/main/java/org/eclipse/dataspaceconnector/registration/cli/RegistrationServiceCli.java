@@ -25,7 +25,7 @@ import picocli.CommandLine.Command;
                 ParticipantsCommand.class
         })
 public class RegistrationServiceCli {
-    @CommandLine.Option(names = "-s", required = true, description = "Registration service URL", defaultValue = "http://localhost:8181/api")
+    @CommandLine.Option(names = "-s", required = true, description = "Registration service URL", defaultValue = "http://localhost:8182/authority")
     String service;
 
     RegistryApi registryApiClient;

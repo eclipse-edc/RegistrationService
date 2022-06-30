@@ -23,7 +23,7 @@ import static org.eclipse.dataspaceconnector.registration.client.IntegrationTest
 
 @IntegrationTest
 public class RegistrationApiClientTest {
-    static final String API_URL = "http://localhost:8181/api";
+    static final String API_URL = "http://localhost:8182/authority";
 
     ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
     RegistryApi api = new RegistryApi(apiClient);
