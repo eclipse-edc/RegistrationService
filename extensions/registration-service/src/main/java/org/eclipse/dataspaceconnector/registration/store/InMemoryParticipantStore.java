@@ -39,7 +39,7 @@ public class InMemoryParticipantStore implements ParticipantStore {
 
     @Override
     public void save(Participant participant) {
-        storage.put(participant.getName(), participant);
+        storage.put(participant.getDid(), participant);
     }
 
     @Override

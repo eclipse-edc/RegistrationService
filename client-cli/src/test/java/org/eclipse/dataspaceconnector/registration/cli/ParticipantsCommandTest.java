@@ -21,7 +21,6 @@ import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
@@ -30,8 +29,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.registration.cli.TestUtils.createParticipant;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +41,8 @@ class ParticipantsCommandTest {
     Participant participant1 = createParticipant();
     Participant participant2 = createParticipant();
     String serverUrl = FAKER.internet().url();
+    String idsUrl = FAKER.internet().url();
+    String did = FAKER.internet().url();
 
     RegistrationServiceCli app = new RegistrationServiceCli();
     CommandLine cmd = new CommandLine(app);
@@ -61,7 +60,7 @@ class ParticipantsCommandTest {
         when(app.registryApiClient.listParticipants())
                 .thenReturn(participants);
 
-        var exitCode = cmd.execute("-s", serverUrl, "participants", "list");
+        var exitCode = executeParticipantsList();
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
 
@@ -73,27 +72,26 @@ class ParticipantsCommandTest {
     }
 
     @Test
-    void add() throws Exception {
-        var participantArgCaptor = ArgumentCaptor.forClass(Participant.class);
-        doNothing().when(app.registryApiClient).addParticipant(participantArgCaptor.capture());
-        var request = MAPPER.writeValueAsString(participant1);
-
-        var exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request", request);
+    void add() {
+        var exitCode = executeParticipantsAdd(idsUrl);
 
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(isA(Participant.class));
-        assertThat(participantArgCaptor.getValue())
-                .usingRecursiveComparison().isEqualTo(participant1);
+        verify(app.registryApiClient).addParticipant(idsUrl, did);
     }
 
-    @Test
-    void invalidRequest_Add_Failure() throws Exception {
-        var request = "Invalid json";
+    private int executeParticipantsAdd(String idsUrl) {
+        return cmd.execute(
+                "-d", did,
+                "-s", serverUrl,
+                "participants", "add",
+                "--ids-url", idsUrl);
+    }
 
-        var exitCode = cmd.execute("-s", serverUrl, "participants", "add", "--request", request);
-
-        assertThat(exitCode).isNotEqualTo(0);
-        assertThat(serverUrl).isEqualTo(app.service);
+    private int executeParticipantsList() {
+        return cmd.execute(
+                "-d", did,
+                "-s", serverUrl,
+                "participants", "list");
     }
 }

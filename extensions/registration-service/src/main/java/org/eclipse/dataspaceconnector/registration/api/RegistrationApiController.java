@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -34,6 +35,16 @@ import java.util.List;
 @Consumes({ "application/json" })
 @Path("/registry")
 public class RegistrationApiController {
+
+    /**
+     * A IDS URL (this will be removed in https://github.com/agera-edc/MinimumViableDataspace/issues/174)
+     */
+    private static final String TEMPORARY_IDS_URL_HEADER = "IdsUrl";
+
+    /**
+     * A DID that identifies the caller (in the next PR to the same branch, this will be removed from operation parameters and extracted from the passed JWT. This is only here as a stopgap to make PRs smaller)
+     */
+    private static final String CALLER_DID_HEADER = "CallerDid";
 
     private final RegistrationService service;
 
@@ -58,7 +69,9 @@ public class RegistrationApiController {
     @Operation(description = "Asynchronously request to add a dataspace participant.")
     @ApiResponse(responseCode = "204", description = "No content")
     @POST
-    public void addParticipant(Participant participant) {
-        service.addParticipant(participant);
+    public void addParticipant(
+            @HeaderParam(TEMPORARY_IDS_URL_HEADER) String idsUrl,
+            @HeaderParam(CALLER_DID_HEADER) String did) {
+        service.addParticipant(did, idsUrl);
     }
 }

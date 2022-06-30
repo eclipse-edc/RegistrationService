@@ -14,25 +14,31 @@
 
 package org.eclipse.dataspaceconnector.registration.api;
 
+import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class RegistrationServiceTest {
+    static final Faker FAKER = new Faker();
 
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
     RegistrationService service = new RegistrationService(monitor, participantStore);
     Participant.Builder participantBuilder = createParticipant();
+    String did = FAKER.internet().url();
+    String idsUrl = FAKER.internet().url();
 
     @Test
     void listParticipants_empty() {
@@ -48,8 +54,18 @@ class RegistrationServiceTest {
 
     @Test
     void addParticipant() {
-        var participant = participantBuilder.build();
-        service.addParticipant(participant);
-        verify(participantStore).save(participant);
+        service.addParticipant(did, idsUrl);
+
+        var captor = ArgumentCaptor.forClass(Participant.class);
+        verify(participantStore).save(captor.capture());
+        assertThat(captor.getValue())
+                .usingRecursiveComparison()
+                .isEqualTo(Participant.Builder.newInstance()
+                        .did(did)
+                        .status(ONBOARDING_INITIATED)
+                        .name(did)
+                        .url(idsUrl)
+                        .supportedProtocol("ids-multipart")
+                        .build());
     }
 }

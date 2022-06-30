@@ -28,6 +28,9 @@ public class RegistrationServiceCli {
     @CommandLine.Option(names = "-s", required = true, description = "Registration service URL", defaultValue = "http://localhost:8182/authority")
     String service;
 
+    @CommandLine.Option(names = "-d", required = true, description = "Client DID")
+    String clientDid;
+
     RegistryApi registryApiClient;
 
     public static void main(String... args) {
@@ -50,6 +53,5 @@ public class RegistrationServiceCli {
     private void init() {
         var apiClient = ApiClientFactory.createApiClient(service);
         registryApiClient = new RegistryApi(apiClient);
-
     }
 }

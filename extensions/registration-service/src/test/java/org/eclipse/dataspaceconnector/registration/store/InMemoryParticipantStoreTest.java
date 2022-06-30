@@ -26,7 +26,7 @@ class InMemoryParticipantStoreTest {
 
     InMemoryParticipantStore store = new InMemoryParticipantStore();
     Participant participant1 = TestUtils.createParticipant().build();
-    Participant participant1OtherEntry = TestUtils.createParticipant().name(participant1.getName()).build();
+    Participant participant1OtherEntry = TestUtils.createParticipant().did(participant1.getDid()).build();
     Participant participant2 = TestUtils.createParticipant().build();
 
     @Test

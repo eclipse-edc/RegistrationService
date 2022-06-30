@@ -7,11 +7,15 @@ paths:
     post:
       description: Asynchronously request to add a dataspace participant.
       operationId: addParticipant
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Participant'
+      parameters:
+      - in: header
+        name: IdsUrl
+        schema:
+          type: string
+      - in: header
+        name: CallerDid
+        schema:
+          type: string
       responses:
         "204":
           description: No content
@@ -37,6 +41,8 @@ components:
     Participant:
       type: object
       properties:
+        did:
+          type: string
         name:
           type: string
         status:
