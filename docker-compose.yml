@@ -7,9 +7,17 @@ services:
       args:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
-      EDC_API_AUTH_KEY: ApiKeyDefaultValue
+      JWT_AUDIENCE: http://localhost:8182/authority
+      EDC_IAM_DID_WEB_USE_HTTPS: "false"
       WEB_HTTP_AUTHORITY_PORT: 8182
       WEB_HTTP_AUTHORITY_PATH: /authority
     ports:
       - "8182:8182"
       - "5005:5005"
+  did-server:
+    container_name: did-server
+    image: nginx
+    volumes:
+     - ./resources/webdid:/usr/share/nginx/html
+    ports:
+     - "8080:80"

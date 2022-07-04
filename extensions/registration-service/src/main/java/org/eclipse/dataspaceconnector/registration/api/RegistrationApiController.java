@@ -23,9 +23,15 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 
 import java.util.List;
+import java.util.Objects;
+
+import static org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter.CALLER_DID_HEADER;
+
 
 /**
  * Registration Service API controller to manage dataspace participants.
@@ -40,11 +46,6 @@ public class RegistrationApiController {
      * A IDS URL (this will be removed in https://github.com/agera-edc/MinimumViableDataspace/issues/174)
      */
     private static final String TEMPORARY_IDS_URL_HEADER = "IdsUrl";
-
-    /**
-     * A DID that identifies the caller (in the next PR to the same branch, this will be removed from operation parameters and extracted from the passed JWT. This is only here as a stopgap to make PRs smaller)
-     */
-    private static final String CALLER_DID_HEADER = "CallerDid";
 
     private final RegistrationService service;
 
@@ -71,7 +72,9 @@ public class RegistrationApiController {
     @POST
     public void addParticipant(
             @HeaderParam(TEMPORARY_IDS_URL_HEADER) String idsUrl,
-            @HeaderParam(CALLER_DID_HEADER) String did) {
-        service.addParticipant(did, idsUrl);
+            @Context HttpHeaders headers) {
+        var issuer = Objects.requireNonNull(headers.getHeaderString(CALLER_DID_HEADER));
+
+        service.addParticipant(issuer, idsUrl);
     }
 }

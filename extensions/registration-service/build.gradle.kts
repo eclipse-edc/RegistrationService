@@ -11,16 +11,20 @@ val mockitoVersion: String by project
 val faker: String by project
 
 dependencies {
-    implementation("${edcGroup}:core:${edcVersion}")
+    implementation("${edcGroup}:http:${edcVersion}")
     implementation("${edcGroup}:state-machine-lib:${edcVersion}")
+    implementation("${edcGroup}:identity-did-crypto:${edcVersion}")
 
     implementation(project(":extensions:participant-store-spi"))
     implementation(project(":extensions:dataspace-authority-spi"))
+
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation("com.github.javafaker:javafaker:${faker}")
     testImplementation(testFixtures(project(":extensions:dataspace-authority-spi")))
+    testImplementation(testFixtures(project(":rest-client")))
 }
 

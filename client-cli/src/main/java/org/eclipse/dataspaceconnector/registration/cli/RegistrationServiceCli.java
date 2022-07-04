@@ -14,10 +14,13 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import org.eclipse.dataspaceconnector.registration.client.ApiClientFactory;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Command(name = "registration-service-cli", mixinStandardHelpOptions = true,
         description = "Client utility for MVD registration service.",
@@ -30,6 +33,9 @@ public class RegistrationServiceCli {
 
     @CommandLine.Option(names = "-d", required = true, description = "Client DID")
     String clientDid;
+
+    @CommandLine.Option(names = "-k", required = true, description = "File containing the private key in PEM format")
+    Path privateKeyFile;
 
     RegistryApi registryApiClient;
 
@@ -51,7 +57,13 @@ public class RegistrationServiceCli {
     }
 
     private void init() {
-        var apiClient = ApiClientFactory.createApiClient(service);
-        registryApiClient = new RegistryApi(apiClient);
+        String privateKeyData;
+        try {
+            privateKeyData = Files.readString(privateKeyFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading file " + privateKeyFile, e);
+        }
+        var apiClient = ClientUtils.createApiClient(service, clientDid, privateKeyData);
+        this.registryApiClient = new RegistryApi(apiClient);
     }
 }

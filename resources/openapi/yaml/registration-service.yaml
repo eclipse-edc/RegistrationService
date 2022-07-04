@@ -12,10 +12,6 @@ paths:
         name: IdsUrl
         schema:
           type: string
-      - in: header
-        name: CallerDid
-        schema:
-          type: string
       responses:
         "204":
           description: No content

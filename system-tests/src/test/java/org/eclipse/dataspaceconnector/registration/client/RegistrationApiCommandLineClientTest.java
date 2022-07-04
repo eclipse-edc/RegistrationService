@@ -20,21 +20,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Faker FAKER = new Faker();
-    String did = FAKER.internet().url();
+    static Path privateKeyFile;
     String idsUrl = FAKER.internet().url();
+
+    @BeforeAll
+    static void setUpClass() throws Exception {
+        privateKeyFile = Files.createTempFile("test", ".pem");
+        privateKeyFile.toFile().deleteOnExit();
+        Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
+    }
 
     @Test
     void listParticipants() throws Exception {
@@ -43,7 +54,8 @@ public class RegistrationApiCommandLineClientTest {
         assertThat(getParticipants(cmd)).noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
 
         var addCmdExitCode = cmd.execute(
-                "-d", did,
+                "-d", DID_WEB,
+                "-k", privateKeyFile.toString(),
                 "participants", "add",
                 "--ids-url", idsUrl);
         assertThat(addCmdExitCode).isEqualTo(0);
@@ -54,7 +66,8 @@ public class RegistrationApiCommandLineClientTest {
         var writer = new StringWriter();
         cmd.setOut(new PrintWriter(writer));
         var listCmdExitCode = cmd.execute(
-                "-d", did,
+                "-d", DID_WEB,
+                "-k", privateKeyFile.toString(),
                 "participants", "list");
         assertThat(listCmdExitCode).isEqualTo(0);
 

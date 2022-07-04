@@ -23,6 +23,7 @@ val jacksonVersion: String by project
 val faker: String by project
 
 dependencies {
+    testImplementation(testFixtures(project(":rest-client")))
     testImplementation(project(":rest-client"))
     testImplementation(project(":client-cli"))
     testRuntimeOnly(project(":launcher"))

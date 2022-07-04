@@ -17,14 +17,18 @@ package org.eclipse.dataspaceconnector.registration.cli;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import org.eclipse.dataspaceconnector.registration.client.TestKeyData;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +41,7 @@ class ParticipantsCommandTest {
 
     static final Faker FAKER = new Faker();
     static final ObjectMapper MAPPER = new ObjectMapper();
+    static Path privateKeyFile;
 
     Participant participant1 = createParticipant();
     Participant participant2 = createParticipant();
@@ -47,6 +52,13 @@ class ParticipantsCommandTest {
     RegistrationServiceCli app = new RegistrationServiceCli();
     CommandLine cmd = new CommandLine(app);
     StringWriter sw = new StringWriter();
+
+    @BeforeAll
+    static void setUpClass() throws Exception {
+        privateKeyFile = Files.createTempFile("test", ".pem");
+        privateKeyFile.toFile().deleteOnExit();
+        Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
+    }
 
     @BeforeEach
     void setUp() {
@@ -77,12 +89,13 @@ class ParticipantsCommandTest {
 
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(idsUrl, did);
+        verify(app.registryApiClient).addParticipant(idsUrl);
     }
 
     private int executeParticipantsAdd(String idsUrl) {
         return cmd.execute(
                 "-d", did,
+                "-k", privateKeyFile.toString(),
                 "-s", serverUrl,
                 "participants", "add",
                 "--ids-url", idsUrl);
@@ -91,6 +104,7 @@ class ParticipantsCommandTest {
     private int executeParticipantsList() {
         return cmd.execute(
                 "-d", did,
+                "-k", privateKeyFile.toString(),
                 "-s", serverUrl,
                 "participants", "list");
     }
