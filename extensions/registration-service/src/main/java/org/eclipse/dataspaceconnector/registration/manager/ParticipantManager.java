@@ -14,7 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.manager;
 
-import org.eclipse.dataspaceconnector.common.statemachine.StateMachine;
+import org.eclipse.dataspaceconnector.common.statemachine.StateMachineManager;
 import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
@@ -37,7 +37,7 @@ public class ParticipantManager {
     private final Monitor monitor;
     private final ParticipantStore participantStore;
     private final CredentialsVerifier credentialsVerifier;
-    private final StateMachine stateMachine;
+    private final StateMachineManager stateMachineManager;
 
     public ParticipantManager(Monitor monitor, ParticipantStore participantStore, CredentialsVerifier credentialsVerifier, ExecutorInstrumentation executorInstrumentation) {
         this.monitor = monitor;
@@ -48,7 +48,7 @@ public class ParticipantManager {
         WaitStrategy waitStrategy = () -> 5000L;
 
         // define state machine
-        stateMachine = StateMachine.Builder.newInstance("registration-service", monitor, executorInstrumentation, waitStrategy)
+        stateMachineManager = StateMachineManager.Builder.newInstance("registration-service", monitor, executorInstrumentation, waitStrategy)
                 .processor(processParticipantsInState(ONBOARDING_INITIATED, this::processOnboardingInitiated))
                 .processor(processParticipantsInState(AUTHORIZING, this::processAuthorizing))
                 .build();
@@ -58,14 +58,14 @@ public class ParticipantManager {
      * Start the participant manager state machine processor thread.
      */
     public void start() {
-        stateMachine.start();
+        stateMachineManager.start();
     }
 
     /**
      * Stop the participant manager state machine processor thread.
      */
     public void stop() {
-        stateMachine.stop();
+        stateMachineManager.stop();
     }
 
     private Boolean processOnboardingInitiated(Participant participant) {
