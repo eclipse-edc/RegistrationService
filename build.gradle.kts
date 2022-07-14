@@ -3,12 +3,14 @@ plugins {
     `java-library`
 }
 
+val version: String by project
+val groupId: String by project
 val swagger: String by project
 val rsApi: String by project
 
 allprojects {
-    version = "1.0.0-SNAPSHOT"
-    group = "org.eclipse.dataspaceconnector.registrationservice"
+    version = version
+    group = groupId
 
     repositories {
         mavenCentral()
