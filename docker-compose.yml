@@ -9,6 +9,7 @@ services:
     environment:
       JWT_AUDIENCE: http://localhost:8182/authority
       EDC_IAM_DID_WEB_USE_HTTPS: "false"
+      EDC_ERROR_RESPONSE_VERBOSE: "true"
       WEB_HTTP_AUTHORITY_PORT: 8182
       WEB_HTTP_AUTHORITY_PATH: /authority
     ports:
