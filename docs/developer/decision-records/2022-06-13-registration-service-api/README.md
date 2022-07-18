@@ -22,7 +22,7 @@ ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
 RegistryApi api = new RegistryApi(apiClient);
 ```
 
-Currently the Registration Service is not published to any public artifactory so the rest client can be used in local development after publishing the 
+Currently the Registration Service client is not published to any public artifactory so the rest client can be used in local development after publishing the 
 Registration Service artifacts locally
 
 ```
