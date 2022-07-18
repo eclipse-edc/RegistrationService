@@ -38,9 +38,9 @@ import java.util.Objects;
 import static java.lang.String.format;
 
 /**
- * EDC extension to boot the services used by the Registration Service.
+ * EDC extension to boot the services used by the Authority Service.
  */
-public class RegistrationServiceExtension implements ServiceExtension {
+public class AuthorityExtension implements ServiceExtension {
 
     public static final String CONTEXT_ALIAS = "authority";
 
