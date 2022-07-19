@@ -17,43 +17,58 @@ package org.eclipse.dataspaceconnector.registration.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.IntegrationTestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
-    static final String API_URL = "http://localhost:8181/api";
-
     static final ObjectMapper MAPPER = new ObjectMapper();
-    Participant participant = createParticipant();
+    static final Faker FAKER = new Faker();
+    static Path privateKeyFile;
+    String idsUrl = FAKER.internet().url();
+
+    @BeforeAll
+    static void setUpClass() throws Exception {
+        privateKeyFile = Files.createTempFile("test", ".pem");
+        privateKeyFile.toFile().deleteOnExit();
+        Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
+    }
 
     @Test
     void listParticipants() throws Exception {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
 
-        assertThat(getParticipants(cmd)).doesNotContain(participant);
+        assertThat(getParticipants(cmd)).noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
 
-        var request = MAPPER.writeValueAsString(participant);
-
-        var addCmdExitCode = cmd.execute("-s", API_URL, "participants", "add", "--request", request);
+        var addCmdExitCode = cmd.execute(
+                "-d", DID_WEB,
+                "-k", privateKeyFile.toString(),
+                "participants", "add",
+                "--ids-url", idsUrl);
         assertThat(addCmdExitCode).isEqualTo(0);
-        assertThat(getParticipants(cmd)).contains(participant);
+        assertThat(getParticipants(cmd)).anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
     }
 
     private List<Participant> getParticipants(CommandLine cmd) throws JsonProcessingException {
         var writer = new StringWriter();
         cmd.setOut(new PrintWriter(writer));
-        var listCmdExitCode = cmd.execute("participants", "list");
-
+        var listCmdExitCode = cmd.execute(
+                "-d", DID_WEB,
+                "-k", privateKeyFile.toString(),
+                "participants", "list");
         assertThat(listCmdExitCode).isEqualTo(0);
 
         var output = writer.toString();

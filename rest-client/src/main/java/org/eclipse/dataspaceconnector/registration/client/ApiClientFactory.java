@@ -14,6 +14,13 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
+import org.eclipse.dataspaceconnector.spi.iam.TokenParameters;
+import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
+import org.eclipse.dataspaceconnector.spi.result.Result;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+
 /**
  * Factory class for {@link ApiClient}.
  */
@@ -23,13 +30,18 @@ public class ApiClientFactory {
 
     /**
      * Create a new instance of {@link ApiClient} configured to access the given URL.
+     * <p>
+     * Note that the type of {@code credentialsProvider} is modeled on the EDC {@code IdentityService} interface, for easier integration.
      *
-     * @param baseUri API base URL.
-     * @return a new instance of {@link ApiClient}.
+     * @param baseUri             API base URL.
+     * @param credentialsProvider Provider for client credential.
+     * @return API client.
      */
-    public static ApiClient createApiClient(String baseUri) {
+    @NotNull
+    public static ApiClient createApiClient(String baseUri, Function<TokenParameters, Result<TokenRepresentation>> credentialsProvider) {
         var apiClient = new ApiClient();
         apiClient.updateBaseUri(baseUri);
+        apiClient.setRequestInterceptor(new JsonWebSignatureHeaderInterceptor(credentialsProvider, baseUri));
         return apiClient;
     }
 }

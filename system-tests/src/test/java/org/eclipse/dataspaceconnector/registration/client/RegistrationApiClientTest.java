@@ -14,29 +14,38 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
+import com.github.javafaker.Faker;
+import org.eclipse.dataspaceconnector.registration.cli.ClientUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
-import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.IntegrationTestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
-    static final String API_URL = "http://localhost:8181/api";
+    static final String API_URL = "http://localhost:8182/authority";
+    static final Faker FAKER = new Faker();
+    static RegistryApi api;
 
-    ApiClient apiClient = ApiClientFactory.createApiClient(API_URL);
-    RegistryApi api = new RegistryApi(apiClient);
-    Participant participant = createParticipant();
+    String participantUrl = FAKER.internet().url();
+
+    @BeforeAll
+    static void setUpClass() {
+        var apiClient = ClientUtils.createApiClient(API_URL, DID_WEB, TestKeyData.PRIVATE_KEY_P256);
+        api = new RegistryApi(apiClient);
+    }
 
     @Test
     void listParticipants() {
-        assertThat(api.listParticipants())
-                .doesNotContain(participant);
-
-        api.addParticipant(participant);
 
         assertThat(api.listParticipants())
-                .contains(participant);
+                .noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
+
+        api.addParticipant(participantUrl);
+
+        assertThat(api.listParticipants())
+                .anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
     }
 }
