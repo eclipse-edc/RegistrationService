@@ -1,9 +1,9 @@
 {
-  "id": "did:web:did-server:test-authority",
+  "id": "did:web:did-server:test-client",
   "@context": [
     "https://www.w3.org/ns/did/v1",
     {
-      "@base": "did:web:did-server:test-authority"
+      "@base": "did:web:did-server:test-client"
     }
   ],
   "verificationMethod": [

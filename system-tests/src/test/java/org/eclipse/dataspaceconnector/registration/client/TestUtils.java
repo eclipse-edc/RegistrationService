@@ -19,7 +19,13 @@ class TestUtils {
     }
 
     /**
-     * The DID that resolves to the sample DID Document in docker compose (served by the nginx container)
+     * The DID that resolves to the sample DID Document for a client in docker compose (served by the nginx container)
      */
-    static final String DID_WEB = "did:web:did-server:test-authority";
+    static final String CLIENT_DID_WEB = "did:web:did-server:test-client";
+
+    /**
+     * The DID that resolves to the sample DID Document for the Dataspace Authority in docker compose (served by the nginx container).
+     * Did web format reference: https://w3c-ccg.github.io/did-method-web/#create-register
+     */
+    static final String DATASPACE_DID_WEB = "did:web:localhost%3A8080:test-dataspace-authority";
 }

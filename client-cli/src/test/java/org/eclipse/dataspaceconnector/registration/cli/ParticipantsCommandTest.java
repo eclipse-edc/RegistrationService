@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
@@ -47,7 +48,8 @@ class ParticipantsCommandTest {
     Participant participant2 = createParticipant();
     String serverUrl = FAKER.internet().url();
     String idsUrl = FAKER.internet().url();
-    String did = FAKER.internet().url();
+    String clientDid = FAKER.internet().url();
+    String dataspaceDid = "did:web:" + FAKER.internet().domainName();
 
     RegistrationServiceCli app = new RegistrationServiceCli();
     CommandLine cmd = new CommandLine(app);
@@ -72,9 +74,60 @@ class ParticipantsCommandTest {
         when(app.registryApiClient.listParticipants())
                 .thenReturn(participants);
 
-        var exitCode = executeParticipantsList();
+        var exitCode = executeParticipantsList("-d", dataspaceDid);
+        assertListParticipants(participants, exitCode, app.dataspaceDid, dataspaceDid);
+    }
+
+    @Test
+    void add() {
+        var exitCode = executeParticipantsAdd("-d", dataspaceDid);
+        assertAddParticipants(exitCode, dataspaceDid, app.dataspaceDid);
+    }
+
+    @Deprecated
+    @Test
+    void list_using_serviceUrl() throws Exception {
+        var participants = List.of(this.participant1, participant2);
+        when(app.registryApiClient.listParticipants())
+                .thenReturn(participants);
+
+        var exitCode = executeParticipantsList("-s", serverUrl);
+        assertListParticipants(participants, exitCode, app.service, serverUrl);
+    }
+
+    @Deprecated
+    @Test
+    void add_using_serviceUrl() {
+        var exitCode = executeParticipantsAdd("-s", serverUrl);
+        assertAddParticipants(exitCode, serverUrl, app.service);
+    }
+
+    @Deprecated
+    @Test
+    void add_both_inputs() {
+        var exitCode = cmd.execute(
+                "-c", clientDid,
+                "-k", privateKeyFile.toString(),
+                "-s", serverUrl,
+                "-d", dataspaceDid,
+                "participants", "add",
+                "--ids-url", idsUrl);
+
         assertThat(exitCode).isEqualTo(0);
+        assertThat(dataspaceDid).isEqualTo(app.dataspaceDid);
         assertThat(serverUrl).isEqualTo(app.service);
+        verify(app.registryApiClient).addParticipant(idsUrl);
+    }
+
+    private void assertAddParticipants(int exitCode, String serverUrl, String service) {
+        assertThat(exitCode).isEqualTo(0);
+        assertThat(serverUrl).isEqualTo(service);
+        verify(app.registryApiClient).addParticipant(idsUrl);
+    }
+
+    private void assertListParticipants(List<Participant> participants, int exitCode, String value, String expectedValue) throws JsonProcessingException {
+        assertThat(exitCode).isEqualTo(0);
+        assertThat(expectedValue).isEqualTo(value);
 
         var parsedResult = MAPPER.readValue(sw.toString(), new TypeReference<List<Participant>>() {
         });
@@ -83,29 +136,20 @@ class ParticipantsCommandTest {
                 .isEqualTo(participants);
     }
 
-    @Test
-    void add() {
-        var exitCode = executeParticipantsAdd(idsUrl);
-
-        assertThat(exitCode).isEqualTo(0);
-        assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
-    }
-
-    private int executeParticipantsAdd(String idsUrl) {
+    private int executeParticipantsAdd(String inputCmd, String inputValue) {
         return cmd.execute(
-                "-d", did,
+                "-c", clientDid,
                 "-k", privateKeyFile.toString(),
-                "-s", serverUrl,
+                inputCmd, inputValue,
                 "participants", "add",
                 "--ids-url", idsUrl);
     }
 
-    private int executeParticipantsList() {
+    private int executeParticipantsList(String inputCmd, String inputValue) {
         return cmd.execute(
-                "-d", did,
+                "-c", clientDid,
                 "-k", privateKeyFile.toString(),
-                "-s", serverUrl,
+                inputCmd, inputValue,
                 "participants", "list");
     }
 }

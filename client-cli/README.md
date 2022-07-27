@@ -16,9 +16,13 @@ For example, to list dataspace participants:
 
 ```
 java -jar client-cli/build/libs/registration-service-cli.jar \
-  -s=http://localhost:8182/authority \
+  -d=did:web:dataspaceauthoritydid \
+  -c=did:web:clientdid
+  -k=file.pem
   participants list
 ```
+
+More about available did:web formats: [https://w3c-ccg.github.io/did-method-web/#example-example-web-method-dids](Web DID method specification).
 
 The client can also be run from a local Maven repository:
 
