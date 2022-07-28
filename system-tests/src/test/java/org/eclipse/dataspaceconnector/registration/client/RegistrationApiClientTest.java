@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.CLIENT_DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
@@ -33,7 +33,7 @@ public class RegistrationApiClientTest {
 
     @BeforeAll
     static void setUpClass() {
-        var apiClient = ClientUtils.createApiClient(API_URL, DID_WEB, TestKeyData.PRIVATE_KEY_P256);
+        var apiClient = ClientUtils.createApiClient(API_URL, CLIENT_DID_WEB, TestKeyData.PRIVATE_KEY_P256);
         api = new RegistryApi(apiClient);
     }
 

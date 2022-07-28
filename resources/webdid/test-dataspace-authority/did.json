@@ -1,0 +1,33 @@
+{
+  "id": "did:web:did-server:test-dataspace-authority",
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    {
+      "@base": "did:web:did-server:test-dataspace-authority"
+    }
+  ],
+  "service": [
+    {
+      "id": "#registration-url",
+      "serviceEndpoint": "http://localhost:8182/authority",
+      "type": "RegistrationUrl"
+    }
+  ],
+  "verificationMethod": [
+    {
+      "controller": "",
+      "id": "#dataspace-authority",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "kid": "43W7BLEhKmasrJYqax399SY3tbAWZ9gbE2Em1pIQIds",
+        "kty": "EC",
+        "x": "wwP_-TypFsR1k41KDoxYelM5nlMDWkW1xI3dfD_JSIE",
+        "y": "iqDGWy1rbemhYrN4NCtn5dCeElIO8KLqXDT2RuzQWH0"
+      },
+      "type": "JsonWebKey2020"
+    }
+  ],
+  "authentication": [
+    "#dataspace-authority"
+  ]
+}
