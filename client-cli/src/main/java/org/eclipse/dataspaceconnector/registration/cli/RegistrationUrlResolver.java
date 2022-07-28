@@ -20,8 +20,6 @@ import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolver;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 /**
  * Resolves the registration url from the DID.
  */
@@ -39,7 +37,7 @@ public class RegistrationUrlResolver {
     }
 
     @NotNull
-    public Optional<String> resolveUrl(String did) {
+    public Result<String> resolveUrl(String did) {
         Result<DidDocument> didDocument = resolver.resolve(did);
         if (didDocument.failed()) {
             throw new CliException("Error resolving the DID " + did);
@@ -47,7 +45,10 @@ public class RegistrationUrlResolver {
         return didDocument.getContent().getService()
                 .stream()
                 .filter(service -> service.getType().equals(REGISTRATION_URL))
-                .map(Service::getServiceEndpoint).findFirst();
+                .map(Service::getServiceEndpoint)
+                .findFirst()
+                .map(Result::success)
+                .orElse(Result.failure("Error resolving service endpoint from DID Document for " + did));
     }
 
 }

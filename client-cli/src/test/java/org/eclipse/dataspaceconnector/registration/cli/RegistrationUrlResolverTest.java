@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,10 +50,10 @@ class RegistrationUrlResolverTest {
         DidDocument didDocument = didDocument(List.of(new Service("some-id", REGISTRATION_URL_TYPE, apiUrl), new Service("some-id", "some-other-type", apiUrl)));
         when(didResolver.resolve(did)).thenReturn(Result.success(didDocument));
 
-        Optional<String> resultApiUrl = urlResolver.resolveUrl(did);
+        Result<String> resultApiUrl = urlResolver.resolveUrl(did);
 
-        assertThat(resultApiUrl).isNotEmpty();
-        assertThat(resultApiUrl.get()).isEqualTo(apiUrl);
+        assertThat(resultApiUrl.succeeded()).isTrue();
+        assertThat(resultApiUrl.getContent()).isEqualTo(apiUrl);
 
     }
 
@@ -65,9 +64,10 @@ class RegistrationUrlResolverTest {
         DidDocument didDocument = didDocument(services);
         when(didResolver.resolve(did)).thenReturn(Result.success(didDocument));
 
-        Optional<String> resultApiUrl = urlResolver.resolveUrl(did);
+        Result<String> resultApiUrl = urlResolver.resolveUrl(did);
 
-        assertThat(resultApiUrl).isEmpty();
+        assertThat(resultApiUrl.failed()).isTrue();
+        assertThat(resultApiUrl.getFailureMessages()).containsExactly("Error resolving service endpoint from DID Document for " + did);
     }
 
     @Test
