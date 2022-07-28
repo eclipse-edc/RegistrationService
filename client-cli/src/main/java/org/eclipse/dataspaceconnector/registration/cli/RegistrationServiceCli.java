@@ -40,14 +40,6 @@ public class RegistrationServiceCli {
 
     private static final ObjectMapper MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-    /**
-     * Set to {@code false} to create DID URLs with {@code http} instead of {@code https} scheme.
-     * Defaults to {@code true}.
-     * <p>
-     * This setting is used for testing purposes.
-     */
-    private static final String USE_HTTPS_SCHEME = "did.web.use.https";
-
     @Deprecated
     @CommandLine.Option(names = "-s", description = "Registration service URL. Deprecated. Use -d instead.", defaultValue = "http://localhost:8182/authority")
     String service;
