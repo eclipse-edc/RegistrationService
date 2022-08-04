@@ -25,14 +25,17 @@ import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static java.lang.String.format;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.registration.client.TestUtils.CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.UNREGISTERED_CLIENT_DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
@@ -85,4 +88,32 @@ public class RegistrationApiClientTest {
         assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(CLIENT_DID_WEB);
         assertThat(jwt.getJWTClaimsSet().getIssueTime()).isAfter(startTime);
     }
+
+    @Test
+    void getParticipant() {
+        api.addParticipant(participantUrl);
+
+        var response = api.getParticipant();
+
+        assertThat(response.getDid()).isEqualTo(CLIENT_DID_WEB);
+        assertThat(response.getUrl()).isEqualTo(participantUrl);
+        assertThat(response.getStatus()).isNotNull();
+    }
+
+    @Test
+    void getParticipant_notFound() {
+        //Arrange - Fresh api client with unregistered client DID.
+        var apiClient = ClientUtils.createApiClient(API_URL, UNREGISTERED_CLIENT_DID_WEB, TestKeyData.PRIVATE_KEY_P256);
+        var api = new RegistryApi(apiClient);
+
+        // look for participant which is not yet registered.
+        assertThatThrownBy(api::getParticipant)
+                .isInstanceOf(ApiException.class)
+                .extracting("code", "responseBody")
+                .containsExactly(
+                        404,
+                        format("[{\"message\":\"Object of type Participant with ID=%s was not found\"}]", UNREGISTERED_CLIENT_DID_WEB)
+                );
+    }
+
 }

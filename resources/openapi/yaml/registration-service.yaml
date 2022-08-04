@@ -4,6 +4,20 @@ info:
   version: 0.0.1
 paths:
   /registry/participant:
+    get:
+      description: Get a participant by caller DID.
+      operationId: getParticipant
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantDto'
+          description: Dataspace participant.
+        "404":
+          description: Dataspace participant not found.
+      tags:
+      - Registry
     post:
       description: Asynchronously request to add a dataspace participant.
       operationId: addParticipant
@@ -22,20 +36,21 @@ paths:
       description: Gets all dataspace participants.
       operationId: listParticipants
       responses:
-        default:
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Participant'
+                  $ref: '#/components/schemas/ParticipantDto'
           description: Dataspace participants.
       tags:
       - Registry
 components:
   schemas:
-    Participant:
+    ParticipantDto:
       type: object
+      description: Dataspace Participant
       properties:
         did:
           type: string
@@ -43,8 +58,8 @@ components:
           type: string
         status:
           type: string
+          description: Participant onboarding status
           enum:
-          - ONBOARDING_INITIATED
           - AUTHORIZING
           - AUTHORIZED
           - ONBOARDED

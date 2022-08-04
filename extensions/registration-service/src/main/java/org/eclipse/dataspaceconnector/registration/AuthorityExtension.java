@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration;
 
+import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.extension.jersey.mapper.EdcApiExceptionMapper;
 import org.eclipse.dataspaceconnector.iam.did.spi.key.PrivateKeyWrapper;
@@ -31,6 +32,7 @@ import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredenti
 import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
+import org.eclipse.dataspaceconnector.registration.transform.ParticipantToParticipantDtoTransformer;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.WebService;
@@ -88,6 +90,9 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private PrivateKeyResolver privateKeyResolver;
 
+    @Inject
+    private DtoTransformerRegistry transformerRegistry;
+
     private ParticipantManager participantManager;
 
     @Override
@@ -99,8 +104,9 @@ public class AuthorityExtension implements ServiceExtension {
         var verifiableCredentialService = verifiableCredentialService(context);
 
         participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation, verifiableCredentialService);
+        transformerRegistry.register(new ParticipantToParticipantDtoTransformer());
 
-        var registrationService = new RegistrationService(monitor, participantStore);
+        var registrationService = new RegistrationService(monitor, participantStore, transformerRegistry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
