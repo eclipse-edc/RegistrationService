@@ -15,9 +15,12 @@
 package org.eclipse.dataspaceconnector.registration;
 
 import org.eclipse.dataspaceconnector.extension.jersey.mapper.EdcApiExceptionMapper;
+import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
+import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
+import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
-import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
+import org.eclipse.dataspaceconnector.registration.api.RegistrationServiceImpl;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
 import org.eclipse.dataspaceconnector.registration.authority.DummyCredentialsVerifier;
 import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
@@ -27,12 +30,15 @@ import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
+import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -68,9 +74,18 @@ public class AuthorityExtension implements ServiceExtension {
     private ExecutorInstrumentation executorInstrumentation;
 
     private ParticipantManager participantManager;
+    @Inject
+    private PolicyEngine policyEngine;
+    @Inject
+    private DidResolverRegistry didResolverRegistry;
+    private org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifier verifier;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
+
+        Policy dummyDataspacePolicy = Policy.Builder.newInstance().build();
+        verifier = participantDid -> Result.success(Map.of("region", "eu"));
+
         var audience = Objects.requireNonNull(context.getSetting(JWT_AUDIENCE_SETTING, null),
                 () -> format("Missing setting %s", JWT_AUDIENCE_SETTING));
         var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
@@ -78,7 +93,7 @@ public class AuthorityExtension implements ServiceExtension {
 
         participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
 
-        var registrationService = new RegistrationService(monitor, participantStore);
+        var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dummyDataspacePolicy, verifier, didResolverRegistry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);

@@ -25,6 +25,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import static org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticat
 public class RegistrationApiController {
 
     /**
-     * A IDS URL (this will be removed in https://github.com/agera-edc/MinimumViableDataspace/issues/174)
+     * An IDS URL (this will be removed in https://github.com/agera-edc/MinimumViableDataspace/issues/174)
      */
     private static final String TEMPORARY_IDS_URL_HEADER = "IdsUrl";
 
@@ -70,11 +71,12 @@ public class RegistrationApiController {
     @Operation(description = "Asynchronously request to add a dataspace participant.")
     @ApiResponse(responseCode = "204", description = "No content")
     @POST
-    public void addParticipant(
+    public Response addParticipant(
             @HeaderParam(TEMPORARY_IDS_URL_HEADER) String idsUrl,
             @Context HttpHeaders headers) {
         var issuer = Objects.requireNonNull(headers.getHeaderString(CALLER_DID_HEADER));
 
-        service.addParticipant(issuer, idsUrl);
+       var result =  service.addParticipant(issuer, idsUrl);
+       return result.succeeded() ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).entity(result.getFailureDetail()).build();
     }
 }

@@ -35,7 +35,7 @@ class RegistrationServiceTest {
 
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
-    RegistrationService service = new RegistrationService(monitor, participantStore);
+    RegistrationService service = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dataspacePolicy, verifier, didResolverRegistry);
     Participant.Builder participantBuilder = createParticipant();
     String did = FAKER.internet().url();
     String idsUrl = FAKER.internet().url();
