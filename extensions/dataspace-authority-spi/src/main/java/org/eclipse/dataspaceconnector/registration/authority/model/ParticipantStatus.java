@@ -17,6 +17,8 @@ package org.eclipse.dataspaceconnector.registration.authority.model;
 public enum ParticipantStatus {
     ONBOARDING_INITIATED, // onboarding request received
     AUTHORIZING, // verifying participants credentials
-    AUTHORIZED, // participant is fully onboarded
+    AUTHORIZED, // participant is authorized
+    ONBOARDED, // participant is fully onboarded
     DENIED, // participant onboarding request denied
+    FAILED, // participant onboarding failed
 }

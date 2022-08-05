@@ -14,32 +14,44 @@
 
 package org.eclipse.dataspaceconnector.registration;
 
+import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.extension.jersey.mapper.EdcApiExceptionMapper;
+import org.eclipse.dataspaceconnector.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
+import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
+import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
+import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
 import org.eclipse.dataspaceconnector.registration.authority.DummyCredentialsVerifier;
 import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
+import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialServiceImpl;
 import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
+import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
+import org.eclipse.dataspaceconnector.spi.system.Requires;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
 import java.util.Objects;
 
 import static java.lang.String.format;
+import static org.eclipse.dataspaceconnector.iam.did.spi.document.DidConstants.DID_URL_SETTING;
 
 /**
  * EDC extension to boot the services used by the Authority Service.
  */
+@Requires({PrivateKeyResolver.class, OkHttpClient.class, DidResolverRegistry.class})
 public class AuthorityExtension implements ServiceExtension {
 
     public static final String CONTEXT_ALIAS = "authority";
@@ -67,6 +79,12 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private ExecutorInstrumentation executorInstrumentation;
 
+    @Inject
+    private DidResolverRegistry resolverRegistry;
+
+    @Inject
+    private VerifiableCredentialService verifiableCredentialService;
+
     private ParticipantManager participantManager;
 
     @Override
@@ -76,7 +94,7 @@ public class AuthorityExtension implements ServiceExtension {
         var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
 
-        participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
+        participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation, verifiableCredentialService);
 
         var registrationService = new RegistrationService(monitor, participantStore);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
@@ -103,5 +121,25 @@ public class AuthorityExtension implements ServiceExtension {
     @Provider(isDefault = true)
     public CredentialsVerifier credentialsVerifier() {
         return new DummyCredentialsVerifier();
+    }
+
+    @Provider(isDefault = true)
+    public VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
+        var didUrl = context.getSetting(DID_URL_SETTING, null);
+        if (didUrl == null) {
+            throw new EdcException(format("The DID Url setting '(%s)' was null!", DID_URL_SETTING));
+        }
+
+        var mapper = context.getTypeManager().getMapper();
+        var jwtService = new VerifiableCredentialsJwtServiceImpl(mapper);
+
+        var identityHubClient = new IdentityHubClientImpl(context.getService(OkHttpClient.class), mapper, monitor);
+
+        var privateKeyResolver = context.getService(PrivateKeyResolver.class);
+
+        var privateKeyWrapper = privateKeyResolver.resolvePrivateKey(context.getConnectorId(), PrivateKeyWrapper.class);
+        Objects.requireNonNull(privateKeyWrapper, "Couldn't resolve private key from connector " + context.getConnectorId());
+
+        return new VerifiableCredentialServiceImpl(monitor, jwtService, privateKeyWrapper, didUrl, resolverRegistry, identityHubClient);
     }
 }
