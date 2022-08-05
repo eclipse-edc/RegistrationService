@@ -22,11 +22,16 @@ import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * EDC extension to boot the services used by the Authority Service.
  */
 public class MocksExtension implements ServiceExtension {
+    private static final String VERIFIABLE_CREDENTIAL_ID_KEY = "id";
+    private static final String CREDENTIAL_SUBJECT_KEY = "credentialSubject";
+    private static final String ISSUER_KEY = "iss";
+    private static final String VERIFIABLE_CREDENTIALS_KEY = "vc";
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -34,7 +39,14 @@ public class MocksExtension implements ServiceExtension {
 
     @Provider(isDefault = true)
     public CredentialsVerifier createRegionIsEuVerifier() {
-        return participantDid -> Result.success(Map.of("region", "eu"));
+
+        var vcId = UUID.randomUUID().toString();
+        return (participant) -> Result.success(Map.of(vcId,
+                Map.of(VERIFIABLE_CREDENTIALS_KEY,
+                        Map.of(CREDENTIAL_SUBJECT_KEY, "eu",
+                                VERIFIABLE_CREDENTIAL_ID_KEY, vcId),
+                        // issuer will be ignored when applying policies for now.
+                        ISSUER_KEY, String.join("did:web:", UUID.randomUUID().toString()))));
     }
 
     @Provider(isDefault = true)
