@@ -20,8 +20,8 @@ import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationServiceImpl;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
-import org.eclipse.dataspaceconnector.registration.authority.DummyCredentialsVerifier;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.DefaultParticipantVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
@@ -62,7 +62,7 @@ public class AuthorityExtension implements ServiceExtension {
     private ParticipantStore participantStore;
 
     @Inject
-    private CredentialsVerifier credentialsVerifier;
+    private ParticipantVerifier participantVerifier;
 
     @Inject
     private ExecutorInstrumentation executorInstrumentation;
@@ -78,7 +78,7 @@ public class AuthorityExtension implements ServiceExtension {
     private org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifier verifier;
 
     @Inject
-    private DataspacePolicyHolder dataspacePolicyHolder;
+    private DataspacePolicy dataspacePolicy;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -89,9 +89,9 @@ public class AuthorityExtension implements ServiceExtension {
         var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
 
-        participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
+        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier, executorInstrumentation);
 
-        var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dataspacePolicyHolder.get(), verifier, didResolverRegistry);
+        var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dataspacePolicy.get(), verifier, didResolverRegistry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
@@ -113,8 +113,8 @@ public class AuthorityExtension implements ServiceExtension {
         return new InMemoryParticipantStore();
     }
 
-    @Provider(isDefault = true)
-    public CredentialsVerifier credentialsVerifier() {
-        return new DummyCredentialsVerifier();
+    @Provider
+    public ParticipantVerifier credentialsVerifier() {
+        return new DefaultParticipantVerifier(didResolverRegistry, verifier);
     }
 }

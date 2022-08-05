@@ -1,0 +1,2 @@
+This module is intended to provide mock objects for the `CredentialsVerifier` and the `DataspacePolicy`. By putting it
+on the classpath it will inject an empty `Policy` and a `CredentialsVerifier` that always returns `"region" -> "eu"`.

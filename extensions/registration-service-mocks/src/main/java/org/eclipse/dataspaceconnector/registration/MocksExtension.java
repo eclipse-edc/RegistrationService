@@ -38,8 +38,8 @@ public class MocksExtension implements ServiceExtension {
     }
 
     @Provider(isDefault = true)
-    public DataspacePolicyHolder createDataspacePolicy() {
+    public DataspacePolicy createDataspacePolicy() {
         var p = Policy.Builder.newInstance().build();
-        return new DataspacePolicyHolder(p);
+        return new DataspacePolicy(p);
     }
 }

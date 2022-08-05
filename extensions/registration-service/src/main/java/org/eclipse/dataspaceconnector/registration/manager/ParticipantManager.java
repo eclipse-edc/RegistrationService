@@ -18,7 +18,7 @@ import org.eclipse.dataspaceconnector.common.statemachine.StateMachineManager;
 import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.retry.WaitStrategy;
@@ -36,13 +36,13 @@ public class ParticipantManager {
 
     private final Monitor monitor;
     private final ParticipantStore participantStore;
-    private final CredentialsVerifier credentialsVerifier;
+    private final ParticipantVerifier participantVerifier;
     private final StateMachineManager stateMachineManager;
 
-    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, CredentialsVerifier credentialsVerifier, ExecutorInstrumentation executorInstrumentation) {
+    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, ParticipantVerifier participantVerifier, ExecutorInstrumentation executorInstrumentation) {
         this.monitor = monitor;
         this.participantStore = participantStore;
-        this.credentialsVerifier = credentialsVerifier;
+        this.participantVerifier = participantVerifier;
 
         // default wait five seconds
         WaitStrategy waitStrategy = () -> 5000L;
@@ -75,11 +75,11 @@ public class ParticipantManager {
     }
 
     private Boolean processAuthorizing(Participant participant) {
-        var credentialsValid = credentialsVerifier.verifyCredentials();
+        var credentialsValid = participantVerifier.verifyCredentials(participant).succeeded();
         if (credentialsValid) {
             participant.transitionAuthorized();
         } else {
-            participant.transitionDenied();
+            participant.transitionDenied();// todo: pass result failure message to the participant state?
         }
         participantStore.save(participant);
         return true;

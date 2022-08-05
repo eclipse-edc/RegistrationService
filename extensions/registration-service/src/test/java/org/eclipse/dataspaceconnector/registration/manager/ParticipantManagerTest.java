@@ -16,9 +16,10 @@ package org.eclipse.dataspaceconnector.registration.manager;
 
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +45,7 @@ class ParticipantManagerTest {
 
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
-    CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
+    ParticipantVerifier credentialsVerifier = mock(ParticipantVerifier.class);
     ParticipantManager service = new ParticipantManager(monitor, participantStore, credentialsVerifier, ExecutorInstrumentation.noop());
     Participant.Builder participantBuilder = createParticipant();
     ArgumentCaptor<Participant> captor = ArgumentCaptor.forClass(Participant.class);
@@ -56,13 +57,13 @@ class ParticipantManagerTest {
 
     @Test
     void advancesStateFromAuthorizingToAuthorized() throws Exception {
-        when(credentialsVerifier.verifyCredentials()).thenReturn(true);
+        when(credentialsVerifier.verifyCredentials(any())).thenReturn(Result.success());
         advancesState(AUTHORIZING, AUTHORIZED);
     }
 
     @Test
     void advancesStateFromAuthorizingToDenied() throws Exception {
-        when(credentialsVerifier.verifyCredentials()).thenReturn(false);
+        when(credentialsVerifier.verifyCredentials(any())).thenReturn(Result.failure("foo"));
         advancesState(AUTHORIZING, DENIED);
     }
 
