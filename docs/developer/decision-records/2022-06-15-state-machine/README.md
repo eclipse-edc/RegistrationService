@@ -10,4 +10,4 @@ The [EDC state machine module](https://github.com/eclipse-dataspaceconnector/Dat
 
 The registration service enrollment endpoint onboards new participant asynchronously and during this processing a participant goes through different states.
 
-In simple scenarios, enrollement could be fast and fully automated. However, in advanced scenarios, enrollment policies could require interactions with external systems, and even manual processes. Therefore, it is implemented asynchronously.
+In simple scenarios, enrollment could be fast and fully automated. However, in advanced scenarios, enrollment policies could require interactions with external systems, and even manual processes. Therefore, it is implemented asynchronously.
