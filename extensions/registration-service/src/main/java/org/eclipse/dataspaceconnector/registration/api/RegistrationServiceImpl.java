@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
 /**
@@ -37,6 +38,7 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
  */
 public class RegistrationServiceImpl implements RegistrationService {
 
+    public static final String ONBOARDING_SCOPE = "PARTICIPANT_REGISTRATION";
     private final Monitor monitor;
     private final ParticipantStore participantStore;
     private final PolicyEngine policyEngine;
@@ -77,12 +79,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     public Result<Void> addParticipant(String did, String idsUrl) {
         monitor.info("Adding a participant in the dataspace.");
 
-        var claims = getClaimsFromDid(did);
-        var pa = new ParticipantAgent(claims, Collections.emptyMap());
-
-        var evaluationResult = policyEngine.evaluate("PARTICIPANT_REGISTRATION", dataspacePolicy, pa);
+        Result<Void> evaluationResult = isDataspaceCompliant(did);
         if (evaluationResult.failed()) {
-            return Result.failure(evaluationResult.getFailureMessages());
+            return evaluationResult;
         }
         var participant = Participant.Builder.newInstance()
                 .did(did)
@@ -96,13 +95,26 @@ public class RegistrationServiceImpl implements RegistrationService {
         return Result.success();
     }
 
-    private Map<String, Object> getClaimsFromDid(String did) {
+    private Result<Void> isDataspaceCompliant(String did) {
+        var claimsResult = getClaimsFromDid(did);
+        if (claimsResult.failed()) {
+            return Result.failure(claimsResult.getFailureMessages());
+        }
+        var pa = new ParticipantAgent(claimsResult.getContent(), Collections.emptyMap());
+
+        var evaluationResult = policyEngine.evaluate(ONBOARDING_SCOPE, dataspacePolicy, pa);
+        return evaluationResult.succeeded() ? Result.success()
+                : Result.failure(evaluationResult.getFailureMessages());
+    }
+
+    private Result<Map<String, Object>> getClaimsFromDid(String did) {
         var didDocumentResult = getDidDocument(did);
-        if(didDocumentResult.failed()){
-            throw new IllegalStateException("DID could not be resolved: " + did);
+        if (didDocumentResult.failed()) {
+            return Result.failure("DID could not be resolved: " + did);
         }
         var result = verifier.getVerifiedCredentials(didDocumentResult.getContent());
-        return result.succeeded() ? result.getContent() : Collections.emptyMap();
+        var success = result.succeeded() && !result.getContent().isEmpty();
+        return success ? result : Result.failure(format("Claims from DID [%s] could not be verified", did));
     }
 
     private Result<DidDocument> getDidDocument(String did) {
