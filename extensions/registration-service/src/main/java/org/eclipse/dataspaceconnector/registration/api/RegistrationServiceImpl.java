@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static org.eclipse.dataspaceconnector.registration.DataspacePolicy.ONBOARDING_SCOPE;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
 /**
@@ -38,7 +39,6 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
  */
 public class RegistrationServiceImpl implements RegistrationService {
 
-    public static final String ONBOARDING_SCOPE = "PARTICIPANT_REGISTRATION";
     private final Monitor monitor;
     private final ParticipantStore participantStore;
     private final PolicyEngine policyEngine;

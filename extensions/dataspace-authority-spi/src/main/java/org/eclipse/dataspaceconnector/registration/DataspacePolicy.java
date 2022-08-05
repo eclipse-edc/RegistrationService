@@ -22,6 +22,7 @@ import org.eclipse.dataspaceconnector.policy.model.Policy;
  * dataspace.
  */
 public class DataspacePolicy {
+    public static final String ONBOARDING_SCOPE = "PARTICIPANT_REGISTRATION";
     private final Policy dataspacePolicy;
 
     public DataspacePolicy(Policy dataspacePolicy) {

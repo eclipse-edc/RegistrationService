@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.dataspaceconnector.registration.DataspacePolicy.ONBOARDING_SCOPE;
 import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipant;
-import static org.eclipse.dataspaceconnector.registration.api.RegistrationServiceImpl.ONBOARDING_SCOPE;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,7 +55,7 @@ class RegistrationServiceTest {
     private final String did = FAKER.internet().url();
     private final String idsUrl = FAKER.internet().url();
     private final DidResolverRegistry didResolverRegistry = mock(DidResolverRegistry.class);
-    private RegistrationService service;
+    private RegistrationServiceImpl service;
 
     @BeforeEach
     void setup() {

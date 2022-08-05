@@ -19,8 +19,27 @@ import org.eclipse.dataspaceconnector.spi.result.Result;
 
 import java.util.List;
 
+/**
+ * Service to list and add participants to the internal membership database.
+ */
 public interface RegistrationService {
+    /**
+     * List all participants that are in the dataspace.
+     */
     List<Participant> listParticipants();
 
+    /**
+     * Adds a participant ("onboarding") to the database. For this to succeed, the following conditions must be true:
+     * <ul>
+     *     <li>DID must be resolvable</li>
+     *     <li>DID must contain verifiable claims</li>
+     *     <li>Claims must not be empty and satisfy the dataspace onboarding policy.</li>
+     * </ul>
+     *
+     * @param did The DID of the participant.
+     * @param idsUrl The IDS URL that should be registered for the participant
+     * @return a success result, if the onboarding was successful, a failed result otherwise.
+     * @see org.eclipse.dataspaceconnector.registration.DataspacePolicy
+     */
     Result<Void> addParticipant(String did, String idsUrl);
 }

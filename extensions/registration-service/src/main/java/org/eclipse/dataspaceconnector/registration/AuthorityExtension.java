@@ -61,8 +61,6 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private ParticipantStore participantStore;
 
-    @Inject
-    private ParticipantVerifier participantVerifier;
 
     @Inject
     private ExecutorInstrumentation executorInstrumentation;
@@ -79,6 +77,7 @@ public class AuthorityExtension implements ServiceExtension {
 
     @Inject
     private DataspacePolicy dataspacePolicy;
+    private ParticipantVerifier participantVerifier;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -89,7 +88,7 @@ public class AuthorityExtension implements ServiceExtension {
         var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
 
-        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier, executorInstrumentation);
+        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier(), executorInstrumentation);
 
         var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dataspacePolicy.get(), verifier, didResolverRegistry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
@@ -114,7 +113,10 @@ public class AuthorityExtension implements ServiceExtension {
     }
 
     @Provider
-    public ParticipantVerifier credentialsVerifier() {
-        return new DefaultParticipantVerifier(didResolverRegistry, verifier);
+    public ParticipantVerifier participantVerifier() {
+        if (participantVerifier == null) {
+            participantVerifier = new DefaultParticipantVerifier(didResolverRegistry, verifier);
+        }
+        return participantVerifier;
     }
 }
