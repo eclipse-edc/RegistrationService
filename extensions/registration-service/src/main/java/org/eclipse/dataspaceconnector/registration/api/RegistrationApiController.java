@@ -76,7 +76,7 @@ public class RegistrationApiController {
             @Context HttpHeaders headers) {
         var issuer = Objects.requireNonNull(headers.getHeaderString(CALLER_DID_HEADER));
 
-       var result =  service.addParticipant(issuer, idsUrl);
-       return result.succeeded() ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).entity(result.getFailureDetail()).build();
+        var result = service.addParticipant(issuer, idsUrl);
+        return result.succeeded() ? Response.ok().build() : Response.status(Response.Status.BAD_REQUEST).entity(result.getFailureDetail()).build();
     }
 }

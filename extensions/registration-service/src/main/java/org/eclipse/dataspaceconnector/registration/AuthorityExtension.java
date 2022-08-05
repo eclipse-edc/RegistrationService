@@ -15,10 +15,8 @@
 package org.eclipse.dataspaceconnector.registration;
 
 import org.eclipse.dataspaceconnector.extension.jersey.mapper.EdcApiExceptionMapper;
-import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
-import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationServiceImpl;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
@@ -31,14 +29,12 @@ import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
-import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -49,12 +45,10 @@ import static java.lang.String.format;
 public class AuthorityExtension implements ServiceExtension {
 
     public static final String CONTEXT_ALIAS = "authority";
-
-    @EdcSetting
-    private static final String JWT_AUDIENCE_SETTING = "jwt.audience";
     @EdcSetting
     public static final String ERROR_RESPONSE_VERBOSE_SETTING = "edc.error.response.verbose";
-
+    @EdcSetting
+    private static final String JWT_AUDIENCE_SETTING = "jwt.audience";
     @Inject
     private DidPublicKeyResolver didPublicKeyResolver;
 
