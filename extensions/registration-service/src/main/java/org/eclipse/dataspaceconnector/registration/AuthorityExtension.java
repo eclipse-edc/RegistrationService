@@ -76,15 +76,19 @@ public class AuthorityExtension implements ServiceExtension {
     private ParticipantManager participantManager;
     @Inject
     private PolicyEngine policyEngine;
+
     @Inject
     private DidResolverRegistry didResolverRegistry;
+
+    @Inject
     private org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifier verifier;
+
+    @Inject
+    private DataspacePolicyHolder dataspacePolicyHolder;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
 
-        Policy dummyDataspacePolicy = Policy.Builder.newInstance().build();
-        verifier = participantDid -> Result.success(Map.of("region", "eu"));
 
         var audience = Objects.requireNonNull(context.getSetting(JWT_AUDIENCE_SETTING, null),
                 () -> format("Missing setting %s", JWT_AUDIENCE_SETTING));
@@ -93,7 +97,7 @@ public class AuthorityExtension implements ServiceExtension {
 
         participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation);
 
-        var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dummyDataspacePolicy, verifier, didResolverRegistry);
+        var registrationService = new RegistrationServiceImpl(monitor, participantStore, policyEngine, dataspacePolicyHolder.get(), verifier, didResolverRegistry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
