@@ -21,6 +21,9 @@ val jupiterVersion: String by project
 val assertj: String by project
 val jacksonVersion: String by project
 val faker: String by project
+val httpMockServer: String by project
+val edcVersion: String by project
+val edcGroup: String by project
 
 dependencies {
     testImplementation(testFixtures(project(":rest-client")))
@@ -33,4 +36,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.awaitility:awaitility:${awaitility}")
     testImplementation("com.github.javafaker:javafaker:${faker}")
+    testImplementation("org.mock-server:mockserver-netty:${httpMockServer}:shaded")
+    testImplementation("org.mock-server:mockserver-client-java:${httpMockServer}:shaded")
+    testImplementation("${edcGroup}:junit:${edcVersion}")
 }

@@ -48,23 +48,15 @@ public class RegistrationService {
 
     /**
      * Add a participant to a dataspace.
-     * <p>
-     * In a future version, the {@code idsUrl} argument will be removed, as the {@code did}
-     * provides sufficient information to identify the participant, and the
-     * Registration Service will not manage service URLs.
      *
-     * @param did    the DID of the dataspace participant to add.
-     * @param idsUrl the IDS URL of the dataspace participant to add.
+     * @param did the DID of the dataspace participant to add.
      */
-    public void addParticipant(String did, String idsUrl) {
+    public void addParticipant(String did) {
         monitor.info("Adding a participant in the dataspace.");
 
         var participant = Participant.Builder.newInstance()
                 .did(did)
                 .status(ONBOARDING_INITIATED)
-                .name(did)
-                .url(idsUrl)
-                .supportedProtocol("ids-multipart")
                 .build();
 
         participantStore.save(participant);

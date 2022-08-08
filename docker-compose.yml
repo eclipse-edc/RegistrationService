@@ -2,6 +2,11 @@ services:
 
   registration-service:
     container_name: registration-service
+    # Special DNS name which resolves to the internal IP address used by the host. Used for testing purposes only.
+    # https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+    # It's used in tests to connect from a container to a mock-service on the host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     build:
       context: launcher
       args:

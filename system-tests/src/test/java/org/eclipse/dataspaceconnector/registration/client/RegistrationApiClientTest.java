@@ -21,15 +21,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.CLIENT_DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
+    static final String CLIENT_DID_WEB = "did:web:did-server:test-client";
     static final String API_URL = "http://localhost:8182/authority";
     static final Faker FAKER = new Faker();
     static RegistryApi api;
 
-    String participantUrl = FAKER.internet().url();
+    String did = "web:did:" + FAKER.internet().domainName();
 
     @BeforeAll
     static void setUpClass() {
@@ -41,11 +41,11 @@ public class RegistrationApiClientTest {
     void listParticipants() {
 
         assertThat(api.listParticipants())
-                .noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
+                .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
-        api.addParticipant(participantUrl);
+        api.addParticipant(did);
 
         assertThat(api.listParticipants())
-                .anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
+                .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
 }

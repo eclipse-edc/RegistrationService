@@ -25,9 +25,6 @@ public class TestUtils {
 
     public static Participant createParticipant() {
         return new Participant()
-                .name(FAKER.lorem().characters())
-                .url(FAKER.internet().url())
-                .addSupportedProtocolsItem(FAKER.lorem().word())
-                .addSupportedProtocolsItem(FAKER.lorem().word());
+                .did("web:did:" + FAKER.internet().domainName());
     }
 }

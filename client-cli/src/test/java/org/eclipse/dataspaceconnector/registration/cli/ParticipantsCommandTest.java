@@ -110,19 +110,18 @@ class ParticipantsCommandTest {
                 "-k", privateKeyFile.toString(),
                 "-s", serverUrl,
                 "-d", dataspaceDid,
-                "participants", "add",
-                "--ids-url", idsUrl);
+                "participants", "add");
 
         assertThat(exitCode).isEqualTo(0);
         assertThat(dataspaceDid).isEqualTo(app.dataspaceDid);
         assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
+        verify(app.registryApiClient).addParticipant(app.clientDid);
     }
 
     private void assertAddParticipants(int exitCode, String serverUrl, String service) {
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
+        verify(app.registryApiClient).addParticipant(app.clientDid);
     }
 
     private void assertListParticipants(List<Participant> participants, int exitCode, String value, String expectedValue) throws JsonProcessingException {
@@ -141,8 +140,7 @@ class ParticipantsCommandTest {
                 "-c", clientDid,
                 "-k", privateKeyFile.toString(),
                 inputCmd, inputValue,
-                "participants", "add",
-                "--ids-url", idsUrl);
+                "participants", "add");
     }
 
     private int executeParticipantsList(String inputCmd, String inputValue) {

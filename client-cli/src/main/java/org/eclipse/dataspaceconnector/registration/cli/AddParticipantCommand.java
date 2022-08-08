@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
@@ -26,12 +25,9 @@ class AddParticipantCommand implements Callable<Integer> {
     @ParentCommand
     private ParticipantsCommand command;
 
-    @CommandLine.Option(names = "--ids-url", required = true, description = "Participant IDS URL")
-    private String idsUrl;
-
     @Override
     public Integer call() {
-        command.cli.registryApiClient.addParticipant(idsUrl);
+        command.cli.registryApiClient.addParticipant(command.cli.clientDid);
 
         return 0;
     }

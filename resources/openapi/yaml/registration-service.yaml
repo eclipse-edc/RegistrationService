@@ -9,7 +9,7 @@ paths:
       operationId: addParticipant
       parameters:
       - in: header
-        name: IdsUrl
+        name: Did
         schema:
           type: string
       responses:
@@ -39,8 +39,6 @@ components:
       properties:
         did:
           type: string
-        name:
-          type: string
         status:
           type: string
           enum:
@@ -48,9 +46,3 @@ components:
           - AUTHORIZING
           - AUTHORIZED
           - DENIED
-        supportedProtocols:
-          type: array
-          items:
-            type: string
-        url:
-          type: string
