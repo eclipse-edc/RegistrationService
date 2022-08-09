@@ -83,7 +83,10 @@ public class AuthorityExtension implements ServiceExtension {
     private DidResolverRegistry resolverRegistry;
 
     @Inject
-    private VerifiableCredentialService verifiableCredentialService;
+    private OkHttpClient httpClient;
+
+    @Inject
+    private PrivateKeyResolver privateKeyResolver;
 
     private ParticipantManager participantManager;
 
@@ -93,6 +96,7 @@ public class AuthorityExtension implements ServiceExtension {
                 () -> format("Missing setting %s", JWT_AUDIENCE_SETTING));
         var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
+        var verifiableCredentialService = verifiableCredentialService(context);
 
         participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation, verifiableCredentialService);
 
@@ -123,19 +127,16 @@ public class AuthorityExtension implements ServiceExtension {
         return new DummyCredentialsVerifier();
     }
 
-    @Provider
-    public VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
+    private VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
         var didUrl = context.getSetting(DID_URL_SETTING, null);
         if (didUrl == null) {
             throw new EdcException(format("The DID Url setting '(%s)' was null!", DID_URL_SETTING));
         }
 
         var mapper = context.getTypeManager().getMapper();
-        var jwtService = new VerifiableCredentialsJwtServiceImpl(mapper);
+        var jwtService = new VerifiableCredentialsJwtServiceImpl(mapper, monitor);
 
-        var identityHubClient = new IdentityHubClientImpl(context.getService(OkHttpClient.class), mapper, monitor);
-
-        var privateKeyResolver = context.getService(PrivateKeyResolver.class);
+        var identityHubClient = new IdentityHubClientImpl(httpClient, mapper, monitor);
 
         var privateKeyWrapper = privateKeyResolver.resolvePrivateKey(context.getConnectorId(), PrivateKeyWrapper.class);
         Objects.requireNonNull(privateKeyWrapper, "Couldn't resolve private key from connector " + context.getConnectorId());
