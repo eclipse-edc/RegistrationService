@@ -28,7 +28,7 @@ jobs:
 
       - uses: ./.github/actions/gradle-setup
 
-      - name: 'Build launchers'
+      - name: 'Build package'
         run: ./gradlew -DuseFsVault="true" build
 
       - name: 'Upgrade docker-compose (for --wait option)'
