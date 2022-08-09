@@ -46,7 +46,6 @@ class ParticipantsCommandTest {
 
     Participant participant1 = createParticipant();
     Participant participant2 = createParticipant();
-    String serverUrl = FAKER.internet().url();
     String idsUrl = FAKER.internet().url();
     String clientDid = FAKER.internet().url();
     String dataspaceDid = "did:web:" + FAKER.internet().domainName();
@@ -82,41 +81,6 @@ class ParticipantsCommandTest {
     void add() {
         var exitCode = executeParticipantsAdd("-d", dataspaceDid);
         assertAddParticipants(exitCode, dataspaceDid, app.dataspaceDid);
-    }
-
-    @Deprecated
-    @Test
-    void list_using_serviceUrl() throws Exception {
-        var participants = List.of(this.participant1, participant2);
-        when(app.registryApiClient.listParticipants())
-                .thenReturn(participants);
-
-        var exitCode = executeParticipantsList("-s", serverUrl);
-        assertListParticipants(participants, exitCode, app.service, serverUrl);
-    }
-
-    @Deprecated
-    @Test
-    void add_using_serviceUrl() {
-        var exitCode = executeParticipantsAdd("-s", serverUrl);
-        assertAddParticipants(exitCode, serverUrl, app.service);
-    }
-
-    @Deprecated
-    @Test
-    void add_both_inputs() {
-        var exitCode = cmd.execute(
-                "-c", clientDid,
-                "-k", privateKeyFile.toString(),
-                "-s", serverUrl,
-                "-d", dataspaceDid,
-                "participants", "add",
-                "--ids-url", idsUrl);
-
-        assertThat(exitCode).isEqualTo(0);
-        assertThat(dataspaceDid).isEqualTo(app.dataspaceDid);
-        assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
     }
 
     private void assertAddParticipants(int exitCode, String serverUrl, String service) {

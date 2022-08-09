@@ -40,11 +40,7 @@ public class RegistrationServiceCli {
 
     private static final ObjectMapper MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-    @Deprecated
-    @CommandLine.Option(names = "-s", description = "Registration service URL. Deprecated. Use -d instead.", defaultValue = "http://localhost:8182/authority")
-    String service;
-
-    @CommandLine.Option(names = { "-d", "--dataspace-did" }, description = "Dataspace Authority DID.", defaultValue = "")
+    @CommandLine.Option(names = { "-d", "--dataspace-did" }, required = true, description = "Dataspace Authority DID.")
     String dataspaceDid;
 
     @CommandLine.Option(names = { "-c", "--client-did" }, required = true, description = "Client DID.")
@@ -83,13 +79,6 @@ public class RegistrationServiceCli {
             privateKeyData = Files.readString(privateKeyFile);
         } catch (IOException e) {
             throw new RuntimeException("Error reading file " + privateKeyFile, e);
-        }
-
-        // TODO: temporary to preserve the backwards compatibility (https://github.com/agera-edc/MinimumViableDataspace/issues/174)
-        if (dataspaceDid.isEmpty()) {
-            var apiClient = createApiClient(service, clientDid, privateKeyData);
-            this.registryApiClient = new RegistryApi(apiClient);
-            return;
         }
 
         registryApiClient = new RegistryApi(createApiClient(registrationUrl(), clientDid, privateKeyData));
