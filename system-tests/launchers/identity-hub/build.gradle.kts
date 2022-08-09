@@ -36,3 +36,11 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
     archiveFileName.set("app.jar")
 }
+
+tasks.withType<Tar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Zip> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
