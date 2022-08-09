@@ -1,0 +1,20 @@
+@startuml
+ONBOARDING_INITIATED: Onboarding request received
+AUTHORIZING: Verifying participants credentials
+AUTHORIZED: Participant is authorized
+ONBOARDED: Participant is fully onboarded
+DENIED: Participant onboarding request denied
+FAILED: Participant onboarding failed
+
+state authorization_result <<fork>>
+state submission_result <<fork>>
+
+[*] --> ONBOARDING_INITIATED: Receive onboarding request from participant
+ONBOARDING_INITIATED --> AUTHORIZING
+AUTHORIZING --> authorization_result: Apply dataspace membership policy on participant's verifiable credentials
+authorization_result --> AUTHORIZED: Success
+authorization_result --> DENIED: Failure
+AUTHORIZED --> submission_result: Submit a membership verifiable credential to participant's Identity Hub
+submission_result --> ONBOARDED: Success
+submission_result --> FAILED: Failure
+@enduml

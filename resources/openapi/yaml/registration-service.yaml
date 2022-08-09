@@ -47,7 +47,9 @@ components:
           - ONBOARDING_INITIATED
           - AUTHORIZING
           - AUTHORIZED
+          - ONBOARDED
           - DENIED
+          - FAILED
         supportedProtocols:
           type: array
           items:

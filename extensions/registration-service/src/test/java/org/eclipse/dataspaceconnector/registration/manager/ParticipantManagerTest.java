@@ -17,8 +17,11 @@ package org.eclipse.dataspaceconnector.registration.manager;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
+import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +35,8 @@ import static org.eclipse.dataspaceconnector.registration.TestUtils.createPartic
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.DENIED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.FAILED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,7 +50,8 @@ class ParticipantManagerTest {
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
     CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
-    ParticipantManager service = new ParticipantManager(monitor, participantStore, credentialsVerifier, ExecutorInstrumentation.noop());
+    VerifiableCredentialService verifiableCredentialService = mock(VerifiableCredentialService.class);
+    ParticipantManager service = new ParticipantManager(monitor, participantStore, credentialsVerifier, ExecutorInstrumentation.noop(), verifiableCredentialService);
     Participant.Builder participantBuilder = createParticipant();
     ArgumentCaptor<Participant> captor = ArgumentCaptor.forClass(Participant.class);
 
@@ -66,8 +72,25 @@ class ParticipantManagerTest {
         advancesState(AUTHORIZING, DENIED);
     }
 
+    @Test
+    void advancesStateFromAuthorizedToOnboarded() throws Exception {
+        when(verifiableCredentialService.pushVerifiableCredential(any()))
+                .thenReturn(StatusResult.success());
+        var participant = advancesState(AUTHORIZED, ONBOARDED);
+        verify(verifiableCredentialService).pushVerifiableCredential(participant);
+    }
+
+    @Test
+    void advancesStateFromAuthorizedToFailed() throws Exception {
+        when(verifiableCredentialService.pushVerifiableCredential(any()))
+                .thenReturn(StatusResult.failure(ResponseStatus.FATAL_ERROR));
+        var participant = advancesState(AUTHORIZED, FAILED);
+        verify(verifiableCredentialService).pushVerifiableCredential(participant);
+    }
+
+
     @SuppressWarnings("unchecked")
-    private void advancesState(ParticipantStatus startState, ParticipantStatus endState) throws Exception {
+    private Participant advancesState(ParticipantStatus startState, ParticipantStatus endState) throws Exception {
         var participant = participantBuilder.status(startState).build();
         when(participantStore.listParticipantsWithStatus(eq(startState)))
                 .thenReturn(List.of(participant), List.of());
@@ -88,5 +111,6 @@ class ParticipantManagerTest {
                 .isEqualTo(participant);
 
         service.stop();
+        return participant;
     }
 }
