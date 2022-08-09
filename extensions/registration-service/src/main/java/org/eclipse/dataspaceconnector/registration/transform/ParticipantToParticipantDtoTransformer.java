@@ -16,9 +16,9 @@ package org.eclipse.dataspaceconnector.registration.transform;
 
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformer;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
-import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
-import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatusDto;
+import org.eclipse.dataspaceconnector.registration.model.ParticipantStatusDto;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.transformer.TransformerContext;
 import org.jetbrains.annotations.NotNull;

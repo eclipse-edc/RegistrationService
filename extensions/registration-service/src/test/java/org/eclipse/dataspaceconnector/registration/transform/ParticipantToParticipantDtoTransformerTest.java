@@ -15,7 +15,7 @@
 package org.eclipse.dataspaceconnector.registration.transform;
 
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
-import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.spi.transformer.TransformerContext;
 import org.junit.jupiter.api.Test;

@@ -29,7 +29,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
-import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
 
 import java.util.List;
 import java.util.Objects;

@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.registration.api;
 
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
-import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.exception.ObjectNotFoundException;

@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.authority.model;
+package org.eclipse.dataspaceconnector.registration.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
