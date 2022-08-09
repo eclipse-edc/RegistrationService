@@ -123,7 +123,7 @@ public class AuthorityExtension implements ServiceExtension {
         return new DummyCredentialsVerifier();
     }
 
-    @Provider(isDefault = true)
+    @Provider
     public VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
         var didUrl = context.getSetting(DID_URL_SETTING, null);
         if (didUrl == null) {
