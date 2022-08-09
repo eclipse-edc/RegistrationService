@@ -25,7 +25,6 @@ import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static java.lang.String.format;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
