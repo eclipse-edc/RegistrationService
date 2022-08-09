@@ -29,8 +29,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipantDto;
+import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 import static org.eclipse.dataspaceconnector.spi.result.Result.failure;
 import static org.eclipse.dataspaceconnector.spi.result.Result.success;
