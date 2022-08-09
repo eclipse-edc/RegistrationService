@@ -29,7 +29,7 @@ jobs:
       - uses: ./.github/actions/gradle-setup
 
       - name: 'Build launchers'
-        run: ./gradlew -DuseFsVault="true" :launcher:shadowJar :system-tests:launchers:identity-hub:shadowJar
+        run: ./gradlew -DuseFsVault="true" build
 
       - name: 'Upgrade docker-compose (for --wait option)'
         run: |
