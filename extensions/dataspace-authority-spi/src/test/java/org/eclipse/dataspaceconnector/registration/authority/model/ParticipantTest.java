@@ -14,7 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.authority.model;
 
-import org.eclipse.dataspaceconnector.registration.TestUtils;
+import org.eclipse.dataspaceconnector.registration.authority.TestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

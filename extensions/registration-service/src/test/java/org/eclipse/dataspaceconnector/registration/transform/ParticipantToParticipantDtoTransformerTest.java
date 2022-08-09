@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.dataspaceconnector.registration.TestUtils.getParticipantDtoFromParticipant;
 import static org.mockito.Mockito.mock;
 

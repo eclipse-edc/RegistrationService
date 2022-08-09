@@ -41,7 +41,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.dataspaceconnector.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.eclipse.dataspaceconnector.spi.response.ResponseStatus.FATAL_ERROR;
 import static org.mockito.Mockito.any;
