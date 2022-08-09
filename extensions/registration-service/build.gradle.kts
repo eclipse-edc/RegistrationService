@@ -19,6 +19,7 @@ dependencies {
     implementation("${edcGroup}:identity-did-crypto:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub-spi:${identityHubVersion}")
     implementation("${identityHubGroup}:identity-hub-client:${identityHubVersion}")
+    implementation("${edcGroup}:api-core:${edcVersion}")
 
     implementation(project(":extensions:participant-store-spi"))
     implementation(project(":extensions:dataspace-authority-spi"))

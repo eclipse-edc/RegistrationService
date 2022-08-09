@@ -16,6 +16,7 @@ package org.eclipse.dataspaceconnector.registration.cli;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.iam.did.web.resolution.WebDidResolver;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
@@ -38,19 +39,21 @@ import static org.eclipse.dataspaceconnector.registration.cli.ClientUtils.create
         })
 public class RegistrationServiceCli {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    static final ObjectMapper MAPPER = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Deprecated
     @CommandLine.Option(names = "-s", description = "Registration service URL. Deprecated. Use -d instead.", defaultValue = "http://localhost:8182/authority")
     String service;
 
-    @CommandLine.Option(names = { "-d", "--dataspace-did" }, description = "Dataspace Authority DID.", defaultValue = "")
+    @CommandLine.Option(names = {"-d", "--dataspace-did"}, description = "Dataspace Authority DID.", defaultValue = "")
     String dataspaceDid;
 
-    @CommandLine.Option(names = { "-c", "--client-did" }, required = true, description = "Client DID.")
+    @CommandLine.Option(names = {"-c", "--client-did"}, required = true, description = "Client DID.")
     String clientDid;
 
-    @CommandLine.Option(names = { "-k", "--private-key" }, required = true, description = "File containing the private key in PEM format")
+    @CommandLine.Option(names = {"-k", "--private-key"}, required = true, description = "File containing the private key in PEM format")
     Path privateKeyFile;
 
     @CommandLine.Option(names = "--http-scheme", description = "Flag to create DID URLs with http instead of https scheme. Used for testing purposes.")

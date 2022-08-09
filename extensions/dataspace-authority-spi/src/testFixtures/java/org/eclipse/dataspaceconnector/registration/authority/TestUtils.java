@@ -12,13 +12,15 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration;
+package org.eclipse.dataspaceconnector.registration.authority;
 
 import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 
 import java.util.List;
+
+import static java.lang.String.format;
 
 public class TestUtils {
     static final Faker FAKER = new Faker();
@@ -28,7 +30,7 @@ public class TestUtils {
 
     public static Participant.Builder createParticipant() {
         return Participant.Builder.newInstance()
-                .did(FAKER.internet().url())
+                .did(format("did:web:%s", FAKER.internet().domainName()))
                 .status(FAKER.options().option(ParticipantStatus.class))
                 .name(FAKER.lorem().characters())
                 .url(FAKER.internet().url())

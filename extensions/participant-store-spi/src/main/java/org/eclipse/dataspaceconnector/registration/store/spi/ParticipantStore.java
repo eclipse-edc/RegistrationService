@@ -16,11 +16,15 @@ package org.eclipse.dataspaceconnector.registration.store.spi;
 
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface ParticipantStore {
+
+    @Nullable Participant findByDid(String did);
+
     List<Participant> listParticipants();
 
     void save(Participant participant);
