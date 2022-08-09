@@ -68,9 +68,11 @@ public class TestUtils {
      */
     private static Map<ParticipantStatus, ParticipantStatusDto> modelToDtoStatusMap() {
         return Map.of(
-                ParticipantStatus.ONBOARDING_INITIATED, ParticipantStatusDto.AUTHORIZING,
-                ParticipantStatus.AUTHORIZING, ParticipantStatusDto.AUTHORIZING,
-                ParticipantStatus.AUTHORIZED, ParticipantStatusDto.AUTHORIZED,
+                ParticipantStatus.ONBOARDING_INITIATED, ParticipantStatusDto.ONBOARDING_IN_PROGRESS,
+                ParticipantStatus.AUTHORIZING, ParticipantStatusDto.ONBOARDING_IN_PROGRESS,
+                ParticipantStatus.AUTHORIZED, ParticipantStatusDto.ONBOARDING_IN_PROGRESS,
+                ParticipantStatus.ONBOARDED, ParticipantStatusDto.ONBOARDED,
+                ParticipantStatus.FAILED, ParticipantStatusDto.DENIED,
                 ParticipantStatus.DENIED, ParticipantStatusDto.DENIED
         );
     }

@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "Participant onboarding status")
 public enum ParticipantStatusDto {
-    AUTHORIZING, // verifying participants credentials
-    AUTHORIZED, // participant is fully onboarded
+    ONBOARDING_IN_PROGRESS, // participant onboarding in progress
+    ONBOARDED, // participant is fully onboarded
     DENIED, // participant onboarding request denied
 }

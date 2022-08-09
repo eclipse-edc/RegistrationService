@@ -60,11 +60,9 @@ components:
           type: string
           description: Participant onboarding status
           enum:
-          - AUTHORIZING
-          - AUTHORIZED
+          - ONBOARDING_IN_PROGRESS
           - ONBOARDED
           - DENIED
-          - FAILED
         supportedProtocols:
           type: array
           items:

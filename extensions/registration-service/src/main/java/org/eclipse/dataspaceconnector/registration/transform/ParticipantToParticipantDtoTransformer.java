@@ -51,7 +51,7 @@ public class ParticipantToParticipantDtoTransformer implements DtoTransformer<Pa
 
     /**
      * Map domain model ParticipantStatus to DTO. This mapping is done to prevent leak of internal status.
-     * DTO only exposes {@link ParticipantStatusDto#AUTHORIZING}, {@link ParticipantStatusDto#AUTHORIZED}
+     * DTO only exposes {@link ParticipantStatusDto#ONBOARDING_IN_PROGRESS}, {@link ParticipantStatusDto#ONBOARDED}
      * and {@link ParticipantStatusDto#DENIED} statues.
      *
      * @param status {@link ParticipantStatus}
@@ -61,10 +61,12 @@ public class ParticipantToParticipantDtoTransformer implements DtoTransformer<Pa
         switch (status) {
             case ONBOARDING_INITIATED:
             case AUTHORIZING:
-                return ParticipantStatusDto.AUTHORIZING;
             case AUTHORIZED:
-                return ParticipantStatusDto.AUTHORIZED;
+                return ParticipantStatusDto.ONBOARDING_IN_PROGRESS;
+            case ONBOARDED:
+                return ParticipantStatusDto.ONBOARDED;
             case DENIED:
+            case FAILED:
                 return ParticipantStatusDto.DENIED;
             default:
                 throw new EdcException(format("Unknown ParticipantStatus value: %s", status));
