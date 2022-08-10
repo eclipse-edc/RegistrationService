@@ -43,7 +43,7 @@ public class Participant {
 
     private String did;
     private String name;
-    private String url;
+    private String url;//checkstyle violation
     private List<String> supportedProtocols = new ArrayList<>();
     private ParticipantStatus status = ONBOARDING_INITIATED;
 
