@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration;
+package org.eclipse.dataspaceconnector.registration.authority;
 
 import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;

@@ -6,6 +6,11 @@
       "@base": "did:web:did-server:test-client"
     }
   ],
+  "service": [{
+    "id": "#identity-hub-url",
+    "type": "IdentityHub",
+    "serviceEndpoint": "http://participant:8181/api/identity-hub"
+  }],
   "verificationMethod": [
     {
       "id": "#my-key-1",

@@ -15,7 +15,10 @@
 package org.eclipse.dataspaceconnector.registration.cli;
 
 import com.github.javafaker.Faker;
-import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto.StatusEnum;
+
+import static java.lang.String.format;
 
 public class TestUtils {
     static final Faker FAKER = new Faker();
@@ -23,8 +26,9 @@ public class TestUtils {
     private TestUtils() {
     }
 
-    public static Participant createParticipant() {
-        return new Participant()
-                .did("web:did:" + FAKER.internet().domainName());
+    public static ParticipantDto createParticipantDto() {
+        return new ParticipantDto()
+                .did(format("did:web:%s", FAKER.internet().domainName()))
+                .status(FAKER.options().option(StatusEnum.class));
     }
 }

@@ -13,13 +13,21 @@ services:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
       JWT_AUDIENCE: http://localhost:8182/authority
+      EDC_CONNECTOR_NAME: registration-service
+      EDC_IDENTITY_DID_URL: did:web:did-server:test-dataspace-authority
+      EDC_VAULT: /resources/vault/registration-service-vault.properties
+      EDC_KEYSTORE: /resources/vault/registration-service-keystore.jks
+      EDC_KEYSTORE_PASSWORD: test123
       EDC_IAM_DID_WEB_USE_HTTPS: "false"
       EDC_ERROR_RESPONSE_VERBOSE: "true"
       WEB_HTTP_AUTHORITY_PORT: 8182
       WEB_HTTP_AUTHORITY_PATH: /authority
+    volumes:
+      - ./resources/vault:/resources/vault
     ports:
       - "8182:8182"
       - "5005:5005"
+
   did-server:
     container_name: did-server
     image: nginx
@@ -27,3 +35,14 @@ services:
      - ./resources/webdid:/usr/share/nginx/html
     ports:
      - "8080:80"
+
+  # Dataspace participant with identity-hub
+  participant:
+    container_name: participant
+    build:
+      context: system-tests/launchers/identity-hub
+      args:
+        JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007"
+    ports:
+      - "8181:8181"
+      - "5007:5007"

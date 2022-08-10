@@ -17,6 +17,7 @@ package org.eclipse.dataspaceconnector.registration.store;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,11 @@ import java.util.stream.Collectors;
 public class InMemoryParticipantStore implements ParticipantStore {
 
     private final Map<String, Participant> storage = new ConcurrentHashMap<>();
+
+    @Override
+    public @Nullable Participant findByDid(String did) {
+        return storage.get(did);
+    }
 
     @Override
     public List<Participant> listParticipants() {

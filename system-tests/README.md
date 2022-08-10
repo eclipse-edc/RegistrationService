@@ -4,10 +4,10 @@ These tests deploy the application in a docker environment, and use the generate
 
 ### Running test locally
 
-Build the application launcher:
+Build the application launchers:
 
 ```
-./gradlew :launcher:shadowJar
+./gradlew -DuseFsVault="true" shadowJar
 ```
 
 Run the application using Docker compose:

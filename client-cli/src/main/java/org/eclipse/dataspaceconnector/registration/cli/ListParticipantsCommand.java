@@ -14,8 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParentCommand;
@@ -23,11 +21,10 @@ import picocli.CommandLine.Spec;
 
 import java.util.concurrent.Callable;
 
+import static org.eclipse.dataspaceconnector.registration.cli.ClientUtils.writeToOutput;
+
 @Command(name = "list", description = "List dataspace participants")
 class ListParticipantsCommand implements Callable<Integer> {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @ParentCommand
     private ParticipantsCommand command;
@@ -37,9 +34,7 @@ class ListParticipantsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        var out = spec.commandLine().getOut();
-        MAPPER.writeValue(out, command.cli.registryApiClient.listParticipants());
-        out.println();
+        writeToOutput(spec.commandLine(), command.cli.registryApiClient.listParticipants());
         return 0;
     }
 }

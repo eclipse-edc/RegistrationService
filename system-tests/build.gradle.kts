@@ -16,8 +16,11 @@ plugins {
     `java-library`
 }
 
+val identityHubVersion: String by project
+val identityHubGroup: String by project
 val awaitility: String by project
 val jupiterVersion: String by project
+val okHttpVersion: String by project
 val assertj: String by project
 val jacksonVersion: String by project
 val faker: String by project
@@ -29,6 +32,8 @@ dependencies {
     testImplementation(testFixtures(project(":rest-client")))
     testImplementation(project(":rest-client"))
     testImplementation(project(":client-cli"))
+    testImplementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
+    testImplementation("${identityHubGroup}:identity-hub-client:${identityHubVersion}")
     testRuntimeOnly(project(":launcher"))
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")

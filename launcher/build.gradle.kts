@@ -28,6 +28,14 @@ dependencies {
     implementation("${edcGroup}:core:${edcVersion}")
     implementation("${edcGroup}:observability-api:${edcVersion}")
     implementation("${edcGroup}:filesystem-configuration:${edcVersion}")
+
+    // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
+    val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
+    if (useFsVault) {
+        implementation("${edcGroup}:filesystem-vault:${edcVersion}")
+    } else {
+        implementation("${edcGroup}:azure-vault:${edcVersion}")
+    }
 }
 
 application {

@@ -21,7 +21,8 @@ import picocli.CommandLine.ParentCommand;
         description = "Manage dataspace participants.",
         subcommands = {
                 ListParticipantsCommand.class,
-                AddParticipantCommand.class
+                AddParticipantCommand.class,
+                GetParticipantCommand.class
         })
 class ParticipantsCommand {
     @ParentCommand

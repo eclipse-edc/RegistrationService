@@ -24,6 +24,8 @@ import static java.lang.String.format;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.DENIED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.FAILED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
 /**
@@ -56,6 +58,14 @@ public class Participant {
 
     public void transitionDenied() {
         transition(DENIED, AUTHORIZING);
+    }
+
+    public void transitionOnboarded() {
+        transition(ONBOARDED, AUTHORIZED);
+    }
+
+    public void transitionFailed() {
+        transition(FAILED, AUTHORIZED);
     }
 
     /**
@@ -95,6 +105,7 @@ public class Participant {
 
         public Participant build() {
             Objects.requireNonNull(participant.did, "did");
+            Objects.requireNonNull(participant.status, "status");
             return participant;
         }
     }

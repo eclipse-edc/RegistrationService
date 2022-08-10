@@ -19,6 +19,7 @@ import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.retry.WaitStrategy;
@@ -26,6 +27,7 @@ import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 
 import java.util.function.Function;
 
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
@@ -34,15 +36,15 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
  */
 public class ParticipantManager {
 
-    private final Monitor monitor;
     private final ParticipantStore participantStore;
     private final CredentialsVerifier credentialsVerifier;
     private final StateMachineManager stateMachineManager;
+    private final VerifiableCredentialService verifiableCredentialService;
 
-    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, CredentialsVerifier credentialsVerifier, ExecutorInstrumentation executorInstrumentation) {
-        this.monitor = monitor;
+    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, CredentialsVerifier credentialsVerifier, ExecutorInstrumentation executorInstrumentation, VerifiableCredentialService verifiableCredentialService) {
         this.participantStore = participantStore;
         this.credentialsVerifier = credentialsVerifier;
+        this.verifiableCredentialService = verifiableCredentialService;
 
         // default wait five seconds
         WaitStrategy waitStrategy = () -> 5000L;
@@ -51,6 +53,7 @@ public class ParticipantManager {
         stateMachineManager = StateMachineManager.Builder.newInstance("registration-service", monitor, executorInstrumentation, waitStrategy)
                 .processor(processParticipantsInState(ONBOARDING_INITIATED, this::processOnboardingInitiated))
                 .processor(processParticipantsInState(AUTHORIZING, this::processAuthorizing))
+                .processor(processParticipantsInState(AUTHORIZED, this::processAuthorized))
                 .build();
     }
 
@@ -81,6 +84,18 @@ public class ParticipantManager {
         } else {
             participant.transitionDenied();
         }
+        participantStore.save(participant);
+        return true;
+    }
+
+    private Boolean processAuthorized(Participant participant) {
+        var result = verifiableCredentialService.pushVerifiableCredential(participant);
+        if (result.succeeded()) {
+            participant.transitionOnboarded();
+        } else {
+            participant.transitionFailed();
+        }
+
         participantStore.save(participant);
         return true;
     }

@@ -24,7 +24,7 @@ import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.EllipticCurvePublicKey;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.VerificationMethod;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
-import org.eclipse.dataspaceconnector.registration.client.models.Participant;
+import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,11 +36,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DATASPACE_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.TestUtils.UNREGISTERED_CLIENT_DID_WEB;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -79,18 +81,91 @@ public class RegistrationApiCommandLineClientTest {
                         .withBody(didDocument())
                         .withStatusCode(HttpStatusCode.OK_200.code()));
 
+        assertThat(listParticipantCmd(didWeb)).noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(didWeb));
+
+        addParticipantCmd(didWeb);
+
+        assertThat(listParticipantCmd(didWeb)).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(didWeb));
+    }
+
+    @Test
+    void getParticipant() throws Exception {
+        httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
+                .respond(response()
+                        .withBody(didDocument())
+                        .withStatusCode(HttpStatusCode.OK_200.code()));
+
+        addParticipantCmd(didWeb);
+
+        var result = getParticipantCmd(didWeb);
+
+        assertThat(result.getDid()).isEqualTo(didWeb);
+        assertThat(result.getStatus()).isNotNull();
+    }
+
+    @Test
+    void getParticipant_notFound() {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
+        var writer = new StringWriter();
+        cmd.setOut(new PrintWriter(writer));
 
-        assertThat(getParticipants(cmd, didWeb)).noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(didWeb));
+        var statusCmdExitCode = cmd.execute(
+                "-c", UNREGISTERED_CLIENT_DID_WEB,
+                "-d", DATASPACE_DID_WEB,
+                "-k", privateKeyFile.toString(),
+                "--http-scheme",
+                "participants", "get");
 
-        var addCmdExitCode = cmd.execute(
+        assertThat(statusCmdExitCode).isEqualTo(1);
+        var output = writer.toString();
+        assertThat(output).isEmpty();
+    }
+
+    private String executeCmd(List<String> cmdArgs) {
+        CommandLine cmd = RegistrationServiceCli.getCommandLine();
+        var writer = new StringWriter();
+        cmd.setOut(new PrintWriter(writer));
+
+        var cmdExitCode = cmd.execute(cmdArgs.toArray(new String[0]));
+        var output = writer.toString();
+
+        assertThat(cmdExitCode).isEqualTo(0);
+
+        return output;
+    }
+
+    private List<String> commonCmdParams(String didWeb) {
+
+        return List.of(
                 "-c", didWeb,
                 "-d", DATASPACE_DID_WEB,
                 "-k", privateKeyFile.toString(),
                 "--http-scheme",
-                "participants", "add");
-        assertThat(addCmdExitCode).isEqualTo(0);
-        assertThat(getParticipants(cmd, didWeb)).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(didWeb));
+                "participants"
+        );
+    }
+
+    private ParticipantDto getParticipantCmd(String didWeb) throws JsonProcessingException {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(didWeb));
+        getParticipantArgs.add("get");
+        var output = executeCmd(getParticipantArgs);
+
+        return MAPPER.readValue(output, ParticipantDto.class);
+    }
+
+    private void addParticipantCmd(String clientDidWeb) {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(clientDidWeb));
+        getParticipantArgs.add("add");
+        executeCmd(getParticipantArgs);
+    }
+
+    private List<ParticipantDto> listParticipantCmd(String clientDidWeb) throws JsonProcessingException {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(clientDidWeb));
+        getParticipantArgs.add("list");
+        var output = executeCmd(getParticipantArgs);
+
+        return MAPPER.readValue(output, new TypeReference<>() {
+        });
     }
 
     private String didDocument() throws JOSEException, JsonProcessingException {
@@ -102,19 +177,4 @@ public class RegistrationApiCommandLineClientTest {
         return MAPPER.writeValueAsString(didDocument);
     }
 
-    private List<Participant> getParticipants(CommandLine cmd, String didWeb) throws JsonProcessingException {
-        var writer = new StringWriter();
-        cmd.setOut(new PrintWriter(writer));
-        var listCmdExitCode = cmd.execute(
-                "-c", didWeb,
-                "-d", DATASPACE_DID_WEB,
-                "-k", privateKeyFile.toString(),
-                "--http-scheme",
-                "participants", "list");
-        assertThat(listCmdExitCode).isEqualTo(0);
-
-        var output = writer.toString();
-        return MAPPER.readValue(output, new TypeReference<>() {
-        });
-    }
 }
