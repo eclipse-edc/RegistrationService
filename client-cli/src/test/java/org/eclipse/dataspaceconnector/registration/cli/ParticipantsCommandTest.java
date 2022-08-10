@@ -129,13 +129,13 @@ class ParticipantsCommandTest {
         assertThat(exitCode).isEqualTo(0);
         assertThat(dataspaceDid).isEqualTo(app.dataspaceDid);
         assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(app.clientDid);
+        verify(app.registryApiClient).addParticipant();
     }
 
     private void assertAddParticipants(int exitCode, String serverUrl, String service) {
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(service);
-        verify(app.registryApiClient).addParticipant(app.clientDid);
+        verify(app.registryApiClient).addParticipant();
     }
 
     private void assertListParticipants(List<ParticipantDto> participants, int exitCode, String value, String expectedValue) throws JsonProcessingException {

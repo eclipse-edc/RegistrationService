@@ -21,11 +21,6 @@ paths:
     post:
       description: Asynchronously request to add a dataspace participant.
       operationId: addParticipant
-      parameters:
-      - in: header
-        name: Did
-        schema:
-          type: string
       responses:
         "204":
           description: No content

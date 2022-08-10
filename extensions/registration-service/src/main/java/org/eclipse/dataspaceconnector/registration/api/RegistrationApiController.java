@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -45,8 +44,6 @@ import static org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticat
 @Consumes({"application/json"})
 @Path("/registry")
 public class RegistrationApiController {
-
-    private static final String DID_HEADER = "Did";
 
     private final RegistrationService service;
 
@@ -107,9 +104,8 @@ public class RegistrationApiController {
     @Operation(description = "Asynchronously request to add a dataspace participant.")
     @ApiResponse(responseCode = "204", description = "No content")
     @POST
-    public void addParticipant(
-            @HeaderParam(DID_HEADER) String did) {
-        var issuer = Objects.requireNonNull(did);
+    public void addParticipant(@Context HttpHeaders headers) {
+        var issuer = Objects.requireNonNull(headers.getHeaderString(CALLER_DID_HEADER));
 
         service.addParticipant(issuer);
     }
