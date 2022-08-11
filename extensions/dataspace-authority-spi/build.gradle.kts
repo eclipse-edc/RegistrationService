@@ -14,8 +14,8 @@ val swagger: String by project
 
 dependencies {
     api("${edcGroup}:core-spi:${edcVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("io.swagger.core.v3:swagger-annotations:${swagger}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
