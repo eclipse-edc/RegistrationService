@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.registration.manager;
 
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
@@ -24,6 +24,8 @@ import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
@@ -49,9 +51,9 @@ class ParticipantManagerTest {
 
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
-    CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
+    ParticipantVerifier participantVerifier = mock(ParticipantVerifier.class);
     VerifiableCredentialService verifiableCredentialService = mock(VerifiableCredentialService.class);
-    ParticipantManager service = new ParticipantManager(monitor, participantStore, credentialsVerifier, ExecutorInstrumentation.noop(), verifiableCredentialService);
+    ParticipantManager service = new ParticipantManager(monitor, participantStore, participantVerifier, ExecutorInstrumentation.noop(), verifiableCredentialService);
     Participant.Builder participantBuilder = createParticipant();
     ArgumentCaptor<Participant> captor = ArgumentCaptor.forClass(Participant.class);
 
@@ -62,32 +64,37 @@ class ParticipantManagerTest {
 
     @Test
     void advancesStateFromAuthorizingToAuthorized() throws Exception {
-        when(credentialsVerifier.verifyCredentials()).thenReturn(true);
+        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.success(true));
         advancesState(AUTHORIZING, AUTHORIZED);
     }
 
     @Test
     void advancesStateFromAuthorizingToDenied() throws Exception {
-        when(credentialsVerifier.verifyCredentials()).thenReturn(false);
+        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.success(false));
         advancesState(AUTHORIZING, DENIED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ResponseStatus.class)
+    void advancesStateFromAuthorizingToFailed(ResponseStatus errorStatus) throws Exception {
+        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.failure(errorStatus));
+        advancesState(AUTHORIZING, FAILED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ResponseStatus.class)
+    void advancesStateFromAuthorizedToFailed(ResponseStatus errorStatus) throws Exception {
+        when(verifiableCredentialService.pushVerifiableCredential(any()))
+                .thenReturn(StatusResult.failure(errorStatus));
+        advancesState(AUTHORIZED, FAILED);
     }
 
     @Test
     void advancesStateFromAuthorizedToOnboarded() throws Exception {
         when(verifiableCredentialService.pushVerifiableCredential(any()))
                 .thenReturn(StatusResult.success());
-        var participant = advancesState(AUTHORIZED, ONBOARDED);
-        verify(verifiableCredentialService).pushVerifiableCredential(participant);
+        advancesState(AUTHORIZED, ONBOARDED);
     }
-
-    @Test
-    void advancesStateFromAuthorizedToFailed() throws Exception {
-        when(verifiableCredentialService.pushVerifiableCredential(any()))
-                .thenReturn(StatusResult.failure(ResponseStatus.FATAL_ERROR));
-        var participant = advancesState(AUTHORIZED, FAILED);
-        verify(verifiableCredentialService).pushVerifiableCredential(participant);
-    }
-
 
     @SuppressWarnings("unchecked")
     private Participant advancesState(ParticipantStatus startState, ParticipantStatus endState) throws Exception {

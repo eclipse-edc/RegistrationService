@@ -20,14 +20,18 @@ plugins {
 
 val edcVersion: String by project
 val edcGroup: String by project
+val identityHubVersion: String by project
+val identityHubGroup: String by project
 
 dependencies {
     implementation(project(":extensions:registration-service"))
+    implementation(project(":extensions:participant-verifier"))
     implementation("${edcGroup}:identity-did-web:${edcVersion}")
     implementation("${edcGroup}:identity-did-core:${edcVersion}")
     implementation("${edcGroup}:core:${edcVersion}")
     implementation("${edcGroup}:observability-api:${edcVersion}")
     implementation("${edcGroup}:filesystem-configuration:${edcVersion}")
+    implementation("${identityHubGroup}:identity-hub-credentials-verifier:${identityHubVersion}")
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
