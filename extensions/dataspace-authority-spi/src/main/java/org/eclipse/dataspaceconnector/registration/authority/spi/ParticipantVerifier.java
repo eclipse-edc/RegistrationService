@@ -17,9 +17,10 @@ package org.eclipse.dataspaceconnector.registration.authority.spi;
 import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 
 /**
- * Verifier that fetches and evaluate verifiable credentials to
+ * Verifier that fetches and evaluates verifiable credentials to
  * authorize dataspace membership.
  */
+@FunctionalInterface
 public interface ParticipantVerifier {
     /**
      * Apply dataspace membership policy to evaluate whether a participant may be onboarded.
