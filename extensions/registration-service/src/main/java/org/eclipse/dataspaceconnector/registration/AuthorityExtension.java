@@ -94,6 +94,12 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private DtoTransformerRegistry transformerRegistry;
 
+    @Inject(required = false)
+    private DidResolverRegistry didResolverRegistry;
+
+    @Inject(required = false)
+    private CredentialsVerifier credentialsVerifier;
+
     private ParticipantManager participantManager;
 
     @Override
@@ -112,6 +118,12 @@ public class AuthorityExtension implements ServiceExtension {
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
         webService.registerResource(CONTEXT_ALIAS, new EdcApiExceptionMapper(errorResponseVerbose));
+
+        if(participantVerifier == null) {
+            Objects.requireNotNull(didResolverRegistry, "DidResolverRegistry is mandatory for creating DefaultParticipantVerifier");
+            Objects.requireNotNull(credentialsVerifier, "CredentialsVerifier is mandatory for creating DefaultParticipantVerifier");
+            context.registerService(ParticipantVerifier.class, new DefaultParticipantVerifier(monitor, didResolverRegistry, credentialsVerifier));
+        }
     }
 
     @Override
@@ -127,11 +139,6 @@ public class AuthorityExtension implements ServiceExtension {
     @Provider(isDefault = true)
     public ParticipantStore participantStore() {
         return new InMemoryParticipantStore();
-    }
-
-    @Provider(isDefault = true)
-    public ParticipantVerifier participantVerifier(ServiceExtensionContext context) {
-        return new DefaultParticipantVerifier(context.getMonitor(), context.getService(DidResolverRegistry.class), context.getService(CredentialsVerifier.class));
     }
 
     private VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
