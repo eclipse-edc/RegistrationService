@@ -28,8 +28,8 @@ jobs:
 
       - uses: ./.github/actions/gradle-setup
 
-      - name: 'Build launcher'
-        run: ./gradlew :launcher:shadowJar
+      - name: 'Build package'
+        run: ./gradlew -DuseFsVault="true" build
 
       - name: 'Upgrade docker-compose (for --wait option)'
         run: |

@@ -14,21 +14,30 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.iam.did.crypto.credentials.VerifiableCredentialFactory;
 import org.eclipse.dataspaceconnector.iam.did.crypto.key.EcPublicKeyWrapper;
 import org.eclipse.dataspaceconnector.registration.client.TestKeyData;
+import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
 import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.http.HttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.dataspaceconnector.registration.cli.TestUtils.createParticipantDto;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ClientUtilsTest {
     static final Faker FAKER = new Faker();
+    static final ObjectMapper MAPPER = new ObjectMapper();
     static final String AUTHORIZATION = "Authorization";
     static final String BEARER = "Bearer";
 
@@ -57,6 +66,22 @@ class ClientUtilsTest {
         var verificationResult = VerifiableCredentialFactory.verify(jwt, publicKey, apiUrl);
         assertThat(verificationResult.succeeded()).isTrue();
         assertThat(jwt.getJWTClaimsSet().getIssuer()).isEqualTo(issuer);
+    }
+
+    @Test
+    void writeToOutput() throws Exception {
+        var commandLine = mock(CommandLine.class);
+        var writer = new StringWriter();
+        when(commandLine.getOut()).thenReturn(new PrintWriter(writer));
+        var participant = createParticipantDto();
+
+        ClientUtils.writeToOutput(commandLine, participant);
+
+        var output = writer.toString();
+        var result = MAPPER.readValue(output, ParticipantDto.class);
+        assertThat(result)
+                .usingRecursiveComparison()
+                .isEqualTo(participant);
     }
 
     static String randomUrl() {

@@ -9,7 +9,14 @@ runs:
       with:
         repository: eclipse-dataspaceconnector/DataSpaceConnector
         path: DataSpaceConnector
-        ref: 3ff940b720f44826df28e893fb31344eb6faacef
+        ref: v0.0.1-milestone-5
+
+    - name: Checkout Identity Hub
+      uses: actions/checkout@v2
+      with:
+        repository: eclipse-dataspaceconnector/IdentityHub
+        path: IdentityHub
+        ref: b9c70e400b1ef016a10c0382b39307d7c2478ae6
 
     # Install Java and cache MVD Gradle build.
     - uses: actions/setup-java@v2
@@ -27,7 +34,7 @@ runs:
       with:
         path: ~/.m2
         # .git/FETCH_HEAD contains latest commit ID
-        key: ${{ runner.os }}-m2-${{ hashFiles('DataSpaceConnector/.git/FETCH_HEAD') }}
+        key: ${{ runner.os }}-m2-${{ hashFiles('DataSpaceConnector/.git/FETCH_HEAD') }}-${{ hashFiles('IdentityHub/.git/FETCH_HEAD') }}
 
     # Install EDC packages into ~/.m2.
     # This action only runs if the packages could not be restored from the cache.
@@ -38,6 +45,19 @@ runs:
       shell: bash
       working-directory: DataSpaceConnector
 
-    - name: Delete EDC packages
+    - name: Delete local EDC repository
       run: rm -r DataSpaceConnector
+      shell: bash
+
+    # Install Identity Hub packages into ~/.m2.
+    # This action only runs if the packages could not be restored from the cache.
+    - name: Build Identity Hub packages
+      run: |
+        ./gradlew publishToMavenLocal -Pskip.signing
+      if: steps.cache.outputs.cache-hit != 'true' # only on cache miss
+      shell: bash
+      working-directory: IdentityHub
+
+    - name: Delete local Identity Hub repository
+      run: rm -r IdentityHub
       shell: bash

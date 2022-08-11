@@ -27,6 +27,8 @@ import static java.lang.String.format;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.DENIED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.FAILED;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
 /**
@@ -83,6 +85,14 @@ public class Participant {
         transition(DENIED, AUTHORIZING);
     }
 
+    public void transitionOnboarded() {
+        transition(ONBOARDED, AUTHORIZED);
+    }
+
+    public void transitionFailed() {
+        transition(FAILED, AUTHORIZED);
+    }
+
     /**
      * Transition to a given end state from an allowed number of previous states.
      *
@@ -108,16 +118,19 @@ public class Participant {
             return new Builder();
         }
 
+        @Deprecated
         public Builder supportedProtocol(String supportedProtocol) {
             participant.supportedProtocols.add(supportedProtocol);
             return this;
         }
 
+        @Deprecated
         public Builder supportedProtocols(List<String> supportedProtocols) {
             participant.supportedProtocols.addAll(supportedProtocols);
             return this;
         }
 
+        @Deprecated
         public Builder url(String url) {
             participant.url = url;
             return this;
@@ -128,7 +141,7 @@ public class Participant {
             return this;
         }
 
-
+        @Deprecated
         public Builder name(String name) {
             participant.name = name;
             return this;
@@ -141,6 +154,7 @@ public class Participant {
 
         public Participant build() {
             Objects.requireNonNull(participant.did, "did");
+            Objects.requireNonNull(participant.status, "status");
             return participant;
         }
     }

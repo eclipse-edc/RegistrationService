@@ -12,7 +12,7 @@ val mockitoVersion: String by project
 val faker: String by project
 val edcGroup: String by project
 val edcVersion: String by project
-val okHttp: String by project
+val okHttpVersion: String by project
 
 dependencies {
     api("info.picocli:picocli:4.6.3")
@@ -24,7 +24,7 @@ dependencies {
     testImplementation(testFixtures(project(":rest-client")))
     implementation("${edcGroup}:identity-did-web:${edcVersion}")
     implementation("${edcGroup}:common-util:${edcVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okHttp}")
+    implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation("com.github.javafaker:javafaker:${faker}")
