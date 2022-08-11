@@ -62,13 +62,13 @@ class ParticipantManagerTest {
 
     @Test
     void advancesStateFromAuthorizingToAuthorized() throws Exception {
-        when(participantVerifier.applyOnboardingPolicy(any())).thenReturn(StatusResult.success(true));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.success(true));
         advancesState(AUTHORIZING, AUTHORIZED);
     }
 
     @Test
     void advancesStateFromAuthorizingToDenied() throws Exception {
-        when(participantVerifier.applyOnboardingPolicy(any())).thenReturn(StatusResult.success(false));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.success(false));
         advancesState(AUTHORIZING, DENIED);
     }
 

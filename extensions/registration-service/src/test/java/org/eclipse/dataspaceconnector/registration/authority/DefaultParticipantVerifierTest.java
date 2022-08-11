@@ -45,24 +45,24 @@ class DefaultParticipantVerifierTest {
     DefaultParticipantVerifier service = new DefaultParticipantVerifier(monitor, policyEngine, dataspaceRegistrationPolicy);
 
     @Test
-    void applyOnboardingPolicy_success() {
+    void isOnboardingAllowed_success() {
         when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), argThat(a ->
                 Map.of("gaiaXMember", "true").equals(a.getClaims()) &&
                         Map.of().equals(a.getAttributes()))))
                 .thenReturn(Result.success(policyResult));
 
-        var result = service.applyOnboardingPolicy(participantDid);
+        var result = service.isOnboardingAllowed(participantDid);
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent()).isTrue();
     }
 
     @Test
-    void applyOnboardingPolicy_failure() {
+    void isOnboardingAllowed_failure() {
         when(policyEngine.evaluate(any(), any(), any()))
                 .thenReturn(Result.failure(failure));
 
-        var result = service.applyOnboardingPolicy(participantDid);
+        var result = service.isOnboardingAllowed(participantDid);
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent()).isFalse();

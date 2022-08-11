@@ -33,5 +33,5 @@ public interface ParticipantVerifier {
      * @param did The putative participant's DID URL. Used to resolve participant Identity Hub and retrieve Verifiable Credentials.
      * @return a result indicating whether the the policy could be evaluated, and if successful, the evaluation result.
      */
-    StatusResult<Boolean> applyOnboardingPolicy(String did);
+    StatusResult<Boolean> isOnboardingAllowed(String did);
 }

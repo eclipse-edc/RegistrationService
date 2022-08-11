@@ -39,7 +39,7 @@ public class DefaultParticipantVerifier implements ParticipantVerifier {
     }
 
     @Override
-    public StatusResult<Boolean> applyOnboardingPolicy(String participantDid) {
+    public StatusResult<Boolean> isOnboardingAllowed(String participantDid) {
         var claimsResult = Result.success(Map.<String, Object>of("gaiaXMember", "true")); // TODO retrieve real credentials
 
         var agent = new ParticipantAgent(claimsResult.getContent(), Collections.emptyMap());
