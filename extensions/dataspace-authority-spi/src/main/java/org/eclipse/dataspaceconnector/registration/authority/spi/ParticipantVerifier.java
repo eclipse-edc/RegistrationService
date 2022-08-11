@@ -21,5 +21,5 @@ import org.eclipse.dataspaceconnector.spi.response.StatusResult;
  * authorize dataspace membership.
  */
 public interface ParticipantVerifier {
-    StatusResult<Boolean> verifyCredentials(String did);
+    StatusResult<Boolean> isOnboardingAllowed(String did);
 }

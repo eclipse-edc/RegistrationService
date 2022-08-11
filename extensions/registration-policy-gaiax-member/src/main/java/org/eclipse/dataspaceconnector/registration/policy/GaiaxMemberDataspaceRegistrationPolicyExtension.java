@@ -20,6 +20,7 @@ import org.eclipse.dataspaceconnector.policy.model.Operator;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyContext;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
 import org.eclipse.dataspaceconnector.spi.policy.RuleBindingRegistry;
@@ -27,8 +28,12 @@ import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
+import static java.lang.String.format;
+import static org.eclipse.dataspaceconnector.policy.model.Operator.EQ;
 import static org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy.PARTICIPANT_REGISTRATION_SCOPE;
 
 /**
@@ -38,6 +43,9 @@ public class GaiaxMemberDataspaceRegistrationPolicyExtension implements ServiceE
     private static final String CREDENTIAL_NAME = "gaiaXMember";
     public static final String RULE_TYPE = CREDENTIAL_NAME;
     public static final String CREDENTIAL_VALUE = "true";
+
+    @Inject
+    private Monitor monitor;
 
     @Inject
     private RuleBindingRegistry ruleBindingRegistry;
@@ -54,23 +62,41 @@ public class GaiaxMemberDataspaceRegistrationPolicyExtension implements ServiceE
     public DataspaceRegistrationPolicy createDataspaceRegistrationPolicy() {
 
         var constraint = AtomicConstraint.Builder.newInstance().leftExpression(new LiteralExpression(CREDENTIAL_NAME))
-                .operator(Operator.EQ)
+                .operator(EQ)
                 .rightExpression(new LiteralExpression(CREDENTIAL_VALUE)).build();
         var permission = Permission.Builder.newInstance().constraint(constraint).build();
         var policy = Policy.Builder.newInstance()
                 .permission(permission).build();
         ruleBindingRegistry.bind(RULE_TYPE, PARTICIPANT_REGISTRATION_SCOPE);
-        policyEngine.registerFunction(PARTICIPANT_REGISTRATION_SCOPE, Permission.class, RULE_TYPE, GaiaxMemberDataspaceRegistrationPolicyExtension::evaluate);
+        policyEngine.registerFunction(PARTICIPANT_REGISTRATION_SCOPE, Permission.class, RULE_TYPE, this::evaluate);
         return new DataspaceRegistrationPolicy(policy);
     }
 
-    private static boolean evaluate(Operator operator, Object rightOperand, Permission rule, PolicyContext context) {
-        var value = context.getParticipantAgent().getClaims().get(CREDENTIAL_NAME);
-        switch (operator) {
-            case EQ:
-                return Objects.equals(value, rightOperand);
-            default:
-                return false;
+    private boolean evaluate(Operator operator, Object rightOperand, Permission rule, PolicyContext context) {
+        monitor.debug(() -> format("Credentials %s", context.getParticipantAgent().getClaims()));
+        // Order map by key (Verifiable Credential ID), to achieve deterministic output
+        var claims = new TreeMap<>(context.getParticipantAgent().getClaims());
+        for (var claim : claims.values()) {
+            if (!(claim instanceof Map)) {
+                monitor.warning(() -> "Ignoring claim that is not in Map format");
+                continue;
+            }
+            var vc = ((Map<?, ?>) claim).get("vc");
+            if (!(vc instanceof Map)) {
+                monitor.warning(() -> "Ignoring claim that does not have a 'vc' entry in Map format");
+                continue;
+            }
+            var subject = ((Map<?, ?>) vc).get("credentialSubject");
+            if (!(subject instanceof Map)) {
+                monitor.warning(() -> "Ignoring claim that does not have a 'vc' entry with a 'credentialSubject' entry in Map format");
+                continue;
+            }
+            var subjectMap = (Map<?, ?>) subject;
+            var value = subjectMap.get(CREDENTIAL_NAME);
+            if (operator == EQ && Objects.equals(value, rightOperand)) {
+                return true;
+            }
         }
+        return false;
     }
 }

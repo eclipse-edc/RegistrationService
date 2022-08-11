@@ -24,8 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +40,7 @@ class GaiaxMemberDataspaceRegistrationPolicyExtensionTest {
     private static final Faker FAKER = new Faker();
 
     @ParameterizedTest
-    @MethodSource("claims")
+    @MethodSource("claimCases")
     void createDataspaceRegistrationPolicy(Map<String, Object> claims, boolean expected, PolicyEngine policyEngine, DataspaceRegistrationPolicy policy) {
         var agent = new ParticipantAgent(claims, Collections.emptyMap());
 
@@ -47,15 +49,37 @@ class GaiaxMemberDataspaceRegistrationPolicyExtensionTest {
         assertThat(evaluationResult.succeeded()).isEqualTo(expected);
     }
 
-    private static Stream<Arguments> claims() {
+    private static Stream<Arguments> claimCases() {
         return Stream.of(
-                arguments(Map.of("gaiaXMember", "true"), true),
-                arguments(Map.of("gaiaXMember", FAKER.lorem().sentence()), false),
-                arguments(Map.of("gaiaXMember", "true "), false),
-                arguments(Map.of("gaiaXMember ", ""), false),
-                arguments(Map.of("GaiaXMember", "true"), false),
-                arguments(Map.of("gaiaXMember", "true", FAKER.lorem().sentence(), FAKER.lorem().sentence()), true),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "true")))), true),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", rnd())))), false),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "true ")))), false),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "")))), false),
+                arguments(claims(vc(subject(Map.of("GaiaXMember", "true")))), false),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "true", rnd(), rnd())))), true),
+                arguments(claims(vc(subject(new Object()))), false),
+                arguments(claims(vc(new Object())), false),
+                arguments(claims(new Object()), false),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "true"))), vc(subject(Map.of("gaiaXMember", "true")))), true),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", "true"))), vc(subject(Map.of("gaiaXMember", rnd())))), true),
+                arguments(claims(vc(subject(Map.of("gaiaXMember", rnd()))), vc(subject(Map.of("gaiaXMember", "true")))), true),
                 arguments(Map.of(), false)
         );
+    }
+
+    private static String rnd() {
+        return FAKER.lorem().sentence();
+    }
+
+    private static Map<String, Object> claims(Object... claims) {
+        return Arrays.stream(claims).collect(Collectors.toMap(e -> FAKER.internet().uuid(), e -> e));
+    }
+
+    private static Map<String, Object> vc(Object vc) {
+        return Map.of("vc", vc);
+    }
+
+    private static Map<String, Object> subject(Object credentialSubject) {
+        return Map.of("credentialSubject", credentialSubject);
     }
 }

@@ -77,7 +77,7 @@ class ParticipantManagerTest {
     @ParameterizedTest
     @EnumSource(ResponseStatus.class)
     void advancesStateFromAuthorizingToFailed(ResponseStatus errorStatus) throws Exception {
-        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.failure(errorStatus));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.failure(errorStatus));
         advancesState(AUTHORIZING, FAILED);
     }
 

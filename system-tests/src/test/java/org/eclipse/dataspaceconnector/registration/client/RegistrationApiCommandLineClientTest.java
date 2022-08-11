@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.CLIENT_DID_WEB;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DATASPACE_DID_WEB;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.UNREGISTERED_CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.UNREGISTERED_CLIENT_DID_WEB;
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
