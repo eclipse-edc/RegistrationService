@@ -1,13 +1,11 @@
 plugins {
     `java-library`
-    id("io.swagger.core.v3.swagger-gradle-plugin")
 }
 
 val edcVersion: String by project
 val edcGroup: String by project
 val identityHubVersion: String by project
 val identityHubGroup: String by project
-val okHttpVersion: String by project
 val jupiterVersion: String by project
 val assertj: String by project
 val mockitoVersion: String by project
