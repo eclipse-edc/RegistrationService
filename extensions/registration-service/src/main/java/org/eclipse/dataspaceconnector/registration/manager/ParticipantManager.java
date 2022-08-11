@@ -18,7 +18,7 @@ import org.eclipse.dataspaceconnector.common.statemachine.StateMachineManager;
 import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
@@ -37,13 +37,13 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
 public class ParticipantManager {
 
     private final ParticipantStore participantStore;
-    private final CredentialsVerifier credentialsVerifier;
+    private final ParticipantVerifier participantVerifier;
     private final StateMachineManager stateMachineManager;
     private final VerifiableCredentialService verifiableCredentialService;
 
-    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, CredentialsVerifier credentialsVerifier, ExecutorInstrumentation executorInstrumentation, VerifiableCredentialService verifiableCredentialService) {
+    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, ParticipantVerifier participantVerifier, ExecutorInstrumentation executorInstrumentation, VerifiableCredentialService verifiableCredentialService) {
         this.participantStore = participantStore;
-        this.credentialsVerifier = credentialsVerifier;
+        this.participantVerifier = participantVerifier;
         this.verifiableCredentialService = verifiableCredentialService;
 
         // default wait five seconds
@@ -78,8 +78,10 @@ public class ParticipantManager {
     }
 
     private Boolean processAuthorizing(Participant participant) {
-        var credentialsValid = credentialsVerifier.verifyCredentials();
-        if (credentialsValid) {
+        var credentialsValid = participantVerifier.applyOnboardingPolicy(participant.getDid());
+        if (credentialsValid.failed()) {
+            participant.transitionFailed();
+        } else if (credentialsValid.getContent()) {
             participant.transitionAuthorized();
         } else {
             participant.transitionDenied();
