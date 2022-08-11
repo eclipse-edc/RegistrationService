@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.authority;
+package org.eclipse.dataspaceconnector.registration.verifier;
 
 import com.github.javafaker.Faker;
 import org.assertj.core.api.AbstractStringAssert;

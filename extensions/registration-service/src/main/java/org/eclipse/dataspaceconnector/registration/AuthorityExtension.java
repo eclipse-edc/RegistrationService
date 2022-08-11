@@ -26,7 +26,6 @@ import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredenti
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
-import org.eclipse.dataspaceconnector.registration.authority.DefaultParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialServiceImpl;
@@ -94,12 +93,6 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private DtoTransformerRegistry transformerRegistry;
 
-    @Inject(required = false)
-    private DidResolverRegistry didResolverRegistry;
-
-    @Inject(required = false)
-    private CredentialsVerifier credentialsVerifier;
-
     private ParticipantManager participantManager;
 
     @Override
@@ -118,12 +111,6 @@ public class AuthorityExtension implements ServiceExtension {
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
         webService.registerResource(CONTEXT_ALIAS, new EdcApiExceptionMapper(errorResponseVerbose));
-
-        if (participantVerifier == null) {
-            Objects.requireNonNull(didResolverRegistry, "DidResolverRegistry is mandatory for creating DefaultParticipantVerifier");
-            Objects.requireNonNull(credentialsVerifier, "CredentialsVerifier is mandatory for creating DefaultParticipantVerifier");
-            context.registerService(ParticipantVerifier.class, new DefaultParticipantVerifier(monitor, didResolverRegistry, credentialsVerifier));
-        }
     }
 
     @Override
