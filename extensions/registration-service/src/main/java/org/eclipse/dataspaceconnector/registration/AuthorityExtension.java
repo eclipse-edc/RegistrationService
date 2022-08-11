@@ -119,9 +119,9 @@ public class AuthorityExtension implements ServiceExtension {
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
         webService.registerResource(CONTEXT_ALIAS, new EdcApiExceptionMapper(errorResponseVerbose));
 
-        if(participantVerifier == null) {
-            Objects.requireNotNull(didResolverRegistry, "DidResolverRegistry is mandatory for creating DefaultParticipantVerifier");
-            Objects.requireNotNull(credentialsVerifier, "CredentialsVerifier is mandatory for creating DefaultParticipantVerifier");
+        if (participantVerifier == null) {
+            Objects.requireNonNull(didResolverRegistry, "DidResolverRegistry is mandatory for creating DefaultParticipantVerifier");
+            Objects.requireNonNull(credentialsVerifier, "CredentialsVerifier is mandatory for creating DefaultParticipantVerifier");
             context.registerService(ParticipantVerifier.class, new DefaultParticipantVerifier(monitor, didResolverRegistry, credentialsVerifier));
         }
     }
