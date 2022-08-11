@@ -90,7 +90,7 @@ public class Participant {
     }
 
     public void transitionFailed() {
-        transition(FAILED, AUTHORIZED);
+        transition(FAILED, AUTHORIZING, AUTHORIZED);
     }
 
     /**

@@ -12,13 +12,14 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.authority;
+package org.eclipse.dataspaceconnector.registration.authority.spi;
 
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 
-public class DummyCredentialsVerifier implements CredentialsVerifier {
-    @Override
-    public boolean verifyCredentials() {
-        return true;
-    }
+/**
+ * Verifier that fetches and evaluate verifiable credentials to
+ * authorize dataspace membership.
+ */
+public interface ParticipantVerifier {
+    StatusResult<Boolean> verifyCredentials(String did);
 }

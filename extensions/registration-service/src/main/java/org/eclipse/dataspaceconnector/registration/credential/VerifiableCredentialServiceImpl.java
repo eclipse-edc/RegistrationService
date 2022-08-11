@@ -15,7 +15,6 @@
 package org.eclipse.dataspaceconnector.registration.credential;
 
 import com.nimbusds.jwt.SignedJWT;
-import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClient;
@@ -25,16 +24,15 @@ import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.response.StatusResult;
-import org.eclipse.dataspaceconnector.spi.result.Result;
 
 import java.util.Map;
 import java.util.UUID;
 
+import static org.eclipse.dataspaceconnector.registration.utils.DidDocumentUtils.getIdentityHubBaseUrl;
 import static org.eclipse.dataspaceconnector.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.eclipse.dataspaceconnector.spi.response.ResponseStatus.FATAL_ERROR;
 
 public class VerifiableCredentialServiceImpl implements VerifiableCredentialService {
-    private static final String IDENTITY_HUB_SERVICE_TYPE = "IdentityHub";
 
     private final Monitor monitor;
     private final VerifiableCredentialsJwtService jwtService;
@@ -88,17 +86,6 @@ public class VerifiableCredentialServiceImpl implements VerifiableCredentialServ
 
         monitor.info("Sent dataspace membership VC for " + did);
         return StatusResult.success();
-    }
-
-    private Result<String> getIdentityHubBaseUrl(DidDocument didDocument) {
-        var hubBaseUrl = didDocument
-                .getService()
-                .stream()
-                .filter(s -> s.getType().equals(IDENTITY_HUB_SERVICE_TYPE))
-                .findFirst();
-
-        return hubBaseUrl.map(u -> Result.success(u.getServiceEndpoint()))
-                .orElse(Result.failure("Failed getting Identity Hub URL"));
     }
 
     private StatusResult<Void> failureResult(ResponseStatus status, String message) {
