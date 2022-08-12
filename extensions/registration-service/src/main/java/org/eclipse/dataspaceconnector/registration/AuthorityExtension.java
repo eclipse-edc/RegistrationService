@@ -17,6 +17,7 @@ package org.eclipse.dataspaceconnector.registration;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
 import org.eclipse.dataspaceconnector.extension.jersey.mapper.EdcApiExceptionMapper;
+import org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifier;
 import org.eclipse.dataspaceconnector.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
@@ -25,8 +26,7 @@ import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredenti
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
-import org.eclipse.dataspaceconnector.registration.authority.DummyCredentialsVerifier;
-import org.eclipse.dataspaceconnector.registration.authority.spi.CredentialsVerifier;
+import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialServiceImpl;
 import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
@@ -53,7 +53,7 @@ import static org.eclipse.dataspaceconnector.iam.did.spi.document.DidConstants.D
 /**
  * EDC extension to boot the services used by the Authority Service.
  */
-@Requires({PrivateKeyResolver.class, OkHttpClient.class, DidResolverRegistry.class})
+@Requires({PrivateKeyResolver.class, OkHttpClient.class, DidResolverRegistry.class, CredentialsVerifier.class})
 public class AuthorityExtension implements ServiceExtension {
 
     public static final String CONTEXT_ALIAS = "authority";
@@ -76,7 +76,7 @@ public class AuthorityExtension implements ServiceExtension {
     private ParticipantStore participantStore;
 
     @Inject
-    private CredentialsVerifier credentialsVerifier;
+    private ParticipantVerifier participantVerifier;
 
     @Inject
     private ExecutorInstrumentation executorInstrumentation;
@@ -103,7 +103,7 @@ public class AuthorityExtension implements ServiceExtension {
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
         var verifiableCredentialService = verifiableCredentialService(context);
 
-        participantManager = new ParticipantManager(monitor, participantStore, credentialsVerifier, executorInstrumentation, verifiableCredentialService);
+        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier, executorInstrumentation, verifiableCredentialService);
         transformerRegistry.register(new ParticipantToParticipantDtoTransformer());
 
         var registrationService = new RegistrationService(monitor, participantStore, transformerRegistry);
@@ -126,11 +126,6 @@ public class AuthorityExtension implements ServiceExtension {
     @Provider(isDefault = true)
     public ParticipantStore participantStore() {
         return new InMemoryParticipantStore();
-    }
-
-    @Provider(isDefault = true)
-    public CredentialsVerifier credentialsVerifier() {
-        return new DummyCredentialsVerifier();
     }
 
     private VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {

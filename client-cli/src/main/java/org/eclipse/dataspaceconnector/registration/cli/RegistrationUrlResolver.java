@@ -50,5 +50,4 @@ public class RegistrationUrlResolver {
                 .map(Result::success)
                 .orElse(Result.failure("Error resolving service endpoint from DID Document for " + did));
     }
-
 }
