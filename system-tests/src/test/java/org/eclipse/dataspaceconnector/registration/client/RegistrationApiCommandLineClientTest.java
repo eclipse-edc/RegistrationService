@@ -88,52 +88,7 @@ public class RegistrationApiCommandLineClientTest {
         assertThat(output).isEmpty();
     }
 
-    @Deprecated
-    @Test
-    void listParticipants_usingServiceUrl() throws Exception {
-        CommandLine cmd = RegistrationServiceCli.getCommandLine();
-        var writer = new StringWriter();
-        cmd.setOut(new PrintWriter(writer));
-
-        // list participant should not find any participant with current idsUrl.
-        var listCmdExitCode = cmd.execute(
-                "-c", CLIENT_DID_WEB,
-                "-k", privateKeyFile.toString(),
-                "participants", "list");
-
-        assertThat(listCmdExitCode).isEqualTo(0);
-        var output = writer.toString();
-        var allParticipants = MAPPER.readValue(output, new TypeReference<List<ParticipantDto>>() {
-        });
-
-        assertThat(allParticipants).noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
-
-        // Add one participant.
-        var addCmdExitCode = cmd.execute(
-                "-c", CLIENT_DID_WEB,
-                "-k", privateKeyFile.toString(),
-                "--http-scheme",
-                "participants", "add",
-                "--ids-url", idsUrl);
-        assertThat(addCmdExitCode).isEqualTo(0);
-
-        // Now at least one participant should exist with current idsUrl.
-        writer = new StringWriter();
-        cmd.setOut(new PrintWriter(writer));
-        listCmdExitCode = cmd.execute(
-                "-c", CLIENT_DID_WEB,
-                "-k", privateKeyFile.toString(),
-                "participants", "list");
-
-        assertThat(listCmdExitCode).isEqualTo(0);
-        output = writer.toString();
-        allParticipants = MAPPER.readValue(output, new TypeReference<>() {
-        });
-        assertThat(allParticipants).anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
-    }
-
     private List<String> commonCmdParams() {
-
         return List.of(
                 "-c", CLIENT_DID_WEB,
                 "-d", DATASPACE_DID_WEB,

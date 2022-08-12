@@ -99,41 +99,6 @@ class ParticipantsCommandTest {
                 .isEqualTo(participant1);
     }
 
-    @Deprecated
-    @Test
-    void list_using_serviceUrl() throws Exception {
-        var participants = List.of(this.participant1, participant2);
-        when(app.registryApiClient.listParticipants())
-                .thenReturn(participants);
-
-        var exitCode = executeParticipantsList("-s", serverUrl);
-        assertListParticipants(participants, exitCode, app.service, serverUrl);
-    }
-
-    @Deprecated
-    @Test
-    void add_using_serviceUrl() {
-        var exitCode = executeParticipantsAdd("-s", serverUrl);
-        assertAddParticipants(exitCode, serverUrl, app.service);
-    }
-
-    @Deprecated
-    @Test
-    void add_both_inputs() {
-        var exitCode = cmd.execute(
-                "-c", clientDid,
-                "-k", privateKeyFile.toString(),
-                "-s", serverUrl,
-                "-d", dataspaceDid,
-                "participants", "add",
-                "--ids-url", idsUrl);
-
-        assertThat(exitCode).isEqualTo(0);
-        assertThat(dataspaceDid).isEqualTo(app.dataspaceDid);
-        assertThat(serverUrl).isEqualTo(app.service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
-    }
-
     private void assertAddParticipants(int exitCode, String serverUrl, String service) {
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(service);
