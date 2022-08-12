@@ -26,6 +26,7 @@ val identityHubGroup: String by project
 dependencies {
     implementation(project(":extensions:registration-service"))
     implementation(project(":extensions:participant-verifier"))
+    implementation(project(":extensions:registration-policy-gaiax-member"))
     implementation("${edcGroup}:identity-did-web:${edcVersion}")
     implementation("${edcGroup}:identity-did-core:${edcVersion}")
     implementation("${edcGroup}:core:${edcVersion}")

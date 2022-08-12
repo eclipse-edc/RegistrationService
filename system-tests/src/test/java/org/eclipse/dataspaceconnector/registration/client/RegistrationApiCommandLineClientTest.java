@@ -36,8 +36,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.DATASPACE_DID_WEB;
-import static org.eclipse.dataspaceconnector.registration.client.TestUtils.didDocument;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;

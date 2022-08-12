@@ -14,9 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.ECKey;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidConstants;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
@@ -27,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class TestUtils {
-    private TestUtils() {
+class RegistrationServiceTestUtils {
+    private RegistrationServiceTestUtils() {
     }
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
@@ -44,7 +42,7 @@ class TestUtils {
      */
     static final String IDENTITY_HUB_URL = "http://participant:8181/api/identity-hub";
 
-    static String didDocument() throws JOSEException, JsonProcessingException {
+    static String didDocument() throws Exception {
         var publicKey = (ECKey) ECKey.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256);
         var vm = VerificationMethod.Builder.create()
                 .id("#my-key-1")

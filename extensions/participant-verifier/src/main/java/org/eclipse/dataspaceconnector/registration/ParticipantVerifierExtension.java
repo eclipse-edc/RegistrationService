@@ -19,6 +19,7 @@ import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry
 import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.verifier.DefaultParticipantVerifier;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
@@ -38,9 +39,15 @@ public class ParticipantVerifierExtension implements ServiceExtension {
     @Inject
     private CredentialsVerifier credentialsVerifier;
 
+    @Inject
+    private PolicyEngine policyEngine;
+
+    @Inject
+    private DataspaceRegistrationPolicy dataspaceRegistrationPolicy;
+
     @Provider
     public ParticipantVerifier participantVerifier(ServiceExtensionContext context) {
-        return new DefaultParticipantVerifier(monitor, didResolverRegistry, credentialsVerifier);
+        return new DefaultParticipantVerifier(monitor, didResolverRegistry, credentialsVerifier, policyEngine, dataspaceRegistrationPolicy);
     }
 }
 

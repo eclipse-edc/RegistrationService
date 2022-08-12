@@ -53,7 +53,7 @@ import static org.eclipse.dataspaceconnector.iam.did.spi.document.DidConstants.D
 /**
  * EDC extension to boot the services used by the Authority Service.
  */
-@Requires({PrivateKeyResolver.class, OkHttpClient.class, DidResolverRegistry.class, CredentialsVerifier.class})
+@Requires({ PrivateKeyResolver.class, OkHttpClient.class, DidResolverRegistry.class, CredentialsVerifier.class })
 public class AuthorityExtension implements ServiceExtension {
 
     public static final String CONTEXT_ALIAS = "authority";
