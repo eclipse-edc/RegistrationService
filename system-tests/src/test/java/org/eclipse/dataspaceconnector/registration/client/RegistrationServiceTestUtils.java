@@ -14,8 +14,8 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
-class TestUtils {
-    private TestUtils() {
+class RegistrationServiceTestUtils {
+    private RegistrationServiceTestUtils() {
     }
 
     /**

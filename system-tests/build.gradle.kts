@@ -16,6 +16,8 @@ plugins {
     `java-library`
 }
 
+val edcVersion: String by project
+val edcGroup: String by project
 val identityHubVersion: String by project
 val identityHubGroup: String by project
 val awaitility: String by project
@@ -38,4 +40,5 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.awaitility:awaitility:${awaitility}")
     testImplementation("com.github.javafaker:javafaker:${faker}")
+    testImplementation("${edcGroup}:junit:${edcVersion}")
 }

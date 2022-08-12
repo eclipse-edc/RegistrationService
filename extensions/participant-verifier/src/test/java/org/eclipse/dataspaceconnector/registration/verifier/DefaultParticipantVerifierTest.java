@@ -20,7 +20,10 @@ import org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifie
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.Service;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry;
+import org.eclipse.dataspaceconnector.policy.model.Policy;
+import org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +35,11 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy.PARTICIPANT_REGISTRATION_SCOPE;
 import static org.eclipse.dataspaceconnector.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,12 +49,16 @@ class DefaultParticipantVerifierTest {
 
     Monitor monitor = mock(Monitor.class);
     String participantDid = FAKER.internet().url();
+    PolicyEngine policyEngine = mock(PolicyEngine.class);
+    Policy policy = mock(Policy.class);
+    Policy policyResult = mock(Policy.class);
+    DataspaceRegistrationPolicy dataspaceRegistrationPolicy = new DataspaceRegistrationPolicy(policy);
     DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
     CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
     String identityHubUrl = FAKER.internet().url();
     String failure = FAKER.lorem().sentence();
-    Map<String, Object> verifiableCredentials = mock(Map.class);
-    DefaultParticipantVerifier service = new DefaultParticipantVerifier(monitor, resolverRegistry, credentialsVerifier);
+    Map<String, Object> verifiableCredentials = Map.of(FAKER.lorem().word(), FAKER.lorem().word());
+    DefaultParticipantVerifier service = new DefaultParticipantVerifier(monitor, resolverRegistry, credentialsVerifier, policyEngine, dataspaceRegistrationPolicy);
 
     @BeforeEach
     void beforeEach() {
@@ -62,14 +72,20 @@ class DefaultParticipantVerifierTest {
     }
 
     @Test
-    void verifyCredentials_createsMembershipCredential() {
-        var result = service.verifyCredentials(participantDid);
+    void isOnboardingAllowed_success() {
+        when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), argThat(a ->
+                verifiableCredentials.equals(a.getClaims()) &&
+                        Map.of().equals(a.getAttributes()))))
+                .thenReturn(Result.success(policyResult));
+
+        var result = service.isOnboardingAllowed(participantDid);
+
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent()).isTrue();
     }
 
     @Test
-    void verifyCredentials_whenDidNotResolved_throws() {
+    void isOnboardingAllowed_whenDidNotResolved_fails() {
         when(resolverRegistry.resolve(participantDid))
                 .thenReturn(Result.failure(failure));
 
@@ -78,7 +94,7 @@ class DefaultParticipantVerifierTest {
     }
 
     @Test
-    void verifyCredentials_whenPushToIdentityHubFails_throws() {
+    void isOnboardingAllowed_whenPushToIdentityHubFails_fails() {
         when(credentialsVerifier.getVerifiedCredentials(any()))
                 .thenReturn(Result.failure(failure));
 
@@ -86,9 +102,21 @@ class DefaultParticipantVerifierTest {
                 .isEqualTo(format("Failed to retrieve VCs. %s", failure));
     }
 
+    @Test
+    void isOnboardingAllowed_whenNotAllowedByPolicy_returnsFalse() {
+        when(policyEngine.evaluate(any(), any(), any()))
+                .thenReturn(Result.failure(failure));
+
+        var result = service.isOnboardingAllowed(participantDid);
+
+        assertThat(result.succeeded()).isTrue();
+        assertThat(result.getContent()).isFalse();
+    }
+
+
     @NotNull
     private AbstractStringAssert<?> assertThatCallFailsWith(ResponseStatus status) {
-        var result = service.verifyCredentials(participantDid);
+        var result = service.isOnboardingAllowed(participantDid);
         assertThat(result.failed()).isTrue();
         assertThat(result.getFailure().status()).isEqualTo(status);
         return assertThat(result.getFailureDetail());

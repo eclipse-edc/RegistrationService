@@ -64,20 +64,20 @@ class ParticipantManagerTest {
 
     @Test
     void advancesStateFromAuthorizingToAuthorized() throws Exception {
-        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.success(true));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.success(true));
         advancesState(AUTHORIZING, AUTHORIZED);
     }
 
     @Test
     void advancesStateFromAuthorizingToDenied() throws Exception {
-        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.success(false));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.success(false));
         advancesState(AUTHORIZING, DENIED);
     }
 
     @ParameterizedTest
     @EnumSource(ResponseStatus.class)
     void advancesStateFromAuthorizingToFailed(ResponseStatus errorStatus) throws Exception {
-        when(participantVerifier.verifyCredentials(any())).thenReturn(StatusResult.failure(errorStatus));
+        when(participantVerifier.isOnboardingAllowed(any())).thenReturn(StatusResult.failure(errorStatus));
         advancesState(AUTHORIZING, FAILED);
     }
 

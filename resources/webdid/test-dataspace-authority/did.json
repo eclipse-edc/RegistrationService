@@ -18,11 +18,11 @@
       "controller": "",
       "id": "#dataspace-authority",
       "publicKeyJwk": {
-        "crv": "P-256",
-        "kid": "43W7BLEhKmasrJYqax399SY3tbAWZ9gbE2Em1pIQIds",
         "kty": "EC",
-        "x": "wwP_-TypFsR1k41KDoxYelM5nlMDWkW1xI3dfD_JSIE",
-        "y": "iqDGWy1rbemhYrN4NCtn5dCeElIO8KLqXDT2RuzQWH0"
+        "crv": "P-256",
+        "kid": "uIowOgviyWueDwC2SjwEPnqsBVQkhIN3m6B0Ajs6rlU",
+        "x": "T6VaLBE16dj2WcqcCaF6M1ORlaQhrT5bEhY8JUiDwRA",
+        "y": "hcVb4PnEmH2TMYbPk-ctwHx3o15JNIOhIYPBzR3iYf4"
       },
       "type": "JsonWebKey2020"
     }
