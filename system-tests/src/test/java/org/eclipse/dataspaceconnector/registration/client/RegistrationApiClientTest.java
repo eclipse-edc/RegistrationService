@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -102,9 +103,8 @@ public class RegistrationApiClientTest {
 
     @Test
     void addsVerifiableCredential() throws Exception {
-        var startTime = Instant.now();
-        // wait 1 second as issueTime in jwt claims is set with 1 sec precision
-        await().until(() -> Instant.now().isAfter(startTime.plus(1, ChronoUnit.SECONDS)));
+        // jwt claims issue time is set with 1 sec precision, so startTime is set to 1 second before
+        var startTime = Instant.now().truncatedTo(SECONDS).minus(1, SECONDS);
         var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
         var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
         var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
@@ -113,14 +113,14 @@ public class RegistrationApiClientTest {
                 .credentialSubject(Map.of("gaiaXMember", "true"))
                 .build();
         var did = did();
+
+        // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
 
         var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
         identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
 
-        // sanity check
         var api = api(did);
-
         api.addParticipant();
 
         await().atMost(2, MINUTES).untilAsserted(() -> {
