@@ -21,6 +21,8 @@ import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.EllipticCurvePublicKey;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.Service;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.VerificationMethod;
+import org.eclipse.dataspaceconnector.registration.cli.ClientUtils;
+import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -55,6 +57,17 @@ class RegistrationServiceTestUtils {
                 .service(List.of(identityHub()))
                 .build();
         return MAPPER.writeValueAsString(didDocument);
+    }
+
+    @NotNull
+    static String getDid(int apiPort) {
+        return "did:web:host.docker.internal%3A" + apiPort;
+    }
+
+    @NotNull
+    static RegistryApi createApi(String did, String apiUrl) {
+        var apiClient = ClientUtils.createApiClient(apiUrl, did, TestKeyData.PRIVATE_KEY_P256);
+        return new RegistryApi(apiClient);
     }
 
     @NotNull

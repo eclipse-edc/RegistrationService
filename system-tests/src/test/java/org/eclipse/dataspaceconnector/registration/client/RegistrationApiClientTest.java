@@ -21,12 +21,10 @@ import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
 import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
-import org.eclipse.dataspaceconnector.registration.cli.ClientUtils;
 import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +46,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.getDid;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -62,8 +62,10 @@ public class RegistrationApiClientTest {
 
     static IdentityHubClientImpl identityHubClient;
 
-    int apiPort;
     ClientAndServer httpSourceClientAndServer;
+    int apiPort;
+    String did;
+    RegistryApi api;
 
     @BeforeAll
     static void setUpClass() {
@@ -79,6 +81,8 @@ public class RegistrationApiClientTest {
                 .respond(response()
                         .withBody(didDocument())
                         .withStatusCode(HttpStatusCode.OK_200.code()));
+        did = getDid(apiPort);
+        api = createApi(did, API_URL);
     }
 
     @AfterEach
@@ -88,9 +92,6 @@ public class RegistrationApiClientTest {
 
     @Test
     void listParticipants() {
-        var did = did();
-        var api = api(did);
-
         assertThat(api.listParticipants())
                 .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
@@ -111,7 +112,6 @@ public class RegistrationApiClientTest {
                 .id(UUID.randomUUID().toString())
                 .credentialSubject(Map.of("gaiaXMember", "true"))
                 .build();
-        var did = did();
 
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
@@ -119,7 +119,6 @@ public class RegistrationApiClientTest {
         var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
         identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
 
-        var api = api(did);
         api.addParticipant();
 
         await().atMost(2, MINUTES).untilAsserted(() -> {
@@ -135,9 +134,6 @@ public class RegistrationApiClientTest {
 
     @Test
     void getParticipant() {
-        var did = did();
-        var api = api(did);
-
         api.addParticipant();
 
         var response = api.getParticipant();
@@ -147,8 +143,6 @@ public class RegistrationApiClientTest {
 
     @Test
     void getParticipant_notFound() {
-
-        var api = api(did());
 
         // look for participant which is not yet registered.
         assertThatThrownBy(api::getParticipant)
@@ -162,15 +156,4 @@ public class RegistrationApiClientTest {
         assertThat(jwt.getJWTClaimsSet().getIssueTime().toInstant()).isAfter(startTime);
     }
 
-    @NotNull
-    private RegistryApi api(String did) {
-        var apiClient = ClientUtils.createApiClient(API_URL, did, TestKeyData.PRIVATE_KEY_P256);
-        return new RegistryApi(apiClient);
-    }
-
-    @NotNull
-    private String did() {
-        return "did:web:host.docker.internal%3A" + apiPort;
-
-    }
 }

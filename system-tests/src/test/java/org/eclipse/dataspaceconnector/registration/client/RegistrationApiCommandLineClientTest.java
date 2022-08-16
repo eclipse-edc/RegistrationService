@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.getDid;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -45,10 +46,12 @@ import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
-    static int apiPort;
 
     static final ObjectMapper MAPPER = new ObjectMapper();
     static Path privateKeyFile;
+
+    int apiPort;
+    String did;
     /*
     host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
      */
@@ -65,6 +68,7 @@ public class RegistrationApiCommandLineClientTest {
                 .respond(response()
                         .withBody(didDocument())
                         .withStatusCode(HttpStatusCode.OK_200.code()));
+        did = getDid(apiPort);
     }
 
     @AfterEach
@@ -75,7 +79,6 @@ public class RegistrationApiCommandLineClientTest {
     @Test
     void listParticipants() throws Exception {
 
-        String did = did();
         assertThat(listParticipantCmd(did)).noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
         addParticipantCmd(did);
@@ -86,7 +89,6 @@ public class RegistrationApiCommandLineClientTest {
     @Test
     void getParticipant() throws Exception {
 
-        String did = did();
         addParticipantCmd(did);
 
         var result = getParticipantCmd(did);
@@ -97,7 +99,6 @@ public class RegistrationApiCommandLineClientTest {
 
     @Test
     void getParticipant_notFound() {
-        String did = did();
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
         var writer = new StringWriter();
         cmd.setOut(new PrintWriter(writer));
@@ -159,10 +160,5 @@ public class RegistrationApiCommandLineClientTest {
 
         return MAPPER.readValue(output, new TypeReference<>() {
         });
-    }
-
-    @NotNull
-    private String did() {
-        return "did:web:host.docker.internal%3A" + apiPort;
     }
 }
