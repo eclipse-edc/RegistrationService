@@ -3,6 +3,7 @@ plugins {
     `java-library`
     signing
     `maven-publish`
+    checkstyle
     id("org.gradle.crypto.checksum") version "1.4.0"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
@@ -64,6 +65,7 @@ subprojects{
 
 allprojects {
     apply(plugin = "maven-publish")
+    apply(plugin = "checkstyle")
     version = projectVersion
     group = projectGroup
 
@@ -76,6 +78,16 @@ allprojects {
         maven{
             url= uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
+    }
+
+    // Specify config file excluding generated source files
+    System.setProperty("org.checkstyle.google.suppressionfilter.config", file("${rootProject.projectDir.path}/resources/checkstyle-suppressions.xml").absolutePath)
+
+    checkstyle {
+        toolVersion = "9.0"
+        configFile = rootProject.file("resources/checkstyle-config.xml")
+        configDirectory.set(rootProject.file("resources"))
+        maxErrors = 0 // does not tolerate errors
     }
 
     if (!project.hasProperty("skip.signing")) {
