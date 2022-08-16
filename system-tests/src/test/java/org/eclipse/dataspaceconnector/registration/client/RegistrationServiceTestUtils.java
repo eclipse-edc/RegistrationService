@@ -60,7 +60,7 @@ class RegistrationServiceTestUtils {
     }
 
     @NotNull
-    static String getDid(int apiPort) {
+    static String createDid(int apiPort) {
         return "did:web:host.docker.internal%3A" + apiPort;
     }
 

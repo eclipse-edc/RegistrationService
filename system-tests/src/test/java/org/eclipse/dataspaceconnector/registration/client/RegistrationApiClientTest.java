@@ -48,7 +48,7 @@ import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.getDid;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -81,7 +81,7 @@ public class RegistrationApiClientTest {
                 .respond(response()
                         .withBody(didDocument())
                         .withStatusCode(HttpStatusCode.OK_200.code()));
-        did = getDid(apiPort);
+        did = createDid(apiPort);
         api = createApi(did, API_URL);
     }
 

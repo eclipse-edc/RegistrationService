@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.getDid;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -68,7 +67,7 @@ public class RegistrationApiCommandLineClientTest {
                 .respond(response()
                         .withBody(didDocument())
                         .withStatusCode(HttpStatusCode.OK_200.code()));
-        did = getDid(apiPort);
+        did = createDid(apiPort);
     }
 
     @AfterEach
