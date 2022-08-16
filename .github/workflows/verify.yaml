@@ -2,6 +2,8 @@ name: Test Code (Style, Tests)
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     paths-ignore:
       - '**.md'
@@ -22,6 +24,9 @@ jobs:
         run: git diff --exit-code
 
   Test:
+    permissions:
+      checks: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,6 +50,7 @@ jobs:
         timeout-minutes: 10
         env:
           INTEGRATION_TEST: true
+          JACOCO: "true"
 
       - name: 'Publish Test Results'
         uses: EnricoMi/publish-unit-test-result-action@v1
@@ -55,6 +61,9 @@ jobs:
       - name: 'docker-compose logs'
         run: docker-compose logs
         if: always()
+
+      - name: CodeCov
+        uses: codecov/codecov-action@v3
 
   Checkstyle:
     runs-on: ubuntu-latest
