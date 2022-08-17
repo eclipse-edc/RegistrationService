@@ -17,11 +17,13 @@ package org.eclipse.dataspaceconnector.registration.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpStatusCode;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
@@ -32,41 +34,65 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.UNREGISTERED_CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
 public class RegistrationApiCommandLineClientTest {
-    static final ObjectMapper MAPPER = new ObjectMapper();
-    static final Faker FAKER = new Faker();
-    static Path privateKeyFile;
-    String idsUrl = FAKER.internet().url();
 
-    @BeforeAll
-    static void setUpClass() throws Exception {
+    static final ObjectMapper MAPPER = new ObjectMapper();
+    static Path privateKeyFile;
+
+    int apiPort;
+    String did;
+    /*
+    host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
+     */
+    ClientAndServer httpSourceClientAndServer;
+
+    @BeforeEach
+    void setUpClass() throws Exception {
         privateKeyFile = Files.createTempFile("test", ".pem");
         privateKeyFile.toFile().deleteOnExit();
         Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
+        apiPort = getFreePort();
+        httpSourceClientAndServer = startClientAndServer(apiPort);
+        httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
+                .respond(response()
+                        .withBody(didDocument())
+                        .withStatusCode(HttpStatusCode.OK_200.code()));
+        did = createDid(apiPort);
+    }
+
+    @AfterEach
+    void tearDown() {
+        stopQuietly(httpSourceClientAndServer);
     }
 
     @Test
     void listParticipants() throws Exception {
-        assertThat(listParticipantsCmd()).noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
 
-        addParticipantCmd();
+        assertThat(listParticipantCmd(did)).noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
-        assertThat(listParticipantsCmd()).anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(idsUrl));
+        addParticipantCmd(did);
+
+        assertThat(listParticipantCmd(did)).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
 
     @Test
     void getParticipant() throws Exception {
-        addParticipantCmd();
 
-        var result = getParticipantCmd();
+        addParticipantCmd(did);
 
-        assertThat(result.getDid()).isEqualTo(CLIENT_DID_WEB);
-        assertThat(result.getUrl()).isEqualTo(idsUrl);
+        var result = getParticipantCmd(did);
+
+        assertThat(result.getDid()).isEqualTo(did);
         assertThat(result.getStatus()).isNotNull();
     }
 
@@ -77,7 +103,7 @@ public class RegistrationApiCommandLineClientTest {
         cmd.setOut(new PrintWriter(writer));
 
         var statusCmdExitCode = cmd.execute(
-                "-c", UNREGISTERED_CLIENT_DID_WEB,
+                "-c", did,
                 "-d", DATASPACE_DID_WEB,
                 "-k", privateKeyFile.toString(),
                 "--http-scheme",
@@ -86,16 +112,6 @@ public class RegistrationApiCommandLineClientTest {
         assertThat(statusCmdExitCode).isEqualTo(1);
         var output = writer.toString();
         assertThat(output).isEmpty();
-    }
-
-    private List<String> commonCmdParams() {
-        return List.of(
-                "-c", CLIENT_DID_WEB,
-                "-d", DATASPACE_DID_WEB,
-                "-k", privateKeyFile.toString(),
-                "--http-scheme",
-                "participants"
-        );
     }
 
     private String executeCmd(List<String> cmdArgs) {
@@ -111,26 +127,37 @@ public class RegistrationApiCommandLineClientTest {
         return output;
     }
 
-    private void addParticipantCmd() {
-        var addParticipantArgs = new ArrayList<>(commonCmdParams());
-        addParticipantArgs.addAll(List.of("add", "--ids-url", idsUrl));
-        executeCmd(addParticipantArgs);
+    private List<String> commonCmdParams(String didWeb) {
+
+        return List.of(
+                "-c", didWeb,
+                "-d", DATASPACE_DID_WEB,
+                "-k", privateKeyFile.toString(),
+                "--http-scheme",
+                "participants"
+        );
     }
 
-    private List<ParticipantDto> listParticipantsCmd() throws JsonProcessingException {
-        var listParticipantsArgs = new ArrayList<>(commonCmdParams());
-        listParticipantsArgs.add("list");
-        var output = executeCmd(listParticipantsArgs);
-        return MAPPER.readValue(output, new TypeReference<>() {
-        });
-    }
-
-    private ParticipantDto getParticipantCmd() throws JsonProcessingException {
-        var getParticipantArgs = new ArrayList<>(commonCmdParams());
+    private ParticipantDto getParticipantCmd(String didWeb) throws JsonProcessingException {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(didWeb));
         getParticipantArgs.add("get");
         var output = executeCmd(getParticipantArgs);
 
         return MAPPER.readValue(output, ParticipantDto.class);
     }
 
+    private void addParticipantCmd(String clientDidWeb) {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(clientDidWeb));
+        getParticipantArgs.add("add");
+        executeCmd(getParticipantArgs);
+    }
+
+    private List<ParticipantDto> listParticipantCmd(String didWeb) throws JsonProcessingException {
+        var getParticipantArgs = new ArrayList<>(commonCmdParams(didWeb));
+        getParticipantArgs.add("list");
+        var output = executeCmd(getParticipantArgs);
+
+        return MAPPER.readValue(output, new TypeReference<>() {
+        });
+    }
 }

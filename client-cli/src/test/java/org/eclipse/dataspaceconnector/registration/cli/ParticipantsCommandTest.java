@@ -47,7 +47,6 @@ class ParticipantsCommandTest {
     ParticipantDto participant1 = createParticipantDto();
     ParticipantDto participant2 = createParticipantDto();
     String serverUrl = FAKER.internet().url();
-    String idsUrl = FAKER.internet().url();
     String clientDid = FAKER.internet().url();
     String dataspaceDid = "did:web:" + FAKER.internet().domainName();
 
@@ -102,7 +101,7 @@ class ParticipantsCommandTest {
     private void assertAddParticipants(int exitCode, String serverUrl, String service) {
         assertThat(exitCode).isEqualTo(0);
         assertThat(serverUrl).isEqualTo(service);
-        verify(app.registryApiClient).addParticipant(idsUrl);
+        verify(app.registryApiClient).addParticipant();
     }
 
     private void assertListParticipants(List<ParticipantDto> participants, int exitCode, String value, String expectedValue) throws JsonProcessingException {
@@ -121,8 +120,7 @@ class ParticipantsCommandTest {
                 "-c", clientDid,
                 "-k", privateKeyFile.toString(),
                 inputCmd, inputValue,
-                "participants", "add",
-                "--ids-url", idsUrl);
+                "participants", "add");
     }
 
     private int executeParticipantsList(String inputCmd, String inputValue) {

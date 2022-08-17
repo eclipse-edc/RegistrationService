@@ -21,11 +21,6 @@ paths:
     post:
       description: Asynchronously request to add a dataspace participant.
       operationId: addParticipant
-      parameters:
-      - in: header
-        name: IdsUrl
-        schema:
-          type: string
       responses:
         "204":
           description: No content
@@ -54,8 +49,6 @@ components:
       properties:
         did:
           type: string
-        name:
-          type: string
         status:
           type: string
           description: Participant onboarding status
@@ -63,9 +56,3 @@ components:
           - ONBOARDING_IN_PROGRESS
           - ONBOARDED
           - DENIED
-        supportedProtocols:
-          type: array
-          items:
-            type: string
-        url:
-          type: string

@@ -15,20 +15,22 @@
 package org.eclipse.dataspaceconnector.registration.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 import com.nimbusds.jwt.SignedJWT;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
 import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
-import org.eclipse.dataspaceconnector.registration.cli.ClientUtils;
 import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpStatusCode;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -38,46 +40,71 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.CLIENT_DID_WEB;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.UNREGISTERED_CLIENT_DID_WEB;
+import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
     static final String API_URL = "http://localhost:8182/authority";
-    static final Faker FAKER = new Faker();
     static final Monitor MONITOR = new ConsoleMonitor();
     public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
-    static RegistryApi api;
+
     static IdentityHubClientImpl identityHubClient;
 
-    String participantUrl = FAKER.internet().url();
-    Instant startTime = Instant.now();
+    ClientAndServer httpSourceClientAndServer;
+    int apiPort;
+    String did;
+    RegistryApi api;
 
     @BeforeAll
     static void setUpClass() {
-        var apiClient = ClientUtils.createApiClient(API_URL, CLIENT_DID_WEB, TestKeyData.PRIVATE_KEY_P256);
-        api = new RegistryApi(apiClient);
         var okHttpClient = new OkHttpClient.Builder().build();
         identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
+        apiPort = getFreePort();
+        httpSourceClientAndServer = startClientAndServer(apiPort);
+        httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
+                .respond(response()
+                        .withBody(didDocument())
+                        .withStatusCode(HttpStatusCode.OK_200.code()));
+        did = createDid(apiPort);
+        api = createApi(did, API_URL);
+    }
+
+    @AfterEach
+    void tearDown() {
+        stopQuietly(httpSourceClientAndServer);
     }
 
     @Test
     void listParticipants() {
         assertThat(api.listParticipants())
-                .noneSatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
+                .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
-        api.addParticipant(participantUrl);
+        api.addParticipant();
 
         assertThat(api.listParticipants())
-                .anySatisfy(p -> assertThat(p.getUrl()).isEqualTo(participantUrl));
+                .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
 
     @Test
     void addsVerifiableCredential() throws Exception {
+        // jwt claims issue time is set with 1 sec precision, so startTime is set to 1 second before
+        var startTime = Instant.now().truncatedTo(SECONDS).minus(1, SECONDS);
         var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
         var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
         var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
@@ -85,15 +112,17 @@ public class RegistrationApiClientTest {
                 .id(UUID.randomUUID().toString())
                 .credentialSubject(Map.of("gaiaXMember", "true"))
                 .build();
-        var jwt = jwtService.buildSignedJwt(vc, "did:web:did-server:test-dataspace-authority", CLIENT_DID_WEB, authorityPrivateKey);
-        identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
-        // sanity check
-        assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(this::assertIssuedVerifiableCredential);
 
-        api.addParticipant(participantUrl);
+        // sanity check
+        assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
+
+        var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
+        identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+
+        api.addParticipant();
 
         await().atMost(2, MINUTES).untilAsserted(() -> {
-            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(this::assertIssuedVerifiableCredential);
+            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
         });
     }
 
@@ -103,33 +132,28 @@ public class RegistrationApiClientTest {
         return result.getContent();
     }
 
-    private void assertIssuedVerifiableCredential(SignedJWT jwt) throws ParseException {
-        assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(CLIENT_DID_WEB);
-        assertThat(jwt.getJWTClaimsSet().getIssueTime()).isAfter(startTime);
-    }
-
     @Test
     void getParticipant() {
-        api.addParticipant(participantUrl);
+        api.addParticipant();
 
         var response = api.getParticipant();
 
-        assertThat(response.getDid()).isEqualTo(CLIENT_DID_WEB);
-        assertThat(response.getUrl()).isEqualTo(participantUrl);
-        assertThat(response.getStatus()).isNotNull();
+        assertThat(response.getDid()).isEqualTo(did);
     }
 
     @Test
     void getParticipant_notFound() {
-        //Arrange - Fresh api client with unregistered client DID.
-        var apiClient = ClientUtils.createApiClient(API_URL, UNREGISTERED_CLIENT_DID_WEB, TestKeyData.PRIVATE_KEY_P256);
-        var api = new RegistryApi(apiClient);
 
         // look for participant which is not yet registered.
         assertThatThrownBy(api::getParticipant)
                 .isInstanceOf(ApiException.class)
                 .extracting("code")
                 .isEqualTo(404);
+    }
+
+    private void assertIssuedVerifiableCredential(SignedJWT jwt, String clientDid, Instant startTime) throws ParseException {
+        assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(clientDid);
+        assertThat(jwt.getJWTClaimsSet().getIssueTime().toInstant()).isAfter(startTime);
     }
 
 }

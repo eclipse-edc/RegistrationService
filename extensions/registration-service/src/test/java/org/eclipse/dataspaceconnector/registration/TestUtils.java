@@ -20,7 +20,6 @@ import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantSt
 import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
 import org.eclipse.dataspaceconnector.registration.model.ParticipantStatusDto;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -32,21 +31,13 @@ public class TestUtils {
     public static ParticipantDto.Builder createParticipantDto() {
         return ParticipantDto.Builder.newInstance()
                 .did(format("did:web:%s", FAKER.internet().domainName()))
-                .status(FAKER.options().option(ParticipantStatusDto.class))
-                .name(FAKER.lorem().characters())
-                .url(FAKER.internet().url())
-                .supportedProtocols(List.of(FAKER.lorem().word(), FAKER.lorem().word()))
-                .supportedProtocol(FAKER.lorem().word());
-
+                .status(FAKER.options().option(ParticipantStatusDto.class));
     }
 
     public static ParticipantDto getParticipantDtoFromParticipant(Participant participant) {
         return ParticipantDto.Builder.newInstance()
                 .did(participant.getDid())
                 .status(modelToDtoStatusMap().get(participant.getStatus()))
-                .name(participant.getName())
-                .url(participant.getUrl())
-                .supportedProtocols(participant.getSupportedProtocols())
                 .build();
     }
 

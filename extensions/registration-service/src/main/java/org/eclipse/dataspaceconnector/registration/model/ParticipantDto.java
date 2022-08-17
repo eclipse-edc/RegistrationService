@@ -17,39 +17,18 @@ package org.eclipse.dataspaceconnector.registration.model;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 @Schema(description = "Dataspace Participant")
 public class ParticipantDto {
     private String did;
-    private String name;
-    private String url;
-    private List<String> supportedProtocols = new ArrayList<>();
     private ParticipantStatusDto status;
 
     private ParticipantDto() {
     }
 
-    @Deprecated
-    public String getName() {
-        return name;
-    }
-
-    @Deprecated
-    public String getUrl() {
-        return url;
-    }
-
     public String getDid() {
         return did;
-    }
-
-    @Deprecated
-    public List<String> getSupportedProtocols() {
-        return Collections.unmodifiableList(supportedProtocols);
     }
 
     public ParticipantStatusDto getStatus() {
@@ -68,32 +47,8 @@ public class ParticipantDto {
             return new Builder();
         }
 
-        @Deprecated
-        public Builder supportedProtocol(String supportedProtocol) {
-            participantDto.supportedProtocols.add(supportedProtocol);
-            return this;
-        }
-
-        @Deprecated
-        public Builder supportedProtocols(List<String> supportedProtocols) {
-            participantDto.supportedProtocols.addAll(supportedProtocols);
-            return this;
-        }
-
-        @Deprecated
-        public Builder url(String url) {
-            participantDto.url = url;
-            return this;
-        }
-
         public Builder did(String did) {
             participantDto.did = did;
-            return this;
-        }
-
-        @Deprecated
-        public Builder name(String name) {
-            participantDto.name = name;
             return this;
         }
 

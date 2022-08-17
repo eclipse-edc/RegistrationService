@@ -42,9 +42,6 @@ public class ParticipantToParticipantDtoTransformer implements DtoTransformer<Pa
     public @Nullable ParticipantDto transform(@Nullable Participant participant, @NotNull TransformerContext context) {
         return ParticipantDto.Builder.newInstance()
                 .did(participant.getDid())
-                .name(participant.getName())
-                .url(participant.getUrl())
-                .supportedProtocols(participant.getSupportedProtocols())
                 .status(mapToDtoStatus(participant.getStatus()))
                 .build();
     }

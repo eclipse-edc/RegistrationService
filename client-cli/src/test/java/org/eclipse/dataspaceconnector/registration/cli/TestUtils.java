@@ -28,11 +28,7 @@ public class TestUtils {
 
     public static ParticipantDto createParticipantDto() {
         return new ParticipantDto()
-                .name(FAKER.lorem().characters())
-                .url(FAKER.internet().url())
                 .did(format("did:web:%s", FAKER.internet().domainName()))
-                .status(FAKER.options().option(StatusEnum.class))
-                .addSupportedProtocolsItem(FAKER.lorem().word())
-                .addSupportedProtocolsItem(FAKER.lorem().word());
+                .status(FAKER.options().option(StatusEnum.class));
     }
 }
