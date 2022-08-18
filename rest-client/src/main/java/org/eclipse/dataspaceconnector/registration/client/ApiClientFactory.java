@@ -19,18 +19,24 @@ import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
  * Factory class for {@link ApiClient}.
  */
 public class ApiClientFactory {
+
+    private static final int API_CLIENT_CONNECT_TIMEOUT = Integer.parseInt(getEnv("API_CLIENT_CONNECT_TIMEOUT", "30"));
+    private static final int API_CLIENT_READ_TIMEOUT = Integer.parseInt(getEnv("API_CLIENT_READ_TIMEOUT", "60"));
+
     private ApiClientFactory() {
     }
 
     /**
      * Create a new instance of {@link ApiClient} configured to access the given URL.
      * <p>
+     * Configured readTimeout as env var API_CLIENT_READ_TIMEOUT and connectTimeout as env var API_CLIENT_CONNECT_TIMEOUT.
      * Note that the type of {@code credentialsProvider} is modeled on the EDC {@code IdentityService} interface, for easier integration.
      *
      * @param baseUri             API base URL.
@@ -40,8 +46,21 @@ public class ApiClientFactory {
     @NotNull
     public static ApiClient createApiClient(String baseUri, Function<TokenParameters, Result<TokenRepresentation>> credentialsProvider) {
         var apiClient = new ApiClient();
+        apiClient.setHttpClientBuilder(
+                apiClient.createDefaultHttpClientBuilder()
+                        .connectTimeout(Duration.ofSeconds(API_CLIENT_CONNECT_TIMEOUT))
+        );
+        apiClient.setReadTimeout(Duration.ofSeconds(API_CLIENT_READ_TIMEOUT));
         apiClient.updateBaseUri(baseUri);
         apiClient.setRequestInterceptor(new JsonWebSignatureHeaderInterceptor(credentialsProvider, baseUri));
         return apiClient;
+    }
+
+    private static String getEnv(String key, String defaultValue) {
+        String value = System.getenv(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
     }
 }
