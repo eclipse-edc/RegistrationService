@@ -22,13 +22,15 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
 import java.util.function.Function;
 
+import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationFunctions.propOrEnv;
+
 /**
  * Factory class for {@link ApiClient}.
  */
 public class ApiClientFactory {
 
-    private static final int API_CLIENT_CONNECT_TIMEOUT = Integer.parseInt(getEnv("API_CLIENT_CONNECT_TIMEOUT", "30"));
-    private static final int API_CLIENT_READ_TIMEOUT = Integer.parseInt(getEnv("API_CLIENT_READ_TIMEOUT", "60"));
+    private static final int API_CLIENT_CONNECT_TIMEOUT = Integer.parseInt(propOrEnv("API_CLIENT_CONNECT_TIMEOUT", "30"));
+    private static final int API_CLIENT_READ_TIMEOUT = Integer.parseInt(propOrEnv("API_CLIENT_READ_TIMEOUT", "60"));
 
     private ApiClientFactory() {
     }
@@ -56,11 +58,4 @@ public class ApiClientFactory {
         return apiClient;
     }
 
-    private static String getEnv(String key, String defaultValue) {
-        String value = System.getenv(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
 }
