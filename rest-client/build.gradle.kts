@@ -68,6 +68,7 @@ val faker: String by project
 
 dependencies {
     api("${edcGroup}:identity-did-crypto:${edcVersion}")
+    api("${edcGroup}:common-util:${edcVersion}")
 
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("com.github.javafaker:javafaker:${faker}")
