@@ -23,6 +23,7 @@ import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
+import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -53,7 +54,7 @@ class ParticipantManagerTest {
     ParticipantStore participantStore = mock(ParticipantStore.class);
     ParticipantVerifier participantVerifier = mock(ParticipantVerifier.class);
     VerifiableCredentialService verifiableCredentialService = mock(VerifiableCredentialService.class);
-    ParticipantManager service = new ParticipantManager(monitor, participantStore, participantVerifier, ExecutorInstrumentation.noop(), verifiableCredentialService);
+    ParticipantManager service = new ParticipantManager(monitor, participantStore, participantVerifier, ExecutorInstrumentation.noop(), verifiableCredentialService, new Telemetry());
     Participant.Builder participantBuilder = createParticipant();
     ArgumentCaptor<Participant> captor = ArgumentCaptor.forClass(Participant.class);
 

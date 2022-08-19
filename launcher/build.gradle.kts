@@ -31,8 +31,14 @@ dependencies {
     implementation("${edcGroup}:identity-did-core:${edcVersion}")
     implementation("${edcGroup}:core:${edcVersion}")
     implementation("${edcGroup}:observability-api:${edcVersion}")
+    implementation("${edcGroup}:core-micrometer:${edcVersion}")
+    runtimeOnly("${edcGroup}:jetty-micrometer:${edcVersion}")
+    runtimeOnly("${edcGroup}:jersey-micrometer:${edcVersion}")
     implementation("${edcGroup}:filesystem-configuration:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub-credentials-verifier:${identityHubVersion}")
+
+    // JDK Logger
+    implementation("${edcGroup}:jdk-logger-monitor:${edcVersion}")
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()

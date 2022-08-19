@@ -22,10 +22,13 @@ import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.exception.ObjectNotFoundException;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,7 +48,9 @@ class RegistrationServiceTest {
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
     DtoTransformerRegistry dtoTransformerRegistry = mock(DtoTransformerRegistry.class);
-    RegistrationService service = new RegistrationService(monitor, participantStore, dtoTransformerRegistry);
+    Telemetry telemetryMock = mock(Telemetry.class);
+    RegistrationService service = new RegistrationService(monitor, participantStore, dtoTransformerRegistry, telemetryMock);
+
 
     Participant.Builder participantBuilder = createParticipant();
     ParticipantDto.Builder participantDtoBuilder = createParticipantDto();
@@ -101,6 +106,8 @@ class RegistrationServiceTest {
 
     @Test
     void addParticipant() {
+        var traceContext = getTraceContext();
+        when(telemetryMock.getCurrentTraceContext()).thenReturn(traceContext);
         service.addParticipant(did);
 
         var captor = ArgumentCaptor.forClass(Participant.class);
@@ -110,6 +117,7 @@ class RegistrationServiceTest {
                 .isEqualTo(Participant.Builder.newInstance()
                         .did(did)
                         .status(ONBOARDING_INITIATED)
+                        .traceContext(traceContext)
                         .build());
     }
 
@@ -156,6 +164,11 @@ class RegistrationServiceTest {
 
         verify(participantStore).findByDid(participant.getDid());
         verifyNoInteractions(dtoTransformerRegistry);
+    }
+
+    @NotNull
+    private Map<String, String> getTraceContext() {
+        return Map.of(FAKER.lorem().word(), FAKER.lorem().word(), FAKER.lorem().word(), FAKER.lorem().word());
     }
 
 }
