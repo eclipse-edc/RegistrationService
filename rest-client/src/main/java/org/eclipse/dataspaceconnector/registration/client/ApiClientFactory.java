@@ -41,7 +41,7 @@ public class ApiClientFactory {
     /**
      * Create a new instance of {@link ApiClient} configured to access the given URL.
      * <p>
-     * Configured with connectTimeout(default to 30 seconds) and readTimeout(default to 60 seconds).
+     * Configured with connectTimeout (default is 30 seconds) and readTimeout (default is 60 seconds).
      * Note that the type of {@code credentialsProvider} is modeled on the EDC {@code IdentityService} interface, for easier integration.
      *
      * @param baseUri             API base URL.
