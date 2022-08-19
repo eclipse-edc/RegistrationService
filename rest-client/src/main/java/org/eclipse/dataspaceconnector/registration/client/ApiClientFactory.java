@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
+import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.iam.TokenParameters;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
@@ -29,8 +30,10 @@ import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationF
  */
 public class ApiClientFactory {
 
-    private static final int API_CLIENT_CONNECT_TIMEOUT = Integer.parseInt(propOrEnv("API_CLIENT_CONNECT_TIMEOUT", "30"));
-    private static final int API_CLIENT_READ_TIMEOUT = Integer.parseInt(propOrEnv("API_CLIENT_READ_TIMEOUT", "60"));
+    @EdcSetting
+    private static final String API_CLIENT_CONNECT_TIMEOUT = "api.client.connect.timeout";
+    @EdcSetting
+    private static final String API_CLIENT_READ_TIMEOUT = "api.client.read.timeout";
 
     private ApiClientFactory() {
     }
@@ -38,7 +41,7 @@ public class ApiClientFactory {
     /**
      * Create a new instance of {@link ApiClient} configured to access the given URL.
      * <p>
-     * Configured readTimeout as env var API_CLIENT_READ_TIMEOUT and connectTimeout as env var API_CLIENT_CONNECT_TIMEOUT.
+     * Configured with connectTimeout(default to 30 seconds) and readTimeout(default to 60 seconds).
      * Note that the type of {@code credentialsProvider} is modeled on the EDC {@code IdentityService} interface, for easier integration.
      *
      * @param baseUri             API base URL.
@@ -48,11 +51,14 @@ public class ApiClientFactory {
     @NotNull
     public static ApiClient createApiClient(String baseUri, Function<TokenParameters, Result<TokenRepresentation>> credentialsProvider) {
         var apiClient = new ApiClient();
+        var connectTimeout = Integer.parseInt(propOrEnv(API_CLIENT_CONNECT_TIMEOUT, "30"));
+        var readTimeout = Integer.parseInt(propOrEnv(API_CLIENT_READ_TIMEOUT, "60"));
+
         apiClient.setHttpClientBuilder(
                 apiClient.createDefaultHttpClientBuilder()
-                        .connectTimeout(Duration.ofSeconds(API_CLIENT_CONNECT_TIMEOUT))
+                        .connectTimeout(Duration.ofSeconds(connectTimeout))
         );
-        apiClient.setReadTimeout(Duration.ofSeconds(API_CLIENT_READ_TIMEOUT));
+        apiClient.setReadTimeout(Duration.ofSeconds(readTimeout));
         apiClient.updateBaseUri(baseUri);
         apiClient.setRequestInterceptor(new JsonWebSignatureHeaderInterceptor(credentialsProvider, baseUri));
         return apiClient;
