@@ -30,9 +30,9 @@ import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationF
  */
 public class ApiClientFactory {
 
-    @EdcSetting
+    @EdcSetting(type = "integer", value = "Rest api client connect timeout")
     private static final String API_CLIENT_CONNECT_TIMEOUT = "api.client.connect.timeout";
-    @EdcSetting
+    @EdcSetting(type = "integer", value = "Rest api client read timeout")
     private static final String API_CLIENT_READ_TIMEOUT = "api.client.read.timeout";
 
     private ApiClientFactory() {
