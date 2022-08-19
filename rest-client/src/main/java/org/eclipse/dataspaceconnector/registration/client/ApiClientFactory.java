@@ -63,5 +63,4 @@ public class ApiClientFactory {
         apiClient.setRequestInterceptor(new JsonWebSignatureHeaderInterceptor(credentialsProvider, baseUri));
         return apiClient;
     }
-
 }
