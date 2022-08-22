@@ -44,6 +44,7 @@ import org.eclipse.dataspaceconnector.spi.system.Provider;
 import org.eclipse.dataspaceconnector.spi.system.Requires;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
+import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 
 import java.util.Objects;
 
@@ -93,6 +94,9 @@ public class AuthorityExtension implements ServiceExtension {
     @Inject
     private DtoTransformerRegistry transformerRegistry;
 
+    @Inject
+    private Telemetry telemetry;
+
     private ParticipantManager participantManager;
 
     @Override
@@ -103,10 +107,10 @@ public class AuthorityExtension implements ServiceExtension {
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
         var verifiableCredentialService = verifiableCredentialService(context);
 
-        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier, executorInstrumentation, verifiableCredentialService);
+        participantManager = new ParticipantManager(monitor, participantStore, participantVerifier, executorInstrumentation, verifiableCredentialService, telemetry);
         transformerRegistry.register(new ParticipantToParticipantDtoTransformer());
 
-        var registrationService = new RegistrationService(monitor, participantStore, transformerRegistry);
+        var registrationService = new RegistrationService(monitor, participantStore, transformerRegistry, telemetry);
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);

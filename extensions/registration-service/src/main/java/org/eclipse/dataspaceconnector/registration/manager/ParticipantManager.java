@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.manager;
 
+import io.opentelemetry.extension.annotations.WithSpan;
 import org.eclipse.dataspaceconnector.common.statemachine.StateMachineManager;
 import org.eclipse.dataspaceconnector.common.statemachine.StateProcessorImpl;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
@@ -24,6 +25,7 @@ import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.retry.WaitStrategy;
 import org.eclipse.dataspaceconnector.spi.system.ExecutorInstrumentation;
+import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 
 import java.util.function.Function;
 
@@ -40,11 +42,14 @@ public class ParticipantManager {
     private final ParticipantVerifier participantVerifier;
     private final StateMachineManager stateMachineManager;
     private final VerifiableCredentialService verifiableCredentialService;
+    private final Telemetry telemetry;
 
-    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, ParticipantVerifier participantVerifier, ExecutorInstrumentation executorInstrumentation, VerifiableCredentialService verifiableCredentialService) {
+    public ParticipantManager(Monitor monitor, ParticipantStore participantStore, ParticipantVerifier participantVerifier, ExecutorInstrumentation executorInstrumentation,
+                              VerifiableCredentialService verifiableCredentialService, Telemetry telemetry) {
         this.participantStore = participantStore;
         this.participantVerifier = participantVerifier;
         this.verifiableCredentialService = verifiableCredentialService;
+        this.telemetry = telemetry;
 
         // default wait five seconds
         WaitStrategy waitStrategy = () -> 5000L;
@@ -71,12 +76,14 @@ public class ParticipantManager {
         stateMachineManager.stop();
     }
 
+    @WithSpan
     private Boolean processOnboardingInitiated(Participant participant) {
         participant.transitionAuthorizing();
         participantStore.save(participant);
         return true;
     }
 
+    @WithSpan
     private Boolean processAuthorizing(Participant participant) {
         var credentialsValid = participantVerifier.isOnboardingAllowed(participant.getDid());
         if (credentialsValid.failed()) {
@@ -90,6 +97,7 @@ public class ParticipantManager {
         return true;
     }
 
+    @WithSpan
     private Boolean processAuthorized(Participant participant) {
         var result = verifiableCredentialService.pushVerifiableCredential(participant);
         if (result.succeeded()) {
@@ -103,6 +111,7 @@ public class ParticipantManager {
     }
 
     private StateProcessorImpl<Participant> processParticipantsInState(ParticipantStatus status, Function<Participant, Boolean> function) {
-        return new StateProcessorImpl<>(() -> participantStore.listParticipantsWithStatus(status), function);
+        var functionWithTraceContext = telemetry.contextPropagationMiddleware(function);
+        return new StateProcessorImpl<>(() -> participantStore.listParticipantsWithStatus(status), functionWithTraceContext);
     }
 }

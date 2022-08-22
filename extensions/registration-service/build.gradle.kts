@@ -12,6 +12,7 @@ val jupiterVersion: String by project
 val assertj: String by project
 val mockitoVersion: String by project
 val faker: String by project
+val openTelemetryVersion: String by project
 
 dependencies {
     implementation("${edcGroup}:http:${edcVersion}")
@@ -19,6 +20,7 @@ dependencies {
     implementation("${edcGroup}:identity-did-crypto:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub-client:${identityHubVersion}")
     implementation("${edcGroup}:api-core:${edcVersion}")
+    implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
     implementation(project(":extensions:participant-store-spi"))
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
