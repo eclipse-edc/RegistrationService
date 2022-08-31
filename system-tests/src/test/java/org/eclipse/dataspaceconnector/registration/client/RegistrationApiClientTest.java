@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
@@ -76,13 +77,14 @@ public class RegistrationApiClientTest {
     @BeforeEach
     void setUp() throws Exception {
         apiPort = getFreePort();
+        did = createDid(apiPort);
+        api = createApi(did, API_URL);
+
         httpSourceClientAndServer = startClientAndServer(apiPort);
         httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
                 .respond(response()
-                        .withBody(didDocument())
+                        .withBody(didDocument(did))
                         .withStatusCode(HttpStatusCode.OK_200.code()));
-        did = createDid(apiPort);
-        api = createApi(did, API_URL);
     }
 
     @AfterEach
@@ -91,14 +93,17 @@ public class RegistrationApiClientTest {
     }
 
     @Test
-    void listParticipants() {
+    void listParticipants() throws Exception {
         assertThat(api.listParticipants())
                 .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
-        api.addParticipant();
+        addsVerifiableCredential();
+
+        Thread.sleep(10000);
 
         assertThat(api.listParticipants())
                 .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
+
     }
 
     @Test
@@ -116,14 +121,13 @@ public class RegistrationApiClientTest {
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
 
-        var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
+        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB, did, authorityPrivateKey);
         identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
 
         api.addParticipant();
 
-        await().atMost(2, MINUTES).untilAsserted(() -> {
-            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
-        });
+        await().atMost(2, MINUTES).untilAsserted(
+                () -> assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime)));
     }
 
     private Collection<SignedJWT> getVerifiableCredentialsFromIdentityHub() {

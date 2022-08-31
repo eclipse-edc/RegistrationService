@@ -62,12 +62,12 @@ public class RegistrationApiCommandLineClientTest {
         privateKeyFile.toFile().deleteOnExit();
         Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
         apiPort = getFreePort();
+        did = createDid(apiPort);
         httpSourceClientAndServer = startClientAndServer(apiPort);
         httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
                 .respond(response()
-                        .withBody(didDocument())
+                        .withBody(didDocument(did))
                         .withStatusCode(HttpStatusCode.OK_200.code()));
-        did = createDid(apiPort);
     }
 
     @AfterEach
