@@ -28,7 +28,7 @@ paths:
       - Registry
   /registry/participants:
     get:
-      description: Gets all dataspace participants.
+      description: Gets all participants onboarded in the dataspace.
       operationId: listParticipants
       responses:
         "200":
