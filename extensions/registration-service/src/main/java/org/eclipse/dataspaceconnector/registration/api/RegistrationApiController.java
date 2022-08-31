@@ -101,7 +101,6 @@ public class RegistrationApiController {
         return service.listOnboardedParticipants();
     }
 
-    
     @Path("/participant")
     @Operation(description = "Asynchronously request to add a dataspace participant.")
     @ApiResponse(responseCode = "204", description = "No content")
