@@ -38,6 +38,8 @@ class RegistrationServiceTestUtils {
      * Did web format reference: https://w3c-ccg.github.io/did-method-web/#create-register
      */
     static final String DATASPACE_DID_WEB = createDid(8080) + ":test-dataspace-authority";
+    static final String DATASPACE_DID_WEB2 = "did:web:localhost%3A8080:test-dataspace-authority";
+
 
     /**
      * Url of IdentityHub of the participant from docker compose (served by the nginx container).
