@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.api;
+package org.eclipse.dataspaceconnector.registration.service;
 
 import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.dataspaceconnector.registration.TestUtils.createParticipantDto;
 import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 import static org.eclipse.dataspaceconnector.spi.result.Result.failure;
 import static org.eclipse.dataspaceconnector.spi.result.Result.success;
@@ -57,37 +58,35 @@ class RegistrationServiceTest {
     String did = FAKER.internet().url();
 
     @Test
-    void listParticipants_empty() {
-        when(participantStore.listParticipants()).thenReturn(List.of());
+    void listOnboardedParticipants_empty() {
+        when(participantStore.listParticipantsWithStatus(ONBOARDED)).thenReturn(List.of());
 
-        assertThat(service.listParticipants()).isEmpty();
-        verify(participantStore).listParticipants();
+        assertThat(service.listOnboardedParticipants()).isEmpty();
+        verify(participantStore).listParticipantsWithStatus(ONBOARDED);
         verifyNoInteractions(dtoTransformerRegistry);
     }
 
     @Test
-    void listParticipants() {
+    void listOnboardedParticipants() {
         var participant = participantBuilder.build();
         var participantDto = participantDtoBuilder.build();
-        when(participantStore.listParticipants()).thenReturn(List.of(participant));
+        when(participantStore.listParticipantsWithStatus(ONBOARDED)).thenReturn(List.of(participant));
         when(dtoTransformerRegistry.transform(participant, ParticipantDto.class))
                 .thenReturn(success(participantDto));
 
-        var result = service.listParticipants();
+        var result = service.listOnboardedParticipants();
 
         assertThat(result).hasSize(1);
         assertThat(result).containsExactly(participantDto);
-        verify(participantStore).listParticipants();
-        verify(dtoTransformerRegistry).transform(participant, ParticipantDto.class);
     }
 
     @Test
-    void listParticipants_verifyResultFilter() {
+    void listOnboardedParticipants_verifyResultFilter() {
         var participant1 = participantBuilder.build();
         var participant2 = createParticipant().build();
         var participantDto1 = participantDtoBuilder.build();
 
-        when(participantStore.listParticipants()).thenReturn(List.of(participant1, participant2));
+        when(participantStore.listParticipantsWithStatus(ONBOARDED)).thenReturn(List.of(participant1, participant2));
         // Transform for participant1 returns success.
         when(dtoTransformerRegistry.transform(participant1, ParticipantDto.class))
                 .thenReturn(success(participantDto1));
@@ -95,11 +94,11 @@ class RegistrationServiceTest {
         when(dtoTransformerRegistry.transform(participant2, ParticipantDto.class))
                 .thenReturn(failure("dummy-failure-from-test"));
 
-        var result = service.listParticipants();
+        var result = service.listOnboardedParticipants();
 
         assertThat(result).hasSize(1);
         assertThat(result).containsExactly(participantDto1);
-        verify(participantStore).listParticipants();
+        verify(participantStore).listParticipantsWithStatus(ONBOARDED);
         verify(dtoTransformerRegistry).transform(participant1, ParticipantDto.class);
         verify(dtoTransformerRegistry).transform(participant2, ParticipantDto.class);
     }

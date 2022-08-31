@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.registration.api;
+package org.eclipse.dataspaceconnector.registration.service;
 
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
 
 /**
@@ -68,14 +69,16 @@ public class RegistrationService {
     }
 
     /**
-     * Lists all dataspace participants.
+     * Lists all dataspace participants in state {@ref #ONBOARDED}.
      *
      * @return list of dataspace participants as DTOs.
      */
-    public List<ParticipantDto> listParticipants() {
-        monitor.info("List all participants of the dataspace.");
+    public List<ParticipantDto> listOnboardedParticipants() {
+        monitor.info("List onboarded participants of the dataspace.");
 
-        return participantStore.listParticipants().stream()
+        return participantStore
+                .listParticipantsWithStatus(ONBOARDED)
+                .stream()
                 .map(participant -> transformerRegistry.transform(participant, ParticipantDto.class))
                 .filter(Result::succeeded)
                 .map(Result::getContent)

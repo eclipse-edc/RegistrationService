@@ -24,12 +24,12 @@ import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry
 import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.dataspaceconnector.registration.api.RegistrationApiController;
-import org.eclipse.dataspaceconnector.registration.api.RegistrationService;
 import org.eclipse.dataspaceconnector.registration.auth.DidJwtAuthenticationFilter;
 import org.eclipse.dataspaceconnector.registration.authority.spi.ParticipantVerifier;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialService;
 import org.eclipse.dataspaceconnector.registration.credential.VerifiableCredentialServiceImpl;
 import org.eclipse.dataspaceconnector.registration.manager.ParticipantManager;
+import org.eclipse.dataspaceconnector.registration.service.RegistrationService;
 import org.eclipse.dataspaceconnector.registration.store.InMemoryParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.registration.transform.ParticipantToParticipantDtoTransformer;

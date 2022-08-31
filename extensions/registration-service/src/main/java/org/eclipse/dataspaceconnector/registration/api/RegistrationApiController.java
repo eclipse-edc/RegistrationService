@@ -29,6 +29,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
+import org.eclipse.dataspaceconnector.registration.service.RegistrationService;
 
 import java.util.List;
 import java.util.Objects;
@@ -83,7 +84,7 @@ public class RegistrationApiController {
 
     @Path("/participants")
     @GET
-    @Operation(description = "Gets all dataspace participants.")
+    @Operation(description = "Gets all participants onboarded in the dataspace.")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -97,7 +98,7 @@ public class RegistrationApiController {
             )
     })
     public List<ParticipantDto> listParticipants() {
-        return service.listParticipants();
+        return service.listOnboardedParticipants();
     }
 
     @Path("/participant")
