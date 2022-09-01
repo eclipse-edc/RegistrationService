@@ -37,7 +37,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,6 +68,7 @@ class RegistrationServiceTestUtils {
     static OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
     static IdentityHubClientImpl identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
     static VerifiableCredentialsJwtServiceImpl jwtService = new VerifiableCredentialsJwtServiceImpl(MAPPER, MONITOR);
+    private static String enrollmentCredentialId = "5067AB66-61A4-4F8E-ADE0-7BDF376F8DB5";
 
     private RegistrationServiceTestUtils() {
     }
@@ -110,7 +110,7 @@ class RegistrationServiceTestUtils {
         var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
         var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
         var vc = VerifiableCredential.Builder.newInstance()
-                .id(UUID.randomUUID().toString())
+                .id(enrollmentCredentialId)
                 .credentialSubject(Map.of("gaiaXMember", "true"))
                 .build();
 
