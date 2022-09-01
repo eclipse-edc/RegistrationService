@@ -88,13 +88,6 @@ class RegistrationApiClientTest {
     void addsVerifiableCredential() throws Exception {
         // jwt claims issue time is set with 1 sec precision, so startTime is set to 1 second before
         var startTime = Instant.now().truncatedTo(SECONDS).minus(1, SECONDS);
-        var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
-        var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
-        var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
-        var vc = VerifiableCredential.Builder.newInstance()
-                .id(UUID.randomUUID().toString())
-                .credentialSubject(Map.of("gaiaXMember", "true"))
-                .build();
 
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
