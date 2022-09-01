@@ -44,19 +44,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegistrationServiceTestUtils {
     static final ObjectMapper MAPPER = new ObjectMapper();
     /**
-     * The DID that resolves to the sample DID Document for the Dataspace Authority in docker compose (served by the nginx container).
-     * Did web format reference: https://w3c-ccg.github.io/did-method-web/#create-register
+     * The <a href="https://w3c-ccg.github.io/did-method-web/#create-register">Web DID</a>
+     * that resolves to the sample DID Document for the Dataspace Authority from the test runtime.
      */
-    static final String DATASPACE_DID_WEB = createDid(8080) + ":test-dataspace-authority";
-    static final String DATASPACE_DID_WEB2 = "did:web:localhost%3A8080:test-dataspace-authority";
+    static final String DATASPACE_DID_WEB_LOCAL = "did:web:localhost%3A8080:test-dataspace-authority";
+
     /**
-     * URL of IdentityHub of the participant from test runtime.
+     * The Web DID that resolves to the sample DID Document for the Dataspace Authority in docker compose (served by the nginx container).
      */
-    static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
+    static final String DATASPACE_DID_WEB_DOCKER = createDid(8080) + ":test-dataspace-authority";
+
+    /**
+     * URL of IdentityHub of the participant from the test runtime.
+     */
+    static final String HUB_BASE_URL_LOCAL = "http://localhost:8181/api/identity-hub";
+
     /**
      * URL of IdentityHub of the participant from docker compose (served by the nginx container).
      */
-    static final String IDENTITY_HUB_URL = "http://participant:8181/api/identity-hub";
+    static final String HUB_BASE_URL_DOCKER = "http://participant:8181/api/identity-hub";
 
     static final Monitor MONITOR = new ConsoleMonitor();
 
@@ -97,7 +103,7 @@ class RegistrationServiceTestUtils {
 
     @NotNull
     private static Service identityHub() {
-        return new Service("#identity-hub", "IdentityHub", IDENTITY_HUB_URL);
+        return new Service("#identity-hub", "IdentityHub", HUB_BASE_URL_DOCKER);
     }
 
     static void addEnrollmentCredential(String did) throws Exception {
@@ -108,8 +114,8 @@ class RegistrationServiceTestUtils {
                 .credentialSubject(Map.of("gaiaXMember", "true"))
                 .build();
 
-        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB, did, authorityPrivateKey);
-        var addVcResult = identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB_DOCKER, did, authorityPrivateKey);
+        var addVcResult = identityHubClient.addVerifiableCredential(HUB_BASE_URL_LOCAL, jwt);
         assertThat(addVcResult.succeeded()).isTrue();
     }
 }
