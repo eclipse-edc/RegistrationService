@@ -92,6 +92,7 @@ public class ParticipantManager {
         var credentialsValid = participantVerifier.isOnboardingAllowed(participant.getDid());
         if (credentialsValid.failed()) {
             monitor.info("Process 21 : " + participant.getDid());
+            monitor.info("Process 21b : " + credentialsValid.getFailureDetail());
             participant.transitionFailed();
         } else if (credentialsValid.getContent()) {
             monitor.info("Process 22 : " + participant.getDid());
