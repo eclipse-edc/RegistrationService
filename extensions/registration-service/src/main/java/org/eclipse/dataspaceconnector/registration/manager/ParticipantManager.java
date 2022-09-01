@@ -38,6 +38,7 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
  */
 public class ParticipantManager {
 
+    private final Monitor monitor;
     private final ParticipantStore participantStore;
     private final ParticipantVerifier participantVerifier;
     private final StateMachineManager stateMachineManager;
@@ -46,6 +47,7 @@ public class ParticipantManager {
 
     public ParticipantManager(Monitor monitor, ParticipantStore participantStore, ParticipantVerifier participantVerifier, ExecutorInstrumentation executorInstrumentation,
                               VerifiableCredentialService verifiableCredentialService, Telemetry telemetry) {
+        this.monitor = monitor;
         this.participantStore = participantStore;
         this.participantVerifier = participantVerifier;
         this.verifiableCredentialService = verifiableCredentialService;
@@ -78,6 +80,7 @@ public class ParticipantManager {
 
     @WithSpan
     private Boolean processOnboardingInitiated(Participant participant) {
+        monitor.info("Process 1 : " + participant.getDid());
         participant.transitionAuthorizing();
         participantStore.save(participant);
         return true;
@@ -85,12 +88,16 @@ public class ParticipantManager {
 
     @WithSpan
     private Boolean processAuthorizing(Participant participant) {
+        monitor.info("Process 2 : " + participant.getDid());
         var credentialsValid = participantVerifier.isOnboardingAllowed(participant.getDid());
         if (credentialsValid.failed()) {
+            monitor.info("Process 21 : " + participant.getDid());
             participant.transitionFailed();
         } else if (credentialsValid.getContent()) {
+            monitor.info("Process 22 : " + participant.getDid());
             participant.transitionAuthorized();
         } else {
+            monitor.info("Process 23 : " + participant.getDid());
             participant.transitionDenied();
         }
         participantStore.save(participant);
@@ -99,10 +106,13 @@ public class ParticipantManager {
 
     @WithSpan
     private Boolean processAuthorized(Participant participant) {
+        monitor.info("Process 3 : " + participant.getDid());
         var result = verifiableCredentialService.pushVerifiableCredential(participant);
         if (result.succeeded()) {
+            monitor.info("Process 31 : " + participant.getDid());
             participant.transitionOnboarded();
         } else {
+            monitor.info("Process 32 : " + participant.getDid());
             participant.transitionFailed();
         }
 

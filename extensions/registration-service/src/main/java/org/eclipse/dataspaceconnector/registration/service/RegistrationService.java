@@ -91,7 +91,7 @@ public class RegistrationService {
      * @param did the DID of the dataspace participant to add.
      */
     public void addParticipant(String did) {
-        monitor.info("Adding a participant in the dataspace.");
+        monitor.info("Adding a participant in the dataspace: " + did);
 
         var participant = Participant.Builder.newInstance()
                 .did(did)
