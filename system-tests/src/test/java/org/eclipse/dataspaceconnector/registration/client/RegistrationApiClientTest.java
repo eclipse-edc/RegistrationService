@@ -14,31 +14,17 @@
 
 package org.eclipse.dataspaceconnector.registration.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
-import okhttp3.OkHttpClient;
-import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
-import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
-import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
-import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
-import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
-import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpStatusCode;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -46,33 +32,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.HUB_BASE_URL;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.addEnrollmentCredential;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.identityHubClient;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
-public class RegistrationApiClientTest {
+class RegistrationApiClientTest {
     static final String API_URL = "http://localhost:8182/authority";
-    static final Monitor MONITOR = new ConsoleMonitor();
-    public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
-
-    static IdentityHubClientImpl identityHubClient;
 
     ClientAndServer httpSourceClientAndServer;
     int apiPort;
     String did;
     RegistryApi api;
-
-    @BeforeAll
-    static void setUpClass() {
-        var okHttpClient = new OkHttpClient.Builder().build();
-        identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
-    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -99,7 +77,7 @@ public class RegistrationApiClientTest {
 
         addsVerifiableCredential();
 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
 
         assertThat(api.listParticipants())
                 .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
@@ -121,8 +99,7 @@ public class RegistrationApiClientTest {
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
 
-        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB, did, authorityPrivateKey);
-        identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+        addEnrollmentCredential(did);
 
         api.addParticipant();
 
