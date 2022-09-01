@@ -37,7 +37,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB2;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB_LOCAL;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.addEnrollmentCredential;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
@@ -107,7 +107,7 @@ class RegistrationApiCommandLineClientTest {
 
         var statusCmdExitCode = cmd.execute(
                 "-c", did,
-                "-d", DATASPACE_DID_WEB2,
+                "-d", DATASPACE_DID_WEB_LOCAL,
                 "-k", privateKeyFile.toString(),
                 "--http-scheme",
                 "participants", "get");
@@ -134,7 +134,7 @@ class RegistrationApiCommandLineClientTest {
 
         return List.of(
                 "-c", didWeb,
-                "-d", DATASPACE_DID_WEB2,
+                "-d", DATASPACE_DID_WEB_LOCAL,
                 "-k", privateKeyFile.toString(),
                 "--http-scheme",
                 "participants"

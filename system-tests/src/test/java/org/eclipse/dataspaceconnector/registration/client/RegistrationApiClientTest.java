@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.HUB_BASE_URL;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.HUB_BASE_URL_LOCAL;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.addEnrollmentCredential;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
@@ -77,8 +77,6 @@ class RegistrationApiClientTest {
 
         addsVerifiableCredential();
 
-        Thread.sleep(20000);
-
         await().atMost(2, MINUTES).untilAsserted(
                 () -> assertThat(api.listParticipants()).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did)));
     }
@@ -100,7 +98,7 @@ class RegistrationApiClientTest {
     }
 
     private Collection<SignedJWT> getVerifiableCredentialsFromIdentityHub() {
-        var result = identityHubClient.getVerifiableCredentials(HUB_BASE_URL);
+        var result = identityHubClient.getVerifiableCredentials(HUB_BASE_URL_LOCAL);
         assertThat(result.succeeded()).isTrue();
         return result.getContent();
     }
