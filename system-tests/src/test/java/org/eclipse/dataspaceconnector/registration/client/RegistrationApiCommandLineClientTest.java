@@ -17,12 +17,6 @@ package org.eclipse.dataspaceconnector.registration.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.OkHttpClient;
-import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
-import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
-import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
-import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
-import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli;
 import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
 import org.junit.jupiter.api.AfterEach;
@@ -32,22 +26,17 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpStatusCode;
 import picocli.CommandLine;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationApiClientTest.HUB_BASE_URL;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationApiClientTest.MONITOR;
-import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.DATASPACE_DID_WEB2;
+import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.addEnrollmentCredential;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.dataspaceconnector.registration.client.RegistrationServiceTestUtils.didDocument;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -56,18 +45,14 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
-public class RegistrationApiCommandLineClientTest {
+class RegistrationApiCommandLineClientTest {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
     static Path privateKeyFile;
 
     int apiPort;
     String did;
-    /*
-    host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
-     */
     ClientAndServer httpSourceClientAndServer;
-    private IdentityHubClientImpl identityHubClient;
 
     @BeforeEach
     void setUpClass() throws Exception {
@@ -81,8 +66,6 @@ public class RegistrationApiCommandLineClientTest {
                 .respond(response()
                         .withBody(didDocument(did))
                         .withStatusCode(HttpStatusCode.OK_200.code()));
-        var okHttpClient = new OkHttpClient.Builder().build();
-        identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
     }
 
     @AfterEach
@@ -95,20 +78,11 @@ public class RegistrationApiCommandLineClientTest {
 
         assertThat(listParticipantCmd(did)).noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
-        var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
-        var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
-        var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
-        var vc = VerifiableCredential.Builder.newInstance()
-                .id(UUID.randomUUID().toString())
-                .credentialSubject(Map.of("gaiaXMember", "true"))
-                .build();
-
-        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB, did, authorityPrivateKey);
-        identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+        addEnrollmentCredential(did);
 
         addParticipantCmd(did);
 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
 
         assertThat(listParticipantCmd(did)).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
