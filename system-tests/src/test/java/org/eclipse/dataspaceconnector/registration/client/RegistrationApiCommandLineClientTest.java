@@ -88,7 +88,7 @@ class RegistrationApiCommandLineClientTest {
                 () -> assertThat(listParticipantCmd(did)).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did)));
     }
 
-    @Test
+    //@Test
     void getParticipant() throws Exception {
 
         addParticipantCmd(did);
@@ -99,7 +99,7 @@ class RegistrationApiCommandLineClientTest {
         assertThat(result.getStatus()).isNotNull();
     }
 
-    @Test
+    //@Test
     void getParticipant_notFound() {
         CommandLine cmd = RegistrationServiceCli.getCommandLine();
         var writer = new StringWriter();
