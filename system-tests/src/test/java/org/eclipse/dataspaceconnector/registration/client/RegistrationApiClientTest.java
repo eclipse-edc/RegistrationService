@@ -79,9 +79,8 @@ class RegistrationApiClientTest {
 
         Thread.sleep(20000);
 
-        assertThat(api.listParticipants())
-                .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
-
+        await().atMost(2, MINUTES).untilAsserted(
+                () -> assertThat(api.listParticipants()).anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did)));
     }
 
     @Test
