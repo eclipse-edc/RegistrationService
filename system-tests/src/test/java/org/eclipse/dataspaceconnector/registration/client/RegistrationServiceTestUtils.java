@@ -16,35 +16,56 @@ package org.eclipse.dataspaceconnector.registration.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.ECKey;
+import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidConstants;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.EllipticCurvePublicKey;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.Service;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.VerificationMethod;
+import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
+import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
+import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
+import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
 import org.eclipse.dataspaceconnector.registration.cli.ClientUtils;
+import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
+import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
+import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RegistrationServiceTestUtils {
-    private RegistrationServiceTestUtils() {
-    }
-
-    public static final ObjectMapper MAPPER = new ObjectMapper();
-
+    static final ObjectMapper MAPPER = new ObjectMapper();
     /**
      * The DID that resolves to the sample DID Document for the Dataspace Authority in docker compose (served by the nginx container).
      * Did web format reference: https://w3c-ccg.github.io/did-method-web/#create-register
      */
     static final String DATASPACE_DID_WEB = createDid(8080) + ":test-dataspace-authority";
     static final String DATASPACE_DID_WEB2 = "did:web:localhost%3A8080:test-dataspace-authority";
-
-
     /**
-     * Url of IdentityHub of the participant from docker compose (served by the nginx container).
+     * URL of IdentityHub of the participant from test runtime.
+     */
+    static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
+    /**
+     * URL of IdentityHub of the participant from docker compose (served by the nginx container).
      */
     static final String IDENTITY_HUB_URL = "http://participant:8181/api/identity-hub";
+
+    static final Monitor MONITOR = new ConsoleMonitor();
+
+    static OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+    static IdentityHubClientImpl identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
+    static VerifiableCredentialsJwtServiceImpl jwtService = new VerifiableCredentialsJwtServiceImpl(MAPPER, MONITOR);
+
+    private RegistrationServiceTestUtils() {
+    }
 
     static String didDocument(String did) throws Exception {
         var publicKey = (ECKey) ECKey.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256);
@@ -64,6 +85,7 @@ class RegistrationServiceTestUtils {
 
     @NotNull
     static String createDid(int apiPort) {
+        // host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
         return "did:web:host.docker.internal%3A" + apiPort;
     }
 
@@ -76,5 +98,18 @@ class RegistrationServiceTestUtils {
     @NotNull
     private static Service identityHub() {
         return new Service("#identity-hub", "IdentityHub", IDENTITY_HUB_URL);
+    }
+
+    static void addEnrollmentCredential(String did) throws Exception {
+        var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
+        var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
+        var vc = VerifiableCredential.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
+                .credentialSubject(Map.of("gaiaXMember", "true"))
+                .build();
+
+        var jwt = jwtService.buildSignedJwt(vc, DATASPACE_DID_WEB, did, authorityPrivateKey);
+        var addVcResult = identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+        assertThat(addVcResult.succeeded()).isTrue();
     }
 }
