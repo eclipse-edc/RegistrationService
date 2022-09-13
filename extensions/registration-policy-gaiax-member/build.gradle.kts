@@ -22,3 +22,11 @@ dependencies {
     testImplementation("com.github.javafaker:javafaker:${faker}")
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("registration-policy-gaiax-member") {
+            artifactId = "registration-policy-gaiax-member"
+            from(components["java"])
+        }
+    }
+}

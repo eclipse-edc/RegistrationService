@@ -12,3 +12,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("participant-store-spi") {
+            artifactId = "participant-store-spi"
+            from(components["java"])
+        }
+    }
+}

@@ -25,3 +25,11 @@ dependencies {
     testImplementation("com.github.javafaker:javafaker:${faker}")
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("participant-verifier") {
+            artifactId = "participant-verifier"
+            from(components["java"])
+        }
+    }
+}
