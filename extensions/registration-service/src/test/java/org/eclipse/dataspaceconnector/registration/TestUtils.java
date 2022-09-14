@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration;
 
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
@@ -26,12 +25,11 @@ import static java.lang.String.format;
 
 public class TestUtils {
 
-    static final Faker FAKER = new Faker();
 
     public static ParticipantDto.Builder createParticipantDto() {
         return ParticipantDto.Builder.newInstance()
-                .did(format("did:web:%s", FAKER.internet().domainName()))
-                .status(FAKER.options().option(ParticipantStatusDto.class));
+                .did(format("did:web:%s", "test-domain"))
+                .status(ParticipantStatusDto.ONBOARDED);
     }
 
     public static ParticipantDto getParticipantDtoFromParticipant(Participant participant) {

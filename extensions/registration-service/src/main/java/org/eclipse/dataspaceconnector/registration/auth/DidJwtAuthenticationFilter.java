@@ -19,7 +19,7 @@ import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.MultivaluedMap;
-import org.eclipse.dataspaceconnector.iam.did.crypto.credentials.VerifiableCredentialFactory;
+import org.eclipse.dataspaceconnector.iam.did.crypto.JwtUtils;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
 import org.eclipse.dataspaceconnector.spi.exception.AuthenticationFailedException;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
@@ -102,10 +102,11 @@ public class DidJwtAuthenticationFilter implements ContainerRequestFilter {
             throw authenticationFailure("Failed obtaining public key for DID: " + issuer, publicKey.getFailureMessages());
         }
 
-        var verificationResult = VerifiableCredentialFactory.verify(jwt, publicKey.getContent(), audience);
+        var verificationResult = JwtUtils.verify(jwt, publicKey.getContent(), audience);
         if (verificationResult.failed()) {
             throw authenticationFailure("Invalid JWT (verification error)", verificationResult.getFailureMessages());
         }
+
     }
 
     @NotNull

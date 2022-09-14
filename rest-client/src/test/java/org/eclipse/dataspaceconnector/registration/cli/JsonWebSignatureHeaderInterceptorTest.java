@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import com.github.javafaker.Faker;
 import com.nimbusds.jose.jwk.JWK;
 import org.eclipse.dataspaceconnector.iam.did.crypto.key.EcPublicKeyWrapper;
 import org.eclipse.dataspaceconnector.registration.client.JsonWebSignatureHeaderInterceptor;
@@ -31,14 +30,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonWebSignatureHeaderInterceptorTest {
 
-    static final Faker FAKER = new Faker();
     static final String AUTHORIZATION = "Authorization";
     static final String BEARER = "Bearer";
 
-    String token = FAKER.lorem().sentence();
-    String targetUrl = FAKER.internet().url();
+    String token = "test-token";
+    String targetUrl = "some.test/url";
     JsonWebSignatureHeaderInterceptor interceptor;
     EcPublicKeyWrapper publicKey;
+
+    static String randomUrl() {
+        return "https://" + "some.test/url";
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -61,9 +63,5 @@ class JsonWebSignatureHeaderInterceptorTest {
         var authHeaderParts = authorizationHeader.split(" ", 2);
         assertThat(authHeaderParts[0]).isEqualTo(BEARER);
         assertThat(authHeaderParts[1]).isEqualTo(token);
-    }
-
-    static String randomUrl() {
-        return "https://" + FAKER.internet().url();
     }
 }

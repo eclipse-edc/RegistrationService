@@ -9,7 +9,6 @@ val jacksonVersion: String by project
 val jupiterVersion: String by project
 val assertj: String by project
 val mockitoVersion: String by project
-val faker: String by project
 val edcGroup: String by project
 val edcVersion: String by project
 val okHttpVersion: String by project
@@ -27,7 +26,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation("com.github.javafaker:javafaker:${faker}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")

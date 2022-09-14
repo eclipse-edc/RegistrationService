@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.api;
 
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.api.transformer.DtoTransformerRegistry;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.model.ParticipantDto;
@@ -43,7 +42,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class RegistrationServiceTest {
-    static final Faker FAKER = new Faker();
 
     Monitor monitor = mock(Monitor.class);
     ParticipantStore participantStore = mock(ParticipantStore.class);
@@ -54,7 +52,7 @@ class RegistrationServiceTest {
 
     Participant.Builder participantBuilder = createParticipant();
     ParticipantDto.Builder participantDtoBuilder = createParticipantDto();
-    String did = FAKER.internet().url();
+    String did = "some.test/url";
 
     @Test
     void listParticipants_empty() {
@@ -168,7 +166,7 @@ class RegistrationServiceTest {
 
     @NotNull
     private Map<String, String> getTraceContext() {
-        return Map.of(FAKER.lorem().word(), FAKER.lorem().word(), FAKER.lorem().word(), FAKER.lorem().word());
+        return Map.of("key1", "value1", "key2", "value2");
     }
 
 }

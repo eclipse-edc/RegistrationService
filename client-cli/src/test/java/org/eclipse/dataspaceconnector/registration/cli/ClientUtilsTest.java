@@ -15,10 +15,9 @@
 package org.eclipse.dataspaceconnector.registration.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.SignedJWT;
-import org.eclipse.dataspaceconnector.iam.did.crypto.credentials.VerifiableCredentialFactory;
+import org.eclipse.dataspaceconnector.iam.did.crypto.JwtUtils;
 import org.eclipse.dataspaceconnector.iam.did.crypto.key.EcPublicKeyWrapper;
 import org.eclipse.dataspaceconnector.registration.client.TestKeyData;
 import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
@@ -36,15 +35,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class ClientUtilsTest {
-    static final Faker FAKER = new Faker();
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final String AUTHORIZATION = "Authorization";
     static final String BEARER = "Bearer";
 
+    static String randomUrl() {
+        return "https://" + "some.test/url";
+    }
+
     @Test
     void createApiClient() throws Exception {
-        var apiUrl = FAKER.internet().url();
-        var issuer = FAKER.internet().url();
+        var apiUrl = "some.test/url";
+        var issuer = "some.test/url";
         var privateKeyData = TestKeyData.PRIVATE_KEY_P256;
         var publicKey = new EcPublicKeyWrapper(JWK.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256).toECKey());
 
@@ -63,7 +65,7 @@ class ClientUtilsTest {
         var authHeaderParts = authorizationHeader.split(" ", 2);
         assertThat(authHeaderParts[0]).isEqualTo(BEARER);
         var jwt = SignedJWT.parse(authHeaderParts[1]);
-        var verificationResult = VerifiableCredentialFactory.verify(jwt, publicKey, apiUrl);
+        var verificationResult = JwtUtils.verify(jwt, publicKey, apiUrl);
         assertThat(verificationResult.succeeded()).isTrue();
         assertThat(jwt.getJWTClaimsSet().getIssuer()).isEqualTo(issuer);
     }
@@ -82,9 +84,5 @@ class ClientUtilsTest {
         assertThat(result)
                 .usingRecursiveComparison()
                 .isEqualTo(participant);
-    }
-
-    static String randomUrl() {
-        return "https://" + FAKER.internet().url();
     }
 }

@@ -14,7 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import org.eclipse.dataspaceconnector.iam.did.crypto.credentials.VerifiableCredentialFactory;
+import org.eclipse.dataspaceconnector.iam.did.crypto.JwtUtils;
 import org.eclipse.dataspaceconnector.registration.client.ApiClient;
 import org.eclipse.dataspaceconnector.registration.client.ApiClientFactory;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
@@ -46,8 +46,9 @@ public class ClientUtils {
         var privateKey = CryptoUtils.parseFromPemEncodedObjects(privateKeyData);
 
         return ApiClientFactory.createApiClient(apiUrl, parameters -> {
-            var token = VerifiableCredentialFactory.create(
+            var token = JwtUtils.create(
                     privateKey,
+                    issuer,
                     issuer,
                     Objects.requireNonNull(parameters.getAudience(), "audience"),
                     Clock.systemUTC()).serialize();

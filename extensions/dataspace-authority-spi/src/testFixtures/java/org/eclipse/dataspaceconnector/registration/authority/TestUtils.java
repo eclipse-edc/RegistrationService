@@ -14,19 +14,17 @@
 
 package org.eclipse.dataspaceconnector.registration.authority;
 
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 
 public class TestUtils {
-    static final Faker FAKER = new Faker();
 
     private TestUtils() {
     }
 
     public static Participant.Builder createParticipant() {
         return Participant.Builder.newInstance()
-                .did(FAKER.internet().url())
-                .status(FAKER.options().option(ParticipantStatus.class));
+                .did("some.test/url")
+                .status(ParticipantStatus.AUTHORIZED);
     }
 }

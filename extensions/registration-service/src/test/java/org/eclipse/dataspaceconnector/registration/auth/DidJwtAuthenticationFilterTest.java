@@ -14,12 +14,11 @@
 
 package org.eclipse.dataspaceconnector.registration.auth;
 
-import com.github.javafaker.Faker;
 import com.nimbusds.jose.jwk.JWK;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import org.assertj.core.api.ThrowableAssertAlternative;
-import org.eclipse.dataspaceconnector.iam.did.crypto.credentials.VerifiableCredentialFactory;
+import org.eclipse.dataspaceconnector.iam.did.crypto.JwtUtils;
 import org.eclipse.dataspaceconnector.iam.did.crypto.key.EcPrivateKeyWrapper;
 import org.eclipse.dataspaceconnector.iam.did.crypto.key.EcPublicKeyWrapper;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
@@ -41,13 +40,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class DidJwtAuthenticationFilterTest {
-    static final Faker FAKER = new Faker();
     static final String AUTHORIZATION = "Authorization";
 
     Monitor monitor = mock(Monitor.class);
     DidPublicKeyResolver didPublicKeyResolver = mock(DidPublicKeyResolver.class);
-    String audience = FAKER.lorem().sentence();
-    String issuer = FAKER.internet().url();
+    String audience = "test-audience";
+    String issuer = "some.test/url";
     DidJwtAuthenticationFilter filter = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
 
     ContainerRequestContext request = mock(ContainerRequestContext.class);
@@ -65,14 +63,6 @@ class DidJwtAuthenticationFilterTest {
                 .thenReturn(Result.success(publicKey));
 
         authHeader = "Bearer " + getTokenFor(audience);
-    }
-
-    private String getTokenFor(String targetAudience) {
-        return VerifiableCredentialFactory.create(
-                privateKey,
-                issuer,
-                targetAudience,
-                Clock.systemUTC()).serialize();
     }
 
     @Test
@@ -113,15 +103,24 @@ class DidJwtAuthenticationFilterTest {
     void filter_onUnresolvedDid_fails() {
         headers.putSingle(AUTHORIZATION, authHeader);
         when(didPublicKeyResolver.resolvePublicKey(issuer))
-                .thenReturn(Result.failure(FAKER.lorem().sentence()));
+                .thenReturn(Result.failure("Test Failure"));
 
         assertNotAuthenticated("Failed obtaining public key for DID: " + issuer);
     }
 
     @Test
     void filter_onJwtVerificationFailure_fails() {
-        headers.putSingle(AUTHORIZATION, "Bearer " + getTokenFor("other audience " + FAKER.lorem().word()));
+        headers.putSingle(AUTHORIZATION, "Bearer " + getTokenFor("other audience test-other-audience"));
         assertNotAuthenticated("Invalid JWT (verification error). Claim verification failed.");
+    }
+
+    private String getTokenFor(String targetAudience) {
+        return JwtUtils.create(
+                privateKey,
+                issuer,
+                issuer,
+                targetAudience,
+                Clock.systemUTC()).serialize();
     }
 
     private ThrowableAssertAlternative<AuthenticationFailedException> assertNotAuthenticated(String message) {

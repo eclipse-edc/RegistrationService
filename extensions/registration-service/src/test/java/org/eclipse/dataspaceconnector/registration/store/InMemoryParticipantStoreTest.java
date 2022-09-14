@@ -51,7 +51,9 @@ class InMemoryParticipantStoreTest {
     void saveAndListParticipants_twoEntries() {
         store.save(participant1);
         store.save(participant2);
-        assertThat(store.listParticipants()).containsOnly(participant1, participant2);
+        assertThat(store.listParticipants())
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsOnly(participant1, participant2);
     }
 
     @Test
@@ -62,7 +64,9 @@ class InMemoryParticipantStoreTest {
         store.save(participant01);
         store.save(participant02);
         store.save(participant03);
-        assertThat(store.listParticipantsWithStatus(AUTHORIZED)).containsOnly(participant01, participant03);
+        assertThat(store.listParticipantsWithStatus(AUTHORIZED))
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsOnly(participant01, participant03);
     }
 
     @Test

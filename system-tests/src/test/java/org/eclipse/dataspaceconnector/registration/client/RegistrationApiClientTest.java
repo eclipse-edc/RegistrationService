@@ -56,9 +56,9 @@ import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
 public class RegistrationApiClientTest {
+    public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
     static final String API_URL = "http://localhost:8182/authority";
     static final Monitor MONITOR = new ConsoleMonitor();
-    public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
 
     static IdentityHubClientImpl identityHubClient;
 
@@ -126,12 +126,6 @@ public class RegistrationApiClientTest {
         });
     }
 
-    private Collection<SignedJWT> getVerifiableCredentialsFromIdentityHub() {
-        var result = identityHubClient.getVerifiableCredentials(HUB_BASE_URL);
-        assertThat(result.succeeded()).isTrue();
-        return result.getContent();
-    }
-
     @Test
     void getParticipant() {
         api.addParticipant();
@@ -149,6 +143,12 @@ public class RegistrationApiClientTest {
                 .isInstanceOf(ApiException.class)
                 .extracting("code")
                 .isEqualTo(404);
+    }
+
+    private Collection<SignedJWT> getVerifiableCredentialsFromIdentityHub() {
+        var result = identityHubClient.getVerifiableCredentials(HUB_BASE_URL);
+        assertThat(result.succeeded()).isTrue();
+        return result.getContent();
     }
 
     private void assertIssuedVerifiableCredential(SignedJWT jwt, String clientDid, Instant startTime) throws ParseException {
