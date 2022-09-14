@@ -35,3 +35,12 @@ dependencies {
     testImplementation(testFixtures(project(":rest-client")))
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("registration-service") {
+            artifactId = "registration-service"
+            from(components["java"])
+        }
+    }
+}
+

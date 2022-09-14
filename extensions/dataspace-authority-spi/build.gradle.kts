@@ -24,3 +24,11 @@ dependencies {
     testFixturesImplementation("com.github.javafaker:javafaker:${faker}")
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("dataspace-authority-spi") {
+            artifactId = "dataspace-authority-spi"
+            from(components["java"])
+        }
+    }
+}
