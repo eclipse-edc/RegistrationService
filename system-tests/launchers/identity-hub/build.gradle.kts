@@ -24,7 +24,8 @@ val identityHubVersion: String by project
 val identityHubGroup: String by project
 
 dependencies {
-    implementation("${edcGroup}:core:${edcVersion}")
+    implementation("${edcGroup}:core-base:${edcVersion}")
+    runtimeOnly("${edcGroup}:core-boot:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub:${identityHubVersion}")
 }
 

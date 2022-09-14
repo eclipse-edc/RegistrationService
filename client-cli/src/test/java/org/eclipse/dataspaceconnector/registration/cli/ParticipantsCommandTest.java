@@ -17,7 +17,6 @@ package org.eclipse.dataspaceconnector.registration.cli;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.registration.client.TestKeyData;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.registration.client.models.ParticipantDto;
@@ -40,15 +39,14 @@ import static org.mockito.Mockito.when;
 
 class ParticipantsCommandTest {
 
-    static final Faker FAKER = new Faker();
     static final ObjectMapper MAPPER = new ObjectMapper();
     static Path privateKeyFile;
 
     ParticipantDto participant1 = createParticipantDto();
     ParticipantDto participant2 = createParticipantDto();
-    String serverUrl = FAKER.internet().url();
-    String clientDid = FAKER.internet().url();
-    String dataspaceDid = "did:web:" + FAKER.internet().domainName();
+    String serverUrl = "some.test/url";
+    String clientDid = "some.test/url";
+    String dataspaceDid = "did:web:" + "test-domain";
 
     RegistrationServiceCli app = new RegistrationServiceCli();
     CommandLine cmd = new CommandLine(app);

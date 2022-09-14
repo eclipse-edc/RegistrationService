@@ -11,7 +11,6 @@ val okHttpVersion: String by project
 val jupiterVersion: String by project
 val assertj: String by project
 val mockitoVersion: String by project
-val faker: String by project
 val openTelemetryVersion: String by project
 
 dependencies {
@@ -30,7 +29,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation("com.github.javafaker:javafaker:${faker}")
     testImplementation(testFixtures(project(":extensions:dataspace-authority-spi")))
     testImplementation(testFixtures(project(":rest-client")))
 }

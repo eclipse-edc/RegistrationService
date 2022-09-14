@@ -63,7 +63,6 @@ val edcGroup: String by project
 val jacksonVersion: String by project
 val jupiterVersion: String by project
 val assertj: String by project
-val faker: String by project
 
 
 dependencies {
@@ -71,7 +70,6 @@ dependencies {
     api("${edcGroup}:common-util:${edcVersion}")
 
     testImplementation("org.assertj:assertj-core:${assertj}")
-    testImplementation("com.github.javafaker:javafaker:${faker}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
 

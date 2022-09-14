@@ -61,8 +61,6 @@ public class AuthorityExtension implements ServiceExtension {
 
     @EdcSetting
     private static final String JWT_AUDIENCE_SETTING = "jwt.audience";
-    @EdcSetting
-    public static final String ERROR_RESPONSE_VERBOSE_SETTING = "edc.error.response.verbose";
 
     @Inject
     private DidPublicKeyResolver didPublicKeyResolver;
@@ -103,7 +101,6 @@ public class AuthorityExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         var audience = Objects.requireNonNull(context.getSetting(JWT_AUDIENCE_SETTING, null),
                 () -> format("Missing setting %s", JWT_AUDIENCE_SETTING));
-        var errorResponseVerbose = context.getSetting(ERROR_RESPONSE_VERBOSE_SETTING, false);
         var authenticationService = new DidJwtAuthenticationFilter(monitor, didPublicKeyResolver, audience);
         var verifiableCredentialService = verifiableCredentialService(context);
 
@@ -114,7 +111,7 @@ public class AuthorityExtension implements ServiceExtension {
         webService.registerResource(CONTEXT_ALIAS, new RegistrationApiController(registrationService));
 
         webService.registerResource(CONTEXT_ALIAS, authenticationService);
-        webService.registerResource(CONTEXT_ALIAS, new EdcApiExceptionMapper(errorResponseVerbose));
+        webService.registerResource(CONTEXT_ALIAS, new EdcApiExceptionMapper());
     }
 
     @Override

@@ -8,7 +8,6 @@ val edcGroup: String by project
 val jupiterVersion: String by project
 val assertj: String by project
 val mockitoVersion: String by project
-val faker: String by project
 
 dependencies {
     api(project(":extensions:dataspace-authority-spi"))
@@ -19,6 +18,5 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation("${edcGroup}:junit:${edcVersion}")
-    testImplementation("com.github.javafaker:javafaker:${faker}")
 }
 

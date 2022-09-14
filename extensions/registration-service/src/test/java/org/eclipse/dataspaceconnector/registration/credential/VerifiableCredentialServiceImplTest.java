@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.credential;
 
-import com.github.javafaker.Faker;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import org.assertj.core.api.AbstractStringAssert;
@@ -51,19 +50,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class VerifiableCredentialServiceImplTest {
-    static final Faker FAKER = new Faker();
     static final String IDENTITY_HUB_TYPE = "IdentityHub";
 
     Monitor monitor = mock(Monitor.class);
     VerifiableCredentialsJwtService jwtService = mock(VerifiableCredentialsJwtService.class);
     PrivateKeyWrapper privateKeyWrapper = mock(PrivateKeyWrapper.class);
-    String dataspaceDid = FAKER.internet().url();
-    String participantDid = FAKER.internet().url();
+    String dataspaceDid = "some.test/url";
+    String participantDid = "some.test/url";
     DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
     IdentityHubClient identityHubClient = mock(IdentityHubClient.class);
     SignedJWT jwt = mock(SignedJWT.class);
-    String identityHubUrl = FAKER.internet().url();
-    String failure = FAKER.lorem().sentence();
+    String identityHubUrl = "some.test/url";
+    String failure = "Test Failure";
     VerifiableCredentialServiceImpl service = new VerifiableCredentialServiceImpl(monitor, jwtService, privateKeyWrapper, dataspaceDid, resolverRegistry, identityHubClient);
     Participant.Builder participantBuilder = createParticipant().did(participantDid);
     ArgumentCaptor<VerifiableCredential> vc = ArgumentCaptor.forClass(VerifiableCredential.class);
@@ -72,7 +70,7 @@ class VerifiableCredentialServiceImplTest {
     void beforeEach() throws Exception {
         when(resolverRegistry.resolve(participantDid))
                 .thenReturn(Result.success(DidDocument.Builder.newInstance()
-                        .service(List.of(new Service(FAKER.lorem().word(), IDENTITY_HUB_TYPE, identityHubUrl)))
+                        .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, identityHubUrl)))
                         .build()));
         when(jwtService.buildSignedJwt(any(), eq(dataspaceDid), eq(participantDid), eq(privateKeyWrapper)))
                 .thenReturn(jwt);
@@ -110,7 +108,7 @@ class VerifiableCredentialServiceImplTest {
     void pushVerifiableCredential_whenDidDocumentDoesNotContainHubUrl_throws() {
         when(resolverRegistry.resolve(participantDid))
                 .thenReturn(Result.success(DidDocument.Builder.newInstance()
-                        .service(List.of(new Service(FAKER.lorem().word(), FAKER.lorem().word(), identityHubUrl)))
+                        .service(List.of(new Service(UUID.randomUUID().toString(), "test-type", identityHubUrl)))
                         .build()));
 
         assertThatCallFailsWith(FATAL_ERROR)
@@ -129,7 +127,7 @@ class VerifiableCredentialServiceImplTest {
     @Test
     void pushVerifiableCredential_whenPushToIdentityHubFails_throws() {
         when(identityHubClient.addVerifiableCredential(identityHubUrl, jwt))
-                .thenReturn(StatusResult.failure(FAKER.options().option(ResponseStatus.class), failure));
+                .thenReturn(StatusResult.failure(FATAL_ERROR, failure));
 
         assertThatCallFailsWith(ERROR_RETRY)
                 .isEqualTo(format("Failed to send VC. %s", failure));

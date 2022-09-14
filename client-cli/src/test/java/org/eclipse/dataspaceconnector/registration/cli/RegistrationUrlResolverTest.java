@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.cli;
 
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.Service;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolver;
@@ -36,13 +35,17 @@ import static org.mockito.Mockito.when;
 class RegistrationUrlResolverTest {
 
     private static final String REGISTRATION_URL_TYPE = "RegistrationUrl";
-    private static final Faker FAKER = new Faker();
-
+    static String apiUrl = "some.test/url";
     DidResolver didResolver = mock(WebDidResolver.class);
     RegistrationUrlResolver urlResolver = new RegistrationUrlResolver(didResolver);
+    String did = "did:web:" + "test-domain";
 
-    String did = "did:web:" + FAKER.internet().domainName();
-    static String apiUrl = FAKER.internet().url();
+    private static Stream<Arguments> listsOfServices() {
+        return Stream.of(
+                Arguments.of(List.of(new Service("some-id", "some-other-type", apiUrl))),
+                Arguments.of(List.of())
+        );
+    }
 
     @Test
     void resolveUrl_success() {
@@ -80,13 +83,6 @@ class RegistrationUrlResolverTest {
 
     private DidDocument didDocument(List<Service> services) {
         return DidDocument.Builder.newInstance().service(services).build();
-    }
-
-    private static Stream<Arguments> listsOfServices() {
-        return Stream.of(
-                Arguments.of(List.of(new Service("some-id", "some-other-type", apiUrl))),
-                Arguments.of(List.of())
-        );
     }
 
 }

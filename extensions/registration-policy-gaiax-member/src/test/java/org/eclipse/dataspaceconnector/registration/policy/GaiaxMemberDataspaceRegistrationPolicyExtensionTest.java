@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.policy;
 
-import com.github.javafaker.Faker;
 import org.eclipse.dataspaceconnector.junit.extensions.EdcExtension;
 import org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy;
 import org.eclipse.dataspaceconnector.spi.agent.ParticipantAgent;
@@ -27,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,18 +36,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @ExtendWith(EdcExtension.class)
 class GaiaxMemberDataspaceRegistrationPolicyExtensionTest {
-
-    private static final Faker FAKER = new Faker();
-
-    @ParameterizedTest
-    @MethodSource("claimCases")
-    void createDataspaceRegistrationPolicy(Map<String, Object> claims, boolean expected, PolicyEngine policyEngine, DataspaceRegistrationPolicy policy) {
-        var agent = new ParticipantAgent(claims, Collections.emptyMap());
-
-        var evaluationResult = policyEngine.evaluate(PARTICIPANT_REGISTRATION_SCOPE, policy.get(), agent);
-
-        assertThat(evaluationResult.succeeded()).isEqualTo(expected);
-    }
 
     private static Stream<Arguments> claimCases() {
         return Stream.of(
@@ -68,11 +56,11 @@ class GaiaxMemberDataspaceRegistrationPolicyExtensionTest {
     }
 
     private static String rnd() {
-        return FAKER.lorem().sentence();
+        return "test message";
     }
 
     private static Map<String, Object> claims(Object... claims) {
-        return Arrays.stream(claims).collect(Collectors.toMap(e -> FAKER.internet().uuid(), e -> e));
+        return Arrays.stream(claims).collect(Collectors.toMap(e -> UUID.randomUUID().toString(), e -> e));
     }
 
     private static Map<String, Object> vc(Object vc) {
@@ -81,5 +69,15 @@ class GaiaxMemberDataspaceRegistrationPolicyExtensionTest {
 
     private static Map<String, Object> subject(Object credentialSubject) {
         return Map.of("credentialSubject", credentialSubject);
+    }
+
+    @ParameterizedTest
+    @MethodSource("claimCases")
+    void createDataspaceRegistrationPolicy(Map<String, Object> claims, boolean expected, PolicyEngine policyEngine, DataspaceRegistrationPolicy policy) {
+        var agent = new ParticipantAgent(claims, Collections.emptyMap());
+
+        var evaluationResult = policyEngine.evaluate(PARTICIPANT_REGISTRATION_SCOPE, policy.get(), agent);
+
+        assertThat(evaluationResult.succeeded()).isEqualTo(expected);
     }
 }

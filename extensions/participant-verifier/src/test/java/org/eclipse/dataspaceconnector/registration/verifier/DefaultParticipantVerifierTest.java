@@ -14,7 +14,6 @@
 
 package org.eclipse.dataspaceconnector.registration.verifier;
 
-import com.github.javafaker.Faker;
 import org.assertj.core.api.AbstractStringAssert;
 import org.eclipse.dataspaceconnector.iam.did.spi.credentials.CredentialsVerifier;
 import org.eclipse.dataspaceconnector.iam.did.spi.document.DidDocument;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,26 +44,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class DefaultParticipantVerifierTest {
-    static final Faker FAKER = new Faker();
     static final String IDENTITY_HUB_TYPE = "IdentityHub";
 
     Monitor monitor = mock(Monitor.class);
-    String participantDid = FAKER.internet().url();
+    String participantDid = "some.test/url";
     PolicyEngine policyEngine = mock(PolicyEngine.class);
     Policy policy = mock(Policy.class);
     Policy policyResult = mock(Policy.class);
     DataspaceRegistrationPolicy dataspaceRegistrationPolicy = new DataspaceRegistrationPolicy(policy);
     DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
     CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
-    String identityHubUrl = FAKER.internet().url();
-    String failure = FAKER.lorem().sentence();
-    Map<String, Object> verifiableCredentials = Map.of(FAKER.lorem().word(), FAKER.lorem().word());
     DefaultParticipantVerifier service = new DefaultParticipantVerifier(monitor, resolverRegistry, credentialsVerifier, policyEngine, dataspaceRegistrationPolicy);
+    String identityHubUrl = "some.test/url";
+    String failure = "test-failure";
+    Map<String, Object> verifiableCredentials = Map.of("key1", "value1");
 
     @BeforeEach
     void beforeEach() {
         DidDocument didDocument = DidDocument.Builder.newInstance()
-                .service(List.of(new Service(FAKER.lorem().word(), IDENTITY_HUB_TYPE, identityHubUrl)))
+                .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, identityHubUrl)))
                 .build();
         when(resolverRegistry.resolve(participantDid))
                 .thenReturn(Result.success(didDocument));
