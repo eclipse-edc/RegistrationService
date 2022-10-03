@@ -16,7 +16,8 @@ package org.eclipse.dataspaceconnector.registration;
 
 
 import org.eclipse.dataspaceconnector.policy.model.Policy;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyScope;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyScope;
+
 
 /**
  * This is a wrapper for a {@link Policy}. Every Dataspace must have a policy for onboarding participants into the

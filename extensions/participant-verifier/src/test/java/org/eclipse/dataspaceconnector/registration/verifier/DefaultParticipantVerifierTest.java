@@ -22,7 +22,7 @@ import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidResolverRegistry
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyEngine;
 import org.eclipse.dataspaceconnector.spi.response.ResponseStatus;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
@@ -44,30 +44,31 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class DefaultParticipantVerifierTest {
-    static final String IDENTITY_HUB_TYPE = "IdentityHub";
-
-    Monitor monitor = mock(Monitor.class);
-    String participantDid = "some.test/url";
-    PolicyEngine policyEngine = mock(PolicyEngine.class);
-    Policy policy = mock(Policy.class);
-    Policy policyResult = mock(Policy.class);
-    DataspaceRegistrationPolicy dataspaceRegistrationPolicy = new DataspaceRegistrationPolicy(policy);
-    DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
-    CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
-    DefaultParticipantVerifier service = new DefaultParticipantVerifier(monitor, resolverRegistry, credentialsVerifier, policyEngine, dataspaceRegistrationPolicy);
-    String identityHubUrl = "some.test/url";
-    String failure = "test-failure";
-    Map<String, Object> verifiableCredentials = Map.of("key1", "value1");
+    private static final String IDENTITY_HUB_TYPE = "IdentityHub";
+    private static final String IDENTITY_HUB_URL = "some.test/url";
+    private final Monitor monitor = mock(Monitor.class);
+    private final String participantDid = "some.test/url";
+    private final PolicyEngine policyEngine = mock(PolicyEngine.class);
+    private final Policy policy = mock(Policy.class);
+    private final Policy policyResult = mock(Policy.class);
+    private final DataspaceRegistrationPolicy dataspaceRegistrationPolicy = new DataspaceRegistrationPolicy(policy);
+    private final DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
+    private final CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
+    private final String failure = "test-failure";
+    private final Map<String, Object> verifiableCredentials = Map.of("key1", "value1");
+    private DefaultParticipantVerifier service;
 
     @BeforeEach
     void beforeEach() {
         DidDocument didDocument = DidDocument.Builder.newInstance()
-                .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, identityHubUrl)))
+                .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, IDENTITY_HUB_URL)))
                 .build();
         when(resolverRegistry.resolve(participantDid))
                 .thenReturn(Result.success(didDocument));
         when(credentialsVerifier.getVerifiedCredentials(didDocument))
                 .thenReturn(Result.success(verifiableCredentials));
+
+        service = new DefaultParticipantVerifier(monitor, resolverRegistry, credentialsVerifier, policyEngine, dataspaceRegistrationPolicy);
     }
 
     @Test

@@ -13,7 +13,7 @@ val swagger: String by project
 
 dependencies {
     api("${edcGroup}:core-spi:${edcVersion}")
-    api("${edcGroup}:policy-spi:${edcVersion}")
+    api("${edcGroup}:policy-engine-spi:${edcVersion}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("io.swagger.core.v3:swagger-annotations:${swagger}")
     testImplementation("org.assertj:assertj-core:${assertj}")

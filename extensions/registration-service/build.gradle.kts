@@ -15,7 +15,7 @@ val openTelemetryVersion: String by project
 
 dependencies {
     implementation("${edcGroup}:http:${edcVersion}")
-    implementation("${edcGroup}:state-machine-lib:${edcVersion}")
+    implementation("${edcGroup}:state-machine:${edcVersion}")
     implementation("${edcGroup}:identity-did-crypto:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub-client:${identityHubVersion}")
     implementation("${edcGroup}:api-core:${edcVersion}")

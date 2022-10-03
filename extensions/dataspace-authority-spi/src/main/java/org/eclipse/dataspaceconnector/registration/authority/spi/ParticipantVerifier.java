@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.authority.spi;
 
+
 import org.eclipse.dataspaceconnector.spi.response.StatusResult;
 
 /**

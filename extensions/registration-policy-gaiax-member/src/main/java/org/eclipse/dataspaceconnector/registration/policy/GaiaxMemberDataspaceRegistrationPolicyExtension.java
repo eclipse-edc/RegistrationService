@@ -20,12 +20,12 @@ import org.eclipse.dataspaceconnector.policy.model.Operator;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.registration.DataspaceRegistrationPolicy;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provider;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyContext;
-import org.eclipse.dataspaceconnector.spi.policy.PolicyEngine;
-import org.eclipse.dataspaceconnector.spi.policy.RuleBindingRegistry;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provider;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyContext;
+import org.eclipse.dataspaceconnector.spi.policy.engine.PolicyEngine;
+import org.eclipse.dataspaceconnector.spi.policy.engine.RuleBindingRegistry;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 
 import java.util.Map;
@@ -40,10 +40,9 @@ import static org.eclipse.dataspaceconnector.registration.DataspaceRegistrationP
  * EDC extension to create a policy that accepts participants with a GAIA-X membership credential.
  */
 public class GaiaxMemberDataspaceRegistrationPolicyExtension implements ServiceExtension {
+    public static final String CREDENTIAL_VALUE = "true";
     private static final String CREDENTIAL_NAME = "gaiaXMember";
     public static final String RULE_TYPE = CREDENTIAL_NAME;
-    public static final String CREDENTIAL_VALUE = "true";
-
     @Inject
     private Monitor monitor;
 
