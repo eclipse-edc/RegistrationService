@@ -25,6 +25,7 @@ import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.telemetry.Telemetry;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -91,6 +92,7 @@ public class RegistrationService {
         monitor.info("Adding a participant in the dataspace.");
 
         var participant = Participant.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
                 .did(did)
                 .status(ONBOARDING_INITIATED)
                 .traceContext(telemetry.getCurrentTraceContext())

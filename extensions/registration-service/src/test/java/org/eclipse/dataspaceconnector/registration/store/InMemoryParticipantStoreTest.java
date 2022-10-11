@@ -14,71 +14,23 @@
 
 package org.eclipse.dataspaceconnector.registration.store;
 
-import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
-import org.junit.jupiter.api.Test;
+import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
+import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStoreTestBase;
+import org.junit.jupiter.api.BeforeEach;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
-import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
-import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 
-class InMemoryParticipantStoreTest {
+class InMemoryParticipantStoreTest extends ParticipantStoreTestBase {
 
-    InMemoryParticipantStore store = new InMemoryParticipantStore();
-    Participant participant1 = createParticipant().build();
-    Participant participant1OtherEntry = createParticipant().did(participant1.getDid()).build();
-    Participant participant2 = createParticipant().build();
+    InMemoryParticipantStore store;
 
-    @Test
-    void listParticipants_empty() {
-        assertThat(store.listParticipants()).isEmpty();
+    @BeforeEach
+    void setup() {
+        store = new InMemoryParticipantStore();
     }
 
-    @Test
-    void saveAndListParticipants() {
-        store.save(participant1);
-        assertThat(store.listParticipants()).containsOnly(participant1);
-    }
 
-    @Test
-    void saveAndListParticipants_removesDuplicates() {
-        store.save(participant1);
-        store.save(participant1OtherEntry);
-        assertThat(store.listParticipants()).containsOnly(participant1OtherEntry);
-    }
-
-    @Test
-    void saveAndListParticipants_twoEntries() {
-        store.save(participant1);
-        store.save(participant2);
-        assertThat(store.listParticipants())
-                .usingRecursiveFieldByFieldElementComparator()
-                .containsOnly(participant1, participant2);
-    }
-
-    @Test
-    void listParticipantsWithStatus() {
-        Participant participant01 = createParticipant().status(AUTHORIZED).build();
-        Participant participant02 = createParticipant().status(AUTHORIZING).build();
-        Participant participant03 = createParticipant().status(AUTHORIZED).build();
-        store.save(participant01);
-        store.save(participant02);
-        store.save(participant03);
-        assertThat(store.listParticipantsWithStatus(AUTHORIZED))
-                .usingRecursiveFieldByFieldElementComparator()
-                .containsOnly(participant01, participant03);
-    }
-
-    @Test
-    void findByDid_null() {
-        assertThat(store.findByDid(participant1.getDid())).isNull();
-    }
-
-    @Test
-    void saveAndFindByDid() {
-        store.save(participant1);
-
-        var participant = store.findByDid(participant1.getDid());
-        assertThat(participant).isEqualTo(participant1);
+    @Override
+    protected ParticipantStore getStore() {
+        return store;
     }
 }

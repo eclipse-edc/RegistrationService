@@ -77,5 +77,41 @@ jobs:
         run: docker-compose logs
         if: always()
 
+
+  Postgresql-Integration-Tests:
+    runs-on: ubuntu-latest
+    env:
+      JACOCO: true
+
+    services:
+      postgres:
+        image: postgres:14.2
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/gradle-setup
+
+      - name: Postgresql Tests
+        uses: ./.github/actions/run-tests
+        with:
+          command: ./gradlew test -DincludeTags="PostgresqlIntegrationTest"
+
+  Upload-Coverage-Report-To-Codecov:
+    needs:
+      - Test
+      - Postgresql-Integration-Tests
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      # Sources are needed for Codecov report
+      - uses: actions/checkout@v3
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
       - name: CodeCov
         uses: codecov/codecov-action@v3

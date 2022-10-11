@@ -1,0 +1,14 @@
+@startuml
+entity edc_participant {
+  * id: string <<PK>>
+  * did: string <<unique>>
+  * state: integer
+  * state_count: integer
+  * state_timestamp: long
+  * error_detail:  string
+  * trace_context: string <<json>>
+  * created_at: long
+  * updated_at: long
+  --
+}
+@enduml

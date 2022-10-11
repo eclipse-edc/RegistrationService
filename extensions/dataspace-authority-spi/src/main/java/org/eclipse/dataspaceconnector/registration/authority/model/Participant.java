@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.registration.authority.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import org.eclipse.dataspaceconnector.spi.telemetry.TraceCarrier;
+import org.eclipse.dataspaceconnector.spi.entity.StatefulEntity;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -35,11 +35,9 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
  * Dataspace participant.
  */
 @JsonDeserialize(builder = Participant.Builder.class)
-public class Participant implements TraceCarrier {
+public class Participant extends StatefulEntity<Participant> {
 
     private String did;
-    private ParticipantStatus status = ONBOARDING_INITIATED;
-    private Map<String, String> traceContext = Map.of();
 
     private Participant() {
     }
@@ -49,12 +47,15 @@ public class Participant implements TraceCarrier {
     }
 
     public ParticipantStatus getStatus() {
-        return status;
+        return ParticipantStatus.from(state);
     }
 
     @Override
-    public Map<String, String> getTraceContext() {
-        return traceContext;
+    public Participant copy() {
+        var builder = Builder.newInstance()
+                .did(did);
+
+        return copy(builder);
     }
 
     public void transitionAuthorizing() {
@@ -84,43 +85,49 @@ public class Participant implements TraceCarrier {
      * @param starts The allowed previous states.
      */
     private void transition(ParticipantStatus end, ParticipantStatus... starts) {
-        if (Arrays.stream(starts).noneMatch(s -> s == status)) {
-            throw new IllegalStateException(format("Cannot transition from state %s to %s", status, end));
+        if (Arrays.stream(starts).noneMatch(s -> s.code() == state)) {
+            throw new IllegalStateException(format("Cannot transition from state %s to %s", ParticipantStatus.from(state), end));
         }
-        status = end;
+        transitionTo(end.code());
     }
 
     @JsonPOJOBuilder(withPrefix = "")
-    public static class Builder {
-        private final Participant participant;
+    public static class Builder extends StatefulEntity.Builder<Participant, Builder> {
 
-        private Builder() {
-            participant = new Participant();
+        private Builder(Participant participant) {
+            super(participant);
         }
 
         public static Builder newInstance() {
-            return new Builder();
+            return new Builder(new Participant());
         }
 
         public Builder did(String did) {
-            participant.did = did;
+            entity.did = did;
             return this;
         }
 
         public Builder status(ParticipantStatus status) {
-            participant.status = status;
+            entity.state = status.code();
             return this;
         }
 
+        @Override
         public Builder traceContext(Map<String, String> traceContext) {
-            participant.traceContext = unmodifiableMap(traceContext);
+            entity.traceContext = unmodifiableMap(traceContext);
             return this;
         }
 
+        @Override
         public Participant build() {
-            Objects.requireNonNull(participant.did, "did");
-            Objects.requireNonNull(participant.status, "status");
-            return participant;
+            Objects.requireNonNull(entity.did, "did");
+            return super.build();
+        }
+
+
+        @Override
+        public Builder self() {
+            return this;
         }
     }
 }

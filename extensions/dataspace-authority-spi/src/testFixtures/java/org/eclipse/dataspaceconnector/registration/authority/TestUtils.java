@@ -17,6 +17,8 @@ package org.eclipse.dataspaceconnector.registration.authority;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 
+import java.util.UUID;
+
 public class TestUtils {
 
     private TestUtils() {
@@ -24,6 +26,7 @@ public class TestUtils {
 
     public static Participant.Builder createParticipant() {
         return Participant.Builder.newInstance()
+                .id(UUID.randomUUID().toString())
                 .did("some.test/url")
                 .status(ParticipantStatus.AUTHORIZED);
     }
