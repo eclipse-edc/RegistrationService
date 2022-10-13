@@ -14,12 +14,17 @@
 
 package org.eclipse.dataspaceconnector.registration.authority.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.authority.TestUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
@@ -29,62 +34,10 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.DENIED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ParticipantTest {
 
-    @ParameterizedTest
-    @MethodSource("allowedStatesForTransitioningToAuthorizing")
-    void transitionAuthorizing_fromAllowedState(ParticipantStatus status) {
-        var build = participantWithStatus(status);
-        build.transitionAuthorizing();
-        assertThat(build.getStatus()).isEqualTo(AUTHORIZING);
-    }
-
-    @ParameterizedTest
-    @MethodSource("notAllowedStatesForTransitioningToAuthorizing")
-    void transitionAuthorizing_fromNotAllowedState(ParticipantStatus status) {
-        var build = participantWithStatus(status);
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(build::transitionAuthorizing);
-    }
-
-    @ParameterizedTest
-    @MethodSource("allowedStatesForTransitioningToAuthorized")
-    void transitionAuthorized_fromAllowedState(ParticipantStatus status) {
-        var build = participantWithStatus(status);
-        build.transitionAuthorized();
-        assertThat(build.getStatus()).isEqualTo(AUTHORIZED);
-    }
-
-    private Participant participantWithStatus(ParticipantStatus status) {
-        return TestUtils.createParticipant()
-                .status(status)
-                .build();
-    }
-
-    @ParameterizedTest
-    @MethodSource("notAllowedStatesForTransitioningToAuthorized")
-    void transitionAuthorized_fromNotAllowedState(ParticipantStatus status) {
-        Participant build = participantWithStatus(status);
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(build::transitionAuthorized);
-    }
-
-    @ParameterizedTest
-    @MethodSource("allowedStatesForTransitioningToDenied")
-    void transitionDenied_fromAllowedState(ParticipantStatus status) {
-        Participant build = participantWithStatus(status);
-        build.transitionDenied();
-        assertThat(build.getStatus()).isEqualTo(DENIED);
-    }
-
-    @ParameterizedTest
-    @MethodSource("notAllowedStatesForTransitioningToDenied")
-    void transitionDenied_fromNotAllowedState(ParticipantStatus status) {
-        Participant build = participantWithStatus(status);
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(build::transitionDenied);
-    }
 
     static List<ParticipantStatus> allowedStatesForTransitioningToAuthorizing() {
         return List.of(ONBOARDING_INITIATED);
@@ -112,5 +65,86 @@ class ParticipantTest {
 
     static Stream<ParticipantStatus> statesNotIn(List<ParticipantStatus> allowed) {
         return Arrays.stream(ParticipantStatus.values()).filter(not(allowed::contains));
+    }
+
+    @ParameterizedTest
+    @MethodSource("allowedStatesForTransitioningToAuthorizing")
+    void transitionAuthorizing_fromAllowedState(ParticipantStatus status) {
+        var build = participantWithStatus(status);
+        build.transitionAuthorizing();
+        assertThat(build.getStatus()).isEqualTo(AUTHORIZING);
+    }
+
+    @ParameterizedTest
+    @MethodSource("notAllowedStatesForTransitioningToAuthorizing")
+    void transitionAuthorizing_fromNotAllowedState(ParticipantStatus status) {
+        var build = participantWithStatus(status);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(build::transitionAuthorizing);
+    }
+
+    @ParameterizedTest
+    @MethodSource("allowedStatesForTransitioningToAuthorized")
+    void transitionAuthorized_fromAllowedState(ParticipantStatus status) {
+        var build = participantWithStatus(status);
+        build.transitionAuthorized();
+        assertThat(build.getStatus()).isEqualTo(AUTHORIZED);
+    }
+
+    @ParameterizedTest
+    @MethodSource("notAllowedStatesForTransitioningToAuthorized")
+    void transitionAuthorized_fromNotAllowedState(ParticipantStatus status) {
+        Participant build = participantWithStatus(status);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(build::transitionAuthorized);
+    }
+
+    @ParameterizedTest
+    @MethodSource("allowedStatesForTransitioningToDenied")
+    void transitionDenied_fromAllowedState(ParticipantStatus status) {
+        Participant build = participantWithStatus(status);
+        build.transitionDenied();
+        assertThat(build.getStatus()).isEqualTo(DENIED);
+    }
+
+    @ParameterizedTest
+    @MethodSource("notAllowedStatesForTransitioningToDenied")
+    void transitionDenied_fromNotAllowedState(ParticipantStatus status) {
+        Participant build = participantWithStatus(status);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(build::transitionDenied);
+    }
+
+    @Test
+    void copy_Participant() {
+        var participant = TestUtils.createParticipant().build();
+        var copiedParticipant = participant.copy();
+
+        assertThat(participant).isNotSameAs(copiedParticipant);
+        assertThat(participant).usingRecursiveComparison().isEqualTo(copiedParticipant);
+    }
+
+    @Test
+    void verifySerDes() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+        var participant = Participant.Builder.newInstance()
+                .did("some:did")
+                .traceContext(Map.of("key1", "value1"))
+                .status(ParticipantStatus.ONBOARDED)
+                .id(UUID.randomUUID().toString())
+                .build();
+
+        var json = mapper.writeValueAsString(participant);
+
+        assertNotNull(json);
+
+        var deser = mapper.readValue(json, Participant.class);
+        assertThat(deser).usingRecursiveComparison().isEqualTo(participant);
+    }
+
+    private Participant participantWithStatus(ParticipantStatus status) {
+        return TestUtils.createParticipant()
+                .status(status)
+                .build();
     }
 }

@@ -110,11 +110,16 @@ class RegistrationServiceTest {
 
         var captor = ArgumentCaptor.forClass(Participant.class);
         verify(participantStore).save(captor.capture());
+        var participant = captor.getValue();
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(Participant.Builder.newInstance()
                         .did(did)
+                        .id(participant.getId())
                         .status(ONBOARDING_INITIATED)
+                        .stateTimestamp(participant.getStateTimestamp())
+                        .createdAt(participant.getCreatedAt())
+                        .updatedAt(participant.getUpdatedAt())
                         .traceContext(traceContext)
                         .build());
     }
