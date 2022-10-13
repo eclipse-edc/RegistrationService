@@ -14,6 +14,8 @@
 
 package org.eclipse.dataspaceconnector.registration.authority.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.authority.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +23,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
@@ -30,6 +34,7 @@ import static org.eclipse.dataspaceconnector.registration.authority.model.Partic
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZING;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.DENIED;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.ONBOARDING_INITIATED;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ParticipantTest {
 
@@ -117,6 +122,24 @@ class ParticipantTest {
 
         assertThat(participant).isNotSameAs(copiedParticipant);
         assertThat(participant).usingRecursiveComparison().isEqualTo(copiedParticipant);
+    }
+
+    @Test
+    void verifySerDes() throws JsonProcessingException {
+        var mapper = new ObjectMapper();
+        var participant = Participant.Builder.newInstance()
+                .did("some:did")
+                .traceContext(Map.of("key1", "value1"))
+                .status(ParticipantStatus.ONBOARDED)
+                .id(UUID.randomUUID().toString())
+                .build();
+
+        var json = mapper.writeValueAsString(participant);
+
+        assertNotNull(json);
+
+        var deser = mapper.readValue(json, Participant.class);
+        assertThat(deser).usingRecursiveComparison().isEqualTo(participant);
     }
 
     private Participant participantWithStatus(ParticipantStatus status) {

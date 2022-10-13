@@ -14,7 +14,6 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 
-    testFixturesImplementation(testFixtures(project(":extensions:dataspace-authority-spi")))
     testFixturesImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testFixturesImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testFixturesRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")

@@ -14,15 +14,17 @@
 
 package org.eclipse.dataspaceconnector.registration.store.sql;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.ParticipantStatements;
+import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.datasource.DataSourceRegistry;
-import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
@@ -50,15 +52,15 @@ public class SqlParticipantStore implements ParticipantStore {
 
 
     private final ParticipantStatements participantStatements;
-    private final TypeManager typeManager;
+    private final ObjectMapper objectMapper;
 
 
-    public SqlParticipantStore(DataSourceRegistry dataSourceRegistry, String dataSourceName, TransactionContext transactionContext, TypeManager typeManager, ParticipantStatements participantStatements) {
+    public SqlParticipantStore(DataSourceRegistry dataSourceRegistry, String dataSourceName, TransactionContext transactionContext, ObjectMapper objectMapper, ParticipantStatements participantStatements) {
         this.dataSourceRegistry = Objects.requireNonNull(dataSourceRegistry);
         this.dataSourceName = Objects.requireNonNull(dataSourceName);
         this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.typeManager = typeManager;
-        this.participantStatements = participantStatements;
+        this.objectMapper = Objects.requireNonNull(objectMapper);
+        this.participantStatements = Objects.requireNonNull(participantStatements);
     }
 
     @Override
@@ -66,13 +68,11 @@ public class SqlParticipantStore implements ParticipantStore {
         Objects.requireNonNull(did);
         return transactionContext.execute(() -> {
             try (var connection = getConnection()) {
-                return executeQuerySingle(connection, true, this::participantMapper, participantStatements.getSelectParticipantByDidTemplate(), did);
+                return findByDidInternal(connection, did);
+            } catch (EdcPersistenceException e) {
+                throw e;
             } catch (Exception e) {
-                if (e instanceof EdcPersistenceException) {
-                    throw (EdcPersistenceException) e;
-                } else {
-                    throw new EdcPersistenceException(e.getMessage(), e);
-                }
+                throw new EdcPersistenceException(e.getMessage(), e);
             }
         });
 
@@ -85,24 +85,33 @@ public class SqlParticipantStore implements ParticipantStore {
                 try (var stream = executeQuery(connection, true, this::participantMapper, participantStatements.getSelectParticipantTemplate())) {
                     return stream.collect(Collectors.toList());
                 }
+            } catch (EdcPersistenceException e) {
+                throw e;
             } catch (Exception e) {
-                if (e instanceof EdcPersistenceException) {
-                    throw (EdcPersistenceException) e;
-                } else {
-                    throw new EdcPersistenceException(e.getMessage(), e);
-                }
+                throw new EdcPersistenceException(e.getMessage(), e);
             }
         });
     }
 
     @Override
     public void save(Participant participant) {
-        var existingParticipant = findByDid(participant.getDid());
-        if (existingParticipant == null) {
-            insert(participant);
-        } else {
-            update(existingParticipant, participant);
-        }
+
+        transactionContext.execute(() -> {
+            try (var connection = getConnection()) {
+                var existingParticipant = findByDidInternal(connection, participant.getDid());
+                if (existingParticipant == null) {
+                    insert(connection, participant);
+                } else {
+                    update(connection, existingParticipant, participant);
+                }
+
+            } catch (EdcPersistenceException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new EdcPersistenceException(e.getMessage(), e);
+            }
+        });
+
     }
 
     @Override
@@ -112,45 +121,46 @@ public class SqlParticipantStore implements ParticipantStore {
                 try (var stream = executeQuery(connection, true, this::participantMapper, participantStatements.getSelectParticipantByStateTemplate(), state.code())) {
                     return stream.collect(Collectors.toList());
                 }
+            } catch (EdcPersistenceException e) {
+                throw e;
             } catch (Exception e) {
-                if (e instanceof EdcPersistenceException) {
-                    throw (EdcPersistenceException) e;
-                } else {
-                    throw new EdcPersistenceException(e.getMessage(), e);
-                }
+                throw new EdcPersistenceException(e.getMessage(), e);
             }
         });
     }
 
-    public void update(Participant oldParticipant, Participant participant) {
+    private void update(Connection connection, Participant oldParticipant, Participant participant) {
 
         if (!oldParticipant.getId().equals(participant.getId())) {
             throw new EdcPersistenceException(format("Failed to update Participant with did %s: participant id didn't match", participant.getDid()));
         }
-        transactionContext.execute(() -> {
-            try (var connection = getConnection()) {
-                executeQuery(connection, participantStatements.getUpdateParticipantTemplate(),
-                        participant.getState(),
-                        participant.getStateCount(),
-                        participant.getStateTimestamp(),
-                        participant.getErrorDetail(),
-                        toJson(participant.getTraceContext()),
-                        participant.getUpdatedAt(),
-                        participant.getDid()
-                );
+        executeQuery(connection, participantStatements.getUpdateParticipantTemplate(),
+                participant.getState(),
+                participant.getStateCount(),
+                participant.getStateTimestamp(),
+                participant.getErrorDetail(),
+                toJson(participant.getTraceContext()),
+                participant.getUpdatedAt(),
+                participant.getDid()
+        );
 
-
-            } catch (Exception e) {
-                if (e instanceof EdcPersistenceException) {
-                    throw (EdcPersistenceException) e;
-                } else {
-                    throw new EdcPersistenceException(e.getMessage(), e);
-                }
-            }
-        });
     }
 
-    protected Participant participantMapper(ResultSet resultSet) throws SQLException {
+    private void insert(Connection connection, Participant participant) {
+        executeQuery(connection, participantStatements.getInsertParticipantsTemplate(),
+                participant.getId(),
+                participant.getDid(),
+                participant.getState(),
+                participant.getStateCount(),
+                participant.getStateTimestamp(),
+                participant.getErrorDetail(),
+                toJson(participant.getTraceContext()),
+                participant.getCreatedAt(),
+                participant.getUpdatedAt()
+        );
+    }
+
+    private Participant participantMapper(ResultSet resultSet) throws SQLException {
         return Participant.Builder.newInstance()
                 .did(resultSet.getString(participantStatements.getDidColumn()))
                 .id(resultSet.getString(participantStatements.getParticipantIdColumn()))
@@ -163,39 +173,24 @@ public class SqlParticipantStore implements ParticipantStore {
                 .build();
     }
 
-    protected void insert(Participant participant) {
-
-        transactionContext.execute(() -> {
-            try (var connection = getConnection()) {
-                executeQuery(connection, participantStatements.getInsertParticipantsTemplate(),
-                        participant.getId(),
-                        participant.getDid(),
-                        participant.getState(),
-                        participant.getStateCount(),
-                        participant.getStateTimestamp(),
-                        participant.getErrorDetail(),
-                        toJson(participant.getTraceContext()),
-                        participant.getCreatedAt(),
-                        participant.getUpdatedAt()
-                );
-
-            } catch (Exception e) {
-                if (e instanceof EdcPersistenceException) {
-                    throw (EdcPersistenceException) e;
-                } else {
-                    throw new EdcPersistenceException(e.getMessage(), e);
-                }
-            }
-        });
-
+    private Participant findByDidInternal(Connection connection, String did) {
+        return executeQuerySingle(connection, false, this::participantMapper, participantStatements.getSelectParticipantByDidTemplate(), did);
     }
 
     private String toJson(Object object) {
-        return typeManager.writeValueAsString(object);
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new EdcException(e);
+        }
     }
 
     private <T> T fromJson(String json, TypeReference<T> typeReference) {
-        return typeManager.readValue(json, typeReference);
+        try {
+            return objectMapper.readValue(json, typeReference);
+        } catch (JsonProcessingException e) {
+            throw new EdcException(e);
+        }
     }
 
     private DataSource getDataSource() {

@@ -17,8 +17,10 @@ package org.eclipse.dataspaceconnector.registration.store.sql;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.ParticipantStatements;
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.PostgresSqlParticipantStatements;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.EdcSetting;
 import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Extension;
 import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provider;
 import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
@@ -34,6 +36,7 @@ public class SqlParticipantStoreExtension implements ServiceExtension {
 
     public static final String NAME = "SQL participants store";
 
+    @EdcSetting
     private static final String DATASOURCE_NAME_SETTING = "edc.datasource.participant.name";
     private static final String DEFAULT_DATASOURCE_NAME = "participant";
     @Inject(required = false)
@@ -48,10 +51,10 @@ public class SqlParticipantStoreExtension implements ServiceExtension {
         return NAME;
     }
 
-    @Override
-    public void initialize(ServiceExtensionContext context) {
-        var sqlStore = new SqlParticipantStore(dataSourceRegistry, getDataSourceName(context), trxContext, context.getTypeManager(), getStatementImpl());
-        context.registerService(ParticipantStore.class, sqlStore);
+
+    @Provider
+    public ParticipantStore participantStore(ServiceExtensionContext context) {
+        return new SqlParticipantStore(dataSourceRegistry, getDataSourceName(context), trxContext, context.getTypeManager().getMapper(), getStatementImpl());
     }
 
     /**

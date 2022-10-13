@@ -97,7 +97,7 @@ public class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
         when(dataSourceRegistry.resolve(DATASOURCE_NAME)).thenReturn(datasourceMock);
 
 
-        store = new SqlParticipantStore(dataSourceRegistry, DATASOURCE_NAME, transactionContext, manager, statements);
+        store = new SqlParticipantStore(dataSourceRegistry, DATASOURCE_NAME, transactionContext, manager.getMapper(), statements);
 
         var schema = Files.readString(Paths.get("docs/schema.sql"));
         try {

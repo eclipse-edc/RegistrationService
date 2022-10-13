@@ -14,6 +14,7 @@
 
 package org.eclipse.dataspaceconnector.registration.authority.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.eclipse.dataspaceconnector.spi.entity.StatefulEntity;
@@ -98,6 +99,7 @@ public class Participant extends StatefulEntity<Participant> {
             super(participant);
         }
 
+        @JsonCreator
         public static Builder newInstance() {
             return new Builder(new Participant());
         }
