@@ -17,6 +17,7 @@ package org.eclipse.dataspaceconnector.registration.client;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -27,7 +28,7 @@ public class TestKeyData {
     public static final String PRIVATE_KEY_P256;
     public static final String PUBLIC_KEY_P256;
     public static final String PRIVATE_KEY_RSA;
-
+ 
     static {
         PRIVATE_KEY_P256 = readResource("private_p256.pem");
         PRIVATE_KEY_RSA = readResource("private_rsa.pem");
@@ -36,8 +37,9 @@ public class TestKeyData {
 
     @NotNull
     private static String readResource(String name) {
-        try {
-            return new String(TestKeyData.class.getClassLoader().getResourceAsStream(name).readAllBytes(), UTF_8);
+        try (var is = TestKeyData.class.getClassLoader().getResourceAsStream(name)) {
+            Objects.requireNonNull(is);
+            return new String(is.readAllBytes(), UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Error loading test key data", e);
         }

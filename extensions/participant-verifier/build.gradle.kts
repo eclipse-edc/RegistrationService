@@ -14,7 +14,7 @@ dependencies {
     api("${identityHubGroup}:identity-hub-spi:${identityHubVersion}")
     api("${edcGroup}:core-spi:${edcVersion}")
     api("${edcGroup}:identity-did-spi:${edcVersion}")
-    api(project(":extensions:dataspace-authority-spi"))
+    api(project(":spi:dataspace-authority-spi"))
 
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")

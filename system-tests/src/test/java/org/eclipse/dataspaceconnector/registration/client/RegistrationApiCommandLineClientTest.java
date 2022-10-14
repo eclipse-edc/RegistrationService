@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpStatusCode;
-import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -44,7 +43,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
-public class RegistrationApiCommandLineClientTest {
+class RegistrationApiCommandLineClientTest {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
     static Path privateKeyFile;
@@ -55,7 +54,7 @@ public class RegistrationApiCommandLineClientTest {
     host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
      */
     ClientAndServer httpSourceClientAndServer;
-
+    
     @BeforeEach
     void setUpClass() throws Exception {
         privateKeyFile = Files.createTempFile("test", ".pem");
@@ -98,7 +97,7 @@ public class RegistrationApiCommandLineClientTest {
 
     @Test
     void getParticipant_notFound() {
-        CommandLine cmd = RegistrationServiceCli.getCommandLine();
+        var cmd = RegistrationServiceCli.getCommandLine();
         var writer = new StringWriter();
         cmd.setOut(new PrintWriter(writer));
 
@@ -115,14 +114,14 @@ public class RegistrationApiCommandLineClientTest {
     }
 
     private String executeCmd(List<String> cmdArgs) {
-        CommandLine cmd = RegistrationServiceCli.getCommandLine();
+        var cmd = RegistrationServiceCli.getCommandLine();
         var writer = new StringWriter();
         cmd.setOut(new PrintWriter(writer));
 
         var cmdExitCode = cmd.execute(cmdArgs.toArray(new String[0]));
         var output = writer.toString();
 
-        assertThat(cmdExitCode).isEqualTo(0);
+        assertThat(cmdExitCode).isZero();
 
         return output;
     }

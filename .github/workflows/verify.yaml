@@ -57,7 +57,7 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
 
       - name: 'Run application in docker-compose'
-        run: docker-compose up --build --wait
+        run: docker-compose -f system-tests/docker-compose.yml up --build --wait
         timeout-minutes: 10
 
       - name: 'Unit and system tests'
@@ -74,7 +74,7 @@ jobs:
           files: "**/test-results/**/*.xml"
 
       - name: 'docker-compose logs'
-        run: docker-compose logs
+        run: docker-compose -f system-tests/docker-compose.yml logs
         if: always()
 
 

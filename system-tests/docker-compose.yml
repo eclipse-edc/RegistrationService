@@ -8,7 +8,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     build:
-      context: launcher
+      context: ../launcher
       args:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
@@ -32,15 +32,15 @@ services:
     container_name: did-server
     image: nginx
     volumes:
-     - ./resources/webdid:/usr/share/nginx/html
+      - ./resources/webdid:/usr/share/nginx/html
     ports:
-     - "8080:80"
+      - "8080:80"
 
   # Dataspace participant with identity-hub
   participant:
     container_name: participant
     build:
-      context: system-tests/launchers/identity-hub
+      context: launchers/identity-hub
       args:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007"
     ports:

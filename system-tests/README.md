@@ -6,25 +6,18 @@ These tests deploy the application in a docker environment, and use the generate
 
 Build the application launchers:
 
-```
+```bash
 ./gradlew -DuseFsVault="true" shadowJar
 ```
 
 Run the application using Docker compose:
 
-```
-docker-compose up --build
+```bash
+docker-compose -f system-tests/docker-compose.yml up --build
 ```
 
 Run tests:
 
-Bash
 ```bash
 INTEGRATION_TEST=true ./gradlew :system-tests:test
-```
-
-PowerShell
-```powershell
-$Env:INTEGRATION_TEST='true'
-.\gradlew :system-tests:test
 ```
