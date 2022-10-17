@@ -20,7 +20,6 @@ import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.dataspaceconnector.identityhub.credentials.model.VerifiableCredential;
-import org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils;
 import org.eclipse.dataspaceconnector.registration.cli.CryptoUtils;
 import org.eclipse.dataspaceconnector.registration.client.api.RegistryApi;
 import org.eclipse.dataspaceconnector.spi.monitor.ConsoleMonitor;
@@ -32,8 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpStatusCode;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
@@ -55,7 +54,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
-public class RegistrationApiClientTest {
+class RegistrationApiClientTest {
     public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
     static final String API_URL = "http://localhost:8182/authority";
     static final Monitor MONITOR = new ConsoleMonitor();
@@ -105,7 +104,7 @@ public class RegistrationApiClientTest {
     void addsVerifiableCredential() throws Exception {
         // jwt claims issue time is set with 1 sec precision, so startTime is set to 1 second before
         var startTime = Instant.now().truncatedTo(SECONDS).minus(1, SECONDS);
-        var key = Files.readString(new File(TestUtils.findBuildRoot(), "resources/vault/private-key.pem").toPath());
+        var key = Files.readString(Path.of("resources/vault/private-key.pem"));
         var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
         var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
         var vc = VerifiableCredential.Builder.newInstance()

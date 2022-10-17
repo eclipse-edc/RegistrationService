@@ -14,6 +14,8 @@ val mockitoVersion: String by project
 val openTelemetryVersion: String by project
 
 dependencies {
+    api(project(":spi:participant-store-spi"))
+
     implementation("${edcGroup}:http:${edcVersion}")
     implementation("${edcGroup}:state-machine:${edcVersion}")
     implementation("${edcGroup}:identity-did-crypto:${edcVersion}")
@@ -21,7 +23,6 @@ dependencies {
     implementation("${edcGroup}:api-core:${edcVersion}")
     implementation("io.opentelemetry:opentelemetry-extension-annotations:${openTelemetryVersion}")
 
-    implementation(project(":extensions:participant-store-spi"))
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
 
     testImplementation("org.assertj:assertj-core:${assertj}")
@@ -29,8 +30,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation(testFixtures(project(":extensions:dataspace-authority-spi")))
-    testImplementation(testFixtures(project(":extensions:participant-store-spi")))
+    testImplementation(testFixtures(project(":spi:dataspace-authority-spi")))
+    testImplementation(testFixtures(project(":spi:participant-store-spi")))
     testImplementation(testFixtures(project(":rest-client")))
 }
 

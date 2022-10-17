@@ -1,11 +1,11 @@
 rootProject.name = "registration-service"
 
+include(":spi:participant-store-spi")
+include(":spi:dataspace-authority-spi")
 include(":launcher")
 include(":extensions:registration-service")
 include(":extensions:participant-verifier")
 include(":extensions:registration-policy-gaiax-member")
-include(":extensions:participant-store-spi")
-include(":extensions:dataspace-authority-spi")
 include(":system-tests")
 include(":system-tests:launchers:identity-hub")
 include(":rest-client")

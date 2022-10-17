@@ -10,7 +10,7 @@ val assertj: String by project
 val mockitoVersion: String by project
 
 dependencies {
-    api(project(":extensions:dataspace-authority-spi"))
+    api(project(":spi:dataspace-authority-spi"))
 
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")

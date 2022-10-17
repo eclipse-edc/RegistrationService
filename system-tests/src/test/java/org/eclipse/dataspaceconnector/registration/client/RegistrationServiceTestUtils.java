@@ -35,7 +35,7 @@ class RegistrationServiceTestUtils {
 
     /**
      * The DID that resolves to the sample DID Document for the Dataspace Authority in docker compose (served by the nginx container).
-     * Did web format reference: https://w3c-ccg.github.io/did-method-web/#create-register
+     * Did web format reference: <a href="https://w3c-ccg.github.io/did-method-web/#create-register">...</a>
      */
     static final String DATASPACE_DID_WEB = "did:web:localhost%3A8080:test-dataspace-authority";
 

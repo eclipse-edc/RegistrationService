@@ -11,13 +11,10 @@ val postgresVersion: String by project
 
 
 dependencies {
-
-    implementation(project(":extensions:participant-store-spi"))
+    api(project(":spi:participant-store-spi"))
     implementation("${edcGroup}:transaction-spi:${edcVersion}")
     implementation("${edcGroup}:transaction-datasource-spi:${edcVersion}")
     implementation("${edcGroup}:common-sql:${edcVersion}")
-
-
 
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
@@ -26,11 +23,9 @@ dependencies {
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation("${edcGroup}:common-util:${edcVersion}:test-fixtures")
     testImplementation("${edcGroup}:common-sql:${edcVersion}:test-fixtures")
-    testImplementation(testFixtures(project(":extensions:participant-store-spi")))
-    testImplementation(testFixtures(project(":extensions:dataspace-authority-spi")))
+    testImplementation(testFixtures(project(":spi:participant-store-spi")))
+    testImplementation(testFixtures(project(":spi:dataspace-authority-spi")))
     testImplementation("org.postgresql:postgresql:${postgresVersion}")
-
-
 }
 
 publishing {

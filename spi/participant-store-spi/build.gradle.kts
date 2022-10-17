@@ -9,7 +9,7 @@ val jupiterVersion: String by project
 val assertj: String by project
 
 dependencies {
-    api(project(":extensions:dataspace-authority-spi"))
+    api(project(":spi:dataspace-authority-spi"))
     api("org.jetbrains:annotations:${jetBrainsAnnotationsVersion}")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
