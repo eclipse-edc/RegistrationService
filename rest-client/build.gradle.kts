@@ -67,7 +67,7 @@ val assertj: String by project
 
 dependencies {
     api("${edcGroup}:identity-did-crypto:${edcVersion}")
-    api("${edcGroup}:common-util:${edcVersion}")
+    api("${edcGroup}:util:${edcVersion}")
 
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
