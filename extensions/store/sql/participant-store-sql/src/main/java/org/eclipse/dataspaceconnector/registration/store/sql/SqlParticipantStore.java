@@ -14,17 +14,16 @@
 
 package org.eclipse.dataspaceconnector.registration.store.sql;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.registration.authority.model.Participant;
 import org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus;
 import org.eclipse.dataspaceconnector.registration.store.spi.ParticipantStore;
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.ParticipantStatements;
-import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
 import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.datasource.DataSourceRegistry;
+import org.eclipse.dataspaceconnector.sql.store.AbstractSqlStore;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
@@ -34,7 +33,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 
 import static java.lang.String.format;
 import static org.eclipse.dataspaceconnector.sql.SqlQueryExecutor.executeQuery;
@@ -44,22 +42,14 @@ import static org.eclipse.dataspaceconnector.sql.SqlQueryExecutor.executeQuerySi
  * SQL implementation for {@link ParticipantStore}
  */
 
-public class SqlParticipantStore implements ParticipantStore {
-
-    private final DataSourceRegistry dataSourceRegistry;
-    private final String dataSourceName;
-    private final TransactionContext transactionContext;
+public class SqlParticipantStore extends AbstractSqlStore implements ParticipantStore {
 
 
     private final ParticipantStatements participantStatements;
-    private final ObjectMapper objectMapper;
 
 
     public SqlParticipantStore(DataSourceRegistry dataSourceRegistry, String dataSourceName, TransactionContext transactionContext, ObjectMapper objectMapper, ParticipantStatements participantStatements) {
-        this.dataSourceRegistry = Objects.requireNonNull(dataSourceRegistry);
-        this.dataSourceName = Objects.requireNonNull(dataSourceName);
-        this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.objectMapper = Objects.requireNonNull(objectMapper);
+        super(dataSourceRegistry, dataSourceName, transactionContext, objectMapper);
         this.participantStatements = Objects.requireNonNull(participantStatements);
     }
 
@@ -177,27 +167,5 @@ public class SqlParticipantStore implements ParticipantStore {
         return executeQuerySingle(connection, false, this::participantMapper, participantStatements.getSelectParticipantByDidTemplate(), did);
     }
 
-    private String toJson(Object object) {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new EdcException(e);
-        }
-    }
 
-    private <T> T fromJson(String json, TypeReference<T> typeReference) {
-        try {
-            return objectMapper.readValue(json, typeReference);
-        } catch (JsonProcessingException e) {
-            throw new EdcException(e);
-        }
-    }
-
-    private DataSource getDataSource() {
-        return Objects.requireNonNull(dataSourceRegistry.resolve(dataSourceName), format("DataSource %s could not be resolved", dataSourceName));
-    }
-
-    private Connection getConnection() throws SQLException {
-        return getDataSource().getConnection();
-    }
 }

@@ -22,92 +22,43 @@ import org.eclipse.dataspaceconnector.registration.store.sql.SqlParticipantStore
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.BaseSqlParticipantStatements;
 import org.eclipse.dataspaceconnector.registration.store.sql.schema.PostgresSqlParticipantStatements;
 import org.eclipse.dataspaceconnector.spi.persistence.EdcPersistenceException;
-import org.eclipse.dataspaceconnector.spi.transaction.NoopTransactionContext;
-import org.eclipse.dataspaceconnector.spi.transaction.TransactionContext;
-import org.eclipse.dataspaceconnector.spi.transaction.datasource.DataSourceRegistry;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
-import org.eclipse.dataspaceconnector.sql.PostgresqlLocalInstance;
+import org.eclipse.dataspaceconnector.sql.PostgresqlStoreSetupExtension;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.postgresql.ds.PGSimpleDataSource;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.dataspaceconnector.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.dataspaceconnector.registration.authority.model.ParticipantStatus.AUTHORIZED;
-import static org.eclipse.dataspaceconnector.sql.SqlQueryExecutor.executeQuery;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+
 
 @PostgresqlDbIntegrationTest
+@ExtendWith(PostgresqlStoreSetupExtension.class)
 public class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
 
-    protected static final String DATASOURCE_NAME = "participant";
-    private static final String POSTGRES_USER = "postgres";
-    private static final String POSTGRES_PASSWORD = "password";
-    private static final String POSTGRES_DATABASE = "itest";
-
-    private TransactionContext transactionContext;
-    private Connection connection;
     private SqlParticipantStore store;
 
     private BaseSqlParticipantStatements statements;
 
-    @BeforeAll
-    static void prepare() {
-        PostgresqlLocalInstance.createDatabase(POSTGRES_DATABASE);
-    }
 
     @BeforeEach
-    void setUp() throws SQLException, IOException {
-        transactionContext = new NoopTransactionContext();
-        DataSourceRegistry dataSourceRegistry = mock(DataSourceRegistry.class);
-
-
+    void setUp(PostgresqlStoreSetupExtension extension) throws SQLException, IOException {
         statements = new PostgresSqlParticipantStatements();
 
-        var ds = new PGSimpleDataSource();
-        ds.setServerNames(new String[]{ "localhost" });
-        ds.setPortNumbers(new int[]{ 5432 });
-        ds.setUser(POSTGRES_USER);
-        ds.setPassword(POSTGRES_PASSWORD);
-        ds.setDatabaseName(POSTGRES_DATABASE);
-
-        // do not actually close
-        connection = spy(ds.getConnection());
-        doNothing().when(connection).close();
-
         TypeManager manager = new TypeManager();
+        manager.registerTypes(Participant.class);
 
-
-        var datasourceMock = mock(DataSource.class);
-        when(datasourceMock.getConnection()).thenReturn(connection);
-        when(dataSourceRegistry.resolve(DATASOURCE_NAME)).thenReturn(datasourceMock);
-
-
-        store = new SqlParticipantStore(dataSourceRegistry, DATASOURCE_NAME, transactionContext, manager.getMapper(), statements);
+        store = new SqlParticipantStore(extension.getDataSourceRegistry(), extension.getDatasourceName(), extension.getTransactionContext(), manager.getMapper(), statements);
 
         var schema = Files.readString(Paths.get("docs/schema.sql"));
-        try {
-            transactionContext.execute(() -> {
-                executeQuery(connection, schema);
-                return null;
-            });
-        } catch (Exception exc) {
-            fail(exc);
-        }
+        extension.runQuery(schema);
     }
 
     @Test
@@ -123,14 +74,9 @@ public class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-
-        transactionContext.execute(() -> {
-            var dialect = new PostgresSqlParticipantStatements();
-            executeQuery(connection, "DROP TABLE " + dialect.getParticipantTable());
-        });
-        doCallRealMethod().when(connection).close();
-        connection.close();
+    void tearDown(PostgresqlStoreSetupExtension extension) throws Exception {
+        var dialect = new PostgresSqlParticipantStatements();
+        extension.runQuery("DROP TABLE " + dialect.getParticipantTable());
     }
 
     @Override
