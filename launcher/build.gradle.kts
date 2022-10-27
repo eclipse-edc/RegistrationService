@@ -29,25 +29,25 @@ dependencies {
     implementation(project(":extensions:registration-policy-gaiax-member"))
     implementation("${edcGroup}:identity-did-web:${edcVersion}")
     implementation("${edcGroup}:identity-did-core:${edcVersion}")
-    implementation("${edcGroup}:core-base:${edcVersion}")
-    runtimeOnly("${edcGroup}:core-boot:${edcVersion}")
+    implementation("${edcGroup}:connector-core:${edcVersion}")
+    runtimeOnly("${edcGroup}:boot:${edcVersion}")
     implementation("${edcGroup}:control-plane-core:${edcVersion}")
-    implementation("${edcGroup}:observability-api:${edcVersion}")
-    implementation("${edcGroup}:core-micrometer:${edcVersion}")
+    implementation("${edcGroup}:api-observability:${edcVersion}")
+    implementation("${edcGroup}:micrometer-core:${edcVersion}")
     runtimeOnly("${edcGroup}:jetty-micrometer:${edcVersion}")
     runtimeOnly("${edcGroup}:jersey-micrometer:${edcVersion}")
-    implementation("${edcGroup}:filesystem-configuration:${edcVersion}")
+    implementation("${edcGroup}:configuration-filesystem:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub-credentials-verifier:${identityHubVersion}")
 
     // JDK Logger
-    implementation("${edcGroup}:jdk-logger-monitor:${edcVersion}")
+    implementation("${edcGroup}:monitor-jdk-logger:${edcVersion}")
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
     if (useFsVault) {
-        implementation("${edcGroup}:filesystem-vault:${edcVersion}")
+        implementation("${edcGroup}:vault-filesystem:${edcVersion}")
     } else {
-        implementation("${edcGroup}:azure-vault:${edcVersion}")
+        implementation("${edcGroup}:vault-azure:${edcVersion}")
     }
 }
 

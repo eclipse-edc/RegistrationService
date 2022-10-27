@@ -22,7 +22,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":rest-client")))
     implementation("${edcGroup}:identity-did-web:${edcVersion}")
-    implementation("${edcGroup}:common-util:${edcVersion}")
+    implementation("${edcGroup}:util:${edcVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     testImplementation("org.assertj:assertj-core:${assertj}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
