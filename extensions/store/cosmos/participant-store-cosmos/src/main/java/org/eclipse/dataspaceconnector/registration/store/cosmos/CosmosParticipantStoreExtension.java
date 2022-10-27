@@ -37,8 +37,9 @@ import org.eclipse.dataspaceconnector.spi.system.health.HealthCheckService;
 public class CosmosParticipantStoreExtension implements ServiceExtension {
 
     public static final String NAME = "Cosmos Participant Store";
+    
     @Inject
-    RetryPolicy<Object> retryPolicy;
+    private RetryPolicy<Object> retryPolicy;
     @Inject
     private Vault vault;
     @Inject
