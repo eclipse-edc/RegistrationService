@@ -27,10 +27,11 @@ dependencies {
     implementation("${edcGroup}:connector-core:${edcVersion}")
     runtimeOnly("${edcGroup}:boot:${edcVersion}")
     implementation("${identityHubGroup}:identity-hub:${identityHubVersion}")
+    implementation("${identityHubGroup}:identity-hub-api:${identityHubVersion}")
 }
 
 application {
-    mainClass.set("org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime")
+    mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {

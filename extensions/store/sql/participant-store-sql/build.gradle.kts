@@ -21,7 +21,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation("${edcGroup}:util:${edcVersion}:test-fixtures")
+    testImplementation("${edcGroup}:junit:${edcVersion}")
     testImplementation("${edcGroup}:sql-core:${edcVersion}:test-fixtures")
     testImplementation(testFixtures(project(":spi:participant-store-spi")))
     testImplementation(testFixtures(project(":spi:dataspace-authority-spi")))
