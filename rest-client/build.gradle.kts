@@ -33,9 +33,9 @@ tasks.withType(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::clas
             "library" to "native",
             "dateLibrary" to "legacy",
             "useRuntimeException" to "true",
-            "invokerPackage" to "org.eclipse.dataspaceconnector.registration.client",
-            "apiPackage" to "org.eclipse.dataspaceconnector.registration.client.api",
-            "modelPackage" to "org.eclipse.dataspaceconnector.registration.client.models",
+            "invokerPackage" to "org.eclipse.edc.registration.client",
+            "apiPackage" to "org.eclipse.edc.registration.client.api",
+            "modelPackage" to "org.eclipse.edc.registration.client.models",
         )
     )
 }

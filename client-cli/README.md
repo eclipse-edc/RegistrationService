@@ -22,7 +22,8 @@ java -jar client-cli/build/libs/registration-service-cli.jar \
   participants list
 ```
 
-More about available did:web formats: [https://w3c-ccg.github.io/did-method-web/#example-example-web-method-dids](Web DID method specification).
+More about available did:web
+formats: [https://w3c-ccg.github.io/did-method-web/#example-example-web-method-dids](Web DID method specification).
 
 The client can also be run from a local Maven repository:
 
@@ -33,7 +34,7 @@ cd RegistrationService
 
 ```
 cd OtherDirectory
-mvn dependency:copy -Dartifact=org.eclipse.dataspaceconnector.registrationservice:registration-service-cli:1.0.0-SNAPSHOT:jar:all -DoutputDirectory=.
+mvn dependency:copy -Dartifact=org.eclipse.edc:registration-service-cli:1.0.0-SNAPSHOT:jar:all -DoutputDirectory=.
 java -jar registration-service-cli-1.0.0-SNAPSHOT-all.jar --help
 ```
 

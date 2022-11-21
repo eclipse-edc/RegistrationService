@@ -31,7 +31,7 @@ if (projectVersion.contains("SNAPSHOT")) {
     deployUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
 }
 
-subprojects{
+subprojects {
     afterEvaluate {
         publishing {
             publications.forEach { i ->
@@ -77,13 +77,16 @@ allprojects {
         maven {
             url = uri("https://maven.iais.fraunhofer.de/artifactory/eis-ids-public/")
         }
-        maven{
-            url= uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
     }
 
     // Specify config file excluding generated source files
-    System.setProperty("org.checkstyle.google.suppressionfilter.config", file("${rootProject.projectDir.path}/resources/checkstyle-suppressions.xml").absolutePath)
+    System.setProperty(
+        "org.checkstyle.google.suppressionfilter.config",
+        file("${rootProject.projectDir.path}/resources/checkstyle-suppressions.xml").absolutePath
+    )
 
     checkstyle {
         toolVersion = "9.0"
@@ -128,7 +131,7 @@ allprojects {
             prettyPrint = true
             classpath = java.sourceSets["main"].runtimeClasspath
             buildClasspath = classpath
-            resourcePackages = setOf("org.eclipse.dataspaceconnector")
+            resourcePackages = setOf("org.eclipse.edc")
             outputDir = file("${rootProject.projectDir.path}/resources/openapi/yaml")
         }
         configurations {

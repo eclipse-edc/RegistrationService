@@ -32,7 +32,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("org.eclipse.dataspaceconnector.registration.cli.RegistrationServiceCli")
+    mainClass.set("org.eclipse.edc.registration.cli.RegistrationServiceCli")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
