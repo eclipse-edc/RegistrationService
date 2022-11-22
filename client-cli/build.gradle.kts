@@ -5,30 +5,19 @@ plugins {
     `maven-publish`
 }
 
-val jacksonVersion: String by project
-val jupiterVersion: String by project
-val assertj: String by project
-val mockitoVersion: String by project
-val edcGroup: String by project
-val edcVersion: String by project
-val okHttpVersion: String by project
-
 dependencies {
-    api("info.picocli:picocli:4.6.3")
-    annotationProcessor("info.picocli:picocli-codegen:4.6.3")
+    api(libs.picocli.core)
+    annotationProcessor(libs.picocli.codegen)
 
     api(project(":rest-client"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation(libs.jackson.databind)
+
+    implementation(edc.ext.identity.did.web)
+    implementation(edc.ext.identity.did.crypto)
+    implementation(edc.util)
+    implementation(libs.okhttp)
 
     testImplementation(testFixtures(project(":rest-client")))
-    implementation("${edcGroup}:identity-did-web:${edcVersion}")
-    implementation("${edcGroup}:util:${edcVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
-    testImplementation("org.assertj:assertj-core:${assertj}")
-    testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
 }
 
 application {

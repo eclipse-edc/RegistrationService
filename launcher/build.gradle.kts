@@ -18,36 +18,31 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
-val identityHubVersion: String by project
-val identityHubGroup: String by project
-
 dependencies {
     implementation(project(":extensions:registration-service"))
     implementation(project(":extensions:participant-verifier"))
     implementation(project(":extensions:registration-policy-gaiax-member"))
-    implementation("${edcGroup}:identity-did-web:${edcVersion}")
-    implementation("${edcGroup}:identity-did-core:${edcVersion}")
-    implementation("${edcGroup}:connector-core:${edcVersion}")
-    runtimeOnly("${edcGroup}:boot:${edcVersion}")
-    implementation("${edcGroup}:control-plane-core:${edcVersion}")
-    implementation("${edcGroup}:api-observability:${edcVersion}")
-    implementation("${edcGroup}:micrometer-core:${edcVersion}")
-    runtimeOnly("${edcGroup}:jetty-micrometer:${edcVersion}")
-    runtimeOnly("${edcGroup}:jersey-micrometer:${edcVersion}")
-    implementation("${edcGroup}:configuration-filesystem:${edcVersion}")
-    implementation("${identityHubGroup}:identity-hub-credentials-verifier:${identityHubVersion}")
+    implementation(edc.ext.identity.did.web)
+    implementation(edc.ext.identity.did.core)
+    implementation(edc.core.connector)
+    runtimeOnly(edc.boot)
+    implementation(edc.core.controlPlane)
+    implementation(edc.ext.observability)
+    implementation(edc.core.micrometer)
+    runtimeOnly(edc.ext.micrometer.jetty)
+    runtimeOnly(edc.ext.micrometer.jersey)
+    implementation(edc.ext.configuration.filesystem)
+    implementation(identityHub.ext.credentialsVerifier)
 
     // JDK Logger
-    implementation("${edcGroup}:monitor-jdk-logger:${edcVersion}")
+    implementation(edc.ext.jdklogger)
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
     if (useFsVault) {
-        implementation("${edcGroup}:vault-filesystem:${edcVersion}")
+        implementation(edc.ext.vault.filesystem)
     } else {
-        implementation("${edcGroup}:vault-azure:${edcVersion}")
+        implementation(edc.ext.vault.azure)
     }
 }
 

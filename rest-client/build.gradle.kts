@@ -58,30 +58,18 @@ sourceSets {
     }
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
-val jacksonVersion: String by project
-val jupiterVersion: String by project
-val assertj: String by project
-
-
 dependencies {
-    api("${edcGroup}:identity-did-crypto:${edcVersion}")
-    api("${edcGroup}:util:${edcVersion}")
-
-    testImplementation("org.assertj:assertj-core:${assertj}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
+    implementation(edc.ext.identity.did.crypto)
+    api(edc.util)
 
     // Dependencies copied from build/generate-resources/main/build.gradle
-    implementation("io.swagger:swagger-annotations:1.5.22")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("org.openapitools:jackson-databind-nullable:0.2.1")
-    implementation("jakarta.annotation:jakarta.annotation-api:1.3.5")
+    implementation(libs.swagger.annotations)
+    implementation(libs.google.findbugs.jsr305)
+    implementation(libs.jackson.core)
+    implementation(libs.jackson.annotations)
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.datatypeJsr310)
+    implementation(libs.openapi.jackson.databind.nullable)
 }
 
 publishing {
