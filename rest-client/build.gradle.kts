@@ -60,15 +60,13 @@ sourceSets {
 
 dependencies {
     implementation(edc.ext.identity.did.crypto)
-    api(edc.util)
+    implementation(edc.util)
 
     // Dependencies copied from build/generate-resources/main/build.gradle
-    implementation(libs.swagger.annotations)
-    implementation(libs.google.findbugs.jsr305)
+    api(libs.swagger.annotations)
+    api(libs.google.findbugs.jsr305)
     implementation(libs.jackson.core)
-    implementation(libs.jackson.annotations)
-    implementation(libs.jackson.databind)
-    implementation(libs.jackson.datatypeJsr310)
+    implementation(libs.bundles.jackson)
     implementation(libs.openapi.jackson.databind.nullable)
 }
 

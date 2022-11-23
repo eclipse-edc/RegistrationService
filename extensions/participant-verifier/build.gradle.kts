@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(identityHub.spi.core)
     api(edc.spi.core)
     api(edc.spi.identity.did)
     api(project(":spi:dataspace-authority-spi"))

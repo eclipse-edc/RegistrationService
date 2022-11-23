@@ -19,30 +19,30 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":extensions:registration-service"))
-    implementation(project(":extensions:participant-verifier"))
-    implementation(project(":extensions:registration-policy-gaiax-member"))
-    implementation(edc.ext.identity.did.web)
-    implementation(edc.ext.identity.did.core)
-    implementation(edc.core.connector)
+    runtimeOnly(project(":extensions:registration-service"))
+    runtimeOnly(project(":extensions:participant-verifier"))
+    runtimeOnly(project(":extensions:registration-policy-gaiax-member"))
+    runtimeOnly(edc.ext.identity.did.web)
+    runtimeOnly(edc.ext.identity.did.core)
+    runtimeOnly(edc.core.connector)
     runtimeOnly(edc.boot)
-    implementation(edc.core.controlPlane)
-    implementation(edc.ext.observability)
-    implementation(edc.core.micrometer)
+    runtimeOnly(edc.core.controlPlane)
+    runtimeOnly(edc.ext.observability)
+    runtimeOnly(edc.core.micrometer)
     runtimeOnly(edc.ext.micrometer.jetty)
     runtimeOnly(edc.ext.micrometer.jersey)
-    implementation(edc.ext.configuration.filesystem)
-    implementation(identityHub.ext.credentialsVerifier)
+    runtimeOnly(edc.ext.configuration.filesystem)
+    runtimeOnly(identityHub.ext.credentialsVerifier)
 
     // JDK Logger
-    implementation(edc.ext.jdklogger)
+    runtimeOnly(edc.ext.jdklogger)
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
     if (useFsVault) {
-        implementation(edc.ext.vault.filesystem)
+        runtimeOnly(edc.ext.vault.filesystem)
     } else {
-        implementation(edc.ext.vault.azure)
+        runtimeOnly(edc.ext.vault.azure)
     }
 }
 

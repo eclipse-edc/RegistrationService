@@ -4,15 +4,14 @@ plugins {
 
 dependencies {
     api(project(":spi:participant-store-spi"))
-    implementation(edc.spi.transaction)
-    implementation(edc.spi.transaction.datasource)
-    implementation(edc.core.sql)
+    api(edc.spi.transaction)
+    api(edc.spi.transaction.datasource)
+    api(edc.core.sql)
 
     testImplementation(edc.core.junit)
     testImplementation(testFixtures(edc.core.sql))
     testImplementation(testFixtures(project(":spi:participant-store-spi")))
     testImplementation(testFixtures(project(":spi:dataspace-authority-spi")))
-    testImplementation(libs.postgres)
 }
 
 publishing {

@@ -19,10 +19,10 @@ plugins {
 }
 
 dependencies {
-    implementation(edc.core.connector)
+    runtimeOnly(edc.core.connector)
     runtimeOnly(edc.boot)
-    implementation(identityHub.core)
-    implementation(identityHub.core.api)
+    runtimeOnly(identityHub.core)
+    runtimeOnly(identityHub.core.api)
 }
 
 application {

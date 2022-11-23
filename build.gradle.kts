@@ -3,18 +3,12 @@ plugins {
     `java-library`
 }
 
-val projectGroup: String by project
-val swagger: String by project
-val rsApi: String by project
 val edcGroup: String by project
 val annotationProcessorVersion: String by project
 val javaVersion: String by project
 val metaModelVersion: String by project
 
 // these values are required for the project POM (for publishing)
-val edcDeveloperId: String by project
-val edcDeveloperName: String by project
-val edcDeveloperEmail: String by project
 val edcScmConnection: String by project
 val edcWebsiteUrl: String by project
 val edcScmUrl: String by project
@@ -34,7 +28,7 @@ allprojects {
         "org.checkstyle.google.suppressionfilter.config",
         file("${rootProject.projectDir.path}/resources/checkstyle-suppressions.xml").absolutePath
     )
-    
+
     // configure which version of the annotation processor to use. defaults to the same version as the plugin
     configure<org.eclipse.edc.plugins.autodoc.AutodocExtension> {
         processorVersion.set(annotationProcessorVersion)

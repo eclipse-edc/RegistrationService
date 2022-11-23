@@ -27,7 +27,6 @@ dependencies {
     testImplementation(libs.awaitility)
     testImplementation(libs.jackson.databind)
     testImplementation(libs.mockserver.netty)
-    testImplementation(libs.mockserver.netty)
     testImplementation(libs.mockserver.client)
     testImplementation(edc.core.junit)
 }
