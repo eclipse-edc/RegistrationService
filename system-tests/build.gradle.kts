@@ -16,30 +16,17 @@ plugins {
     `java-library`
 }
 
-val identityHubVersion: String by project
-val identityHubGroup: String by project
-val awaitility: String by project
-val jupiterVersion: String by project
-val okHttpVersion: String by project
-val assertj: String by project
-val jacksonVersion: String by project
-val httpMockServer: String by project
-val edcVersion: String by project
-val edcGroup: String by project
-
 dependencies {
     testImplementation(testFixtures(project(":rest-client")))
     testImplementation(project(":rest-client"))
     testImplementation(project(":client-cli"))
-    testImplementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
-    testImplementation("${identityHubGroup}:identity-hub-client:${identityHubVersion}")
+    testImplementation(libs.okhttp)
+    testImplementation(identityHub.core.client)
+    testImplementation(edc.spi.identity.did)
     testRuntimeOnly(project(":launcher"))
-    testImplementation("org.assertj:assertj-core:${assertj}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
-    testImplementation("org.awaitility:awaitility:${awaitility}")
-    testImplementation("org.mock-server:mockserver-netty:${httpMockServer}:shaded")
-    testImplementation("org.mock-server:mockserver-client-java:${httpMockServer}:shaded")
-    testImplementation("${edcGroup}:junit:${edcVersion}")
+    testImplementation(libs.awaitility)
+    testImplementation(libs.jackson.databind)
+    testImplementation(libs.mockserver.netty)
+    testImplementation(libs.mockserver.client)
+    testImplementation(edc.core.junit)
 }

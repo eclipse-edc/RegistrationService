@@ -16,29 +16,15 @@ plugins {
     `java-library`
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
-val assertj: String by project
-val jupiterVersion: String by project
-val mockitoVersion: String by project
-val cosmosSdkVersion: String by project
-val failsafeVersion: String by project
-
 dependencies {
     api(project(":spi:participant-store-spi"))
-    api("${edcGroup}:azure-cosmos-core:${edcVersion}")
+    api(edc.ext.azure.cosmos.core)
 
-    implementation("dev.failsafe:failsafe:${failsafeVersion}")
-    implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
-
-
+    implementation(libs.failsafe.core)
+    implementation(libs.azure.cosmos)
+    
     testImplementation(testFixtures(project(":spi:participant-store-spi")))
-    testImplementation("org.assertj:assertj-core:${assertj}")
-    testImplementation("org.mockito:mockito-core:${mockitoVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
-    testImplementation(testFixtures("${edcGroup}:azure-test:${edcVersion}"))
+    testImplementation(testFixtures(edc.ext.azure.test))
 
 }
 

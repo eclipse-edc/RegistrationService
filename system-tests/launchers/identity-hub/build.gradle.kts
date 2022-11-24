@@ -18,16 +18,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
-val identityHubVersion: String by project
-val identityHubGroup: String by project
-
 dependencies {
-    implementation("${edcGroup}:connector-core:${edcVersion}")
-    runtimeOnly("${edcGroup}:boot:${edcVersion}")
-    implementation("${identityHubGroup}:identity-hub:${identityHubVersion}")
-    implementation("${identityHubGroup}:identity-hub-api:${identityHubVersion}")
+    runtimeOnly(edc.core.connector)
+    runtimeOnly(edc.boot)
+    runtimeOnly(identityHub.core)
+    runtimeOnly(identityHub.core.api)
 }
 
 application {
