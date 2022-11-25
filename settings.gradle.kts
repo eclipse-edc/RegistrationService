@@ -40,7 +40,7 @@ dependencyResolutionManagement {
 
         }
         create("identityHub") {
-            version("identityHub", "0.0.1-20221118-SNAPSHOT")
+            version("identityHub", "0.0.1-SNAPSHOT")
             library("spi-core", "org.eclipse.edc", "identity-hub-spi").versionRef("identityHub")
             library("core", "org.eclipse.edc", "identity-hub").versionRef("identityHub")
             library("core-api", "org.eclipse.edc", "identity-hub-api").versionRef("identityHub")
@@ -54,7 +54,7 @@ dependencyResolutionManagement {
 
         }
         create("edc") {
-            version("edc", "0.0.1-20221113-SNAPSHOT")
+            version("edc", "0.0.1-SNAPSHOT")
             library("util", "org.eclipse.edc", "util").versionRef("edc")
             library("boot", "org.eclipse.edc", "boot").versionRef("edc")
 
