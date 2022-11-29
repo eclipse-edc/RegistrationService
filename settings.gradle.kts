@@ -40,17 +40,17 @@ dependencyResolutionManagement {
 
         }
         create("identityHub") {
-            version("identityHub", "0.0.1-SNAPSHOT")
-            library("spi-core", "org.eclipse.edc", "identity-hub-spi").versionRef("identityHub")
-            library("core", "org.eclipse.edc", "identity-hub").versionRef("identityHub")
-            library("core-api", "org.eclipse.edc", "identity-hub-api").versionRef("identityHub")
-            library("core-client", "org.eclipse.edc", "identity-hub-client").versionRef("identityHub")
+            version("ih", "0.0.1-SNAPSHOT")
+            library("spi-core", "org.eclipse.edc", "identity-hub-spi").versionRef("ih")
+            library("core", "org.eclipse.edc", "identity-hub").versionRef("ih")
+            library("core-api", "org.eclipse.edc", "identity-hub-api").versionRef("ih")
+            library("core-client", "org.eclipse.edc", "identity-hub-client").versionRef("ih")
 
             library(
                 "ext-credentialsVerifier",
                 "org.eclipse.edc",
                 "identity-hub-credentials-verifier"
-            ).versionRef("identityHub")
+            ).versionRef("ih")
 
         }
         create("edc") {
@@ -97,7 +97,7 @@ include(":extensions:registration-service")
 include(":extensions:participant-verifier")
 include(":extensions:registration-policy-gaiax-member")
 include(":system-tests")
-include(":system-tests:launchers:identity-hub")
+include(":system-tests:launchers:participant")
 include(":rest-client")
 include(":client-cli")
 include(":extensions:store:sql:participant-store-sql")

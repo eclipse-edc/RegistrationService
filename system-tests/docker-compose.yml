@@ -40,7 +40,7 @@ services:
   participant:
     container_name: participant
     build:
-      context: launchers/identity-hub
+      context: launchers/participant
       args:
         JVM_ARGS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007"
     ports:
