@@ -15,6 +15,7 @@ dependencies {
     implementation(edc.ext.identity.did.web)
     implementation(edc.ext.identity.did.crypto)
     implementation(libs.okhttp)
+    implementation(edc.core.connector)
 
     testImplementation(testFixtures(project(":rest-client")))
 }

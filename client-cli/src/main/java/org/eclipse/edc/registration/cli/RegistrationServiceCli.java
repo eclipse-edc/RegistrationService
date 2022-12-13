@@ -17,9 +17,13 @@ package org.eclipse.edc.registration.cli;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.failsafe.RetryPolicy;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
+import org.eclipse.edc.connector.core.base.EdcHttpClientImpl;
 import org.eclipse.edc.iam.did.web.resolution.WebDidResolver;
 import org.eclipse.edc.registration.client.api.RegistryApi;
+import org.eclipse.edc.spi.http.EdcHttpClient;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
@@ -28,6 +32,7 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.edc.registration.cli.ClientUtils.createApiClient;
@@ -52,6 +57,7 @@ public class RegistrationServiceCli {
     @CommandLine.Option(names = "--http-scheme", description = "Flag to create DID URLs with http instead of https scheme. Used for testing purposes.")
     boolean useHttpScheme;
     RegistryApi registryApiClient;
+    private EdcHttpClient edcHttpClient;
 
     public static void main(String... args) {
         CommandLine commandLine = getCommandLine();
@@ -92,10 +98,15 @@ public class RegistrationServiceCli {
     }
 
     @NotNull
-    private OkHttpClient httpClient() {
-        return new OkHttpClient.Builder()
+    private EdcHttpClient httpClient() {
+        var httpClient = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();
+
+        var retryPolicy = RetryPolicy.<Response>builder().withMaxRetries(3)
+                .withBackoff(Duration.ofSeconds(2), Duration.ofSeconds(5))
+                .build();
+        return new EdcHttpClientImpl(httpClient, retryPolicy);
     }
 }
