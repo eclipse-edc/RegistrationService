@@ -56,6 +56,9 @@ public class RegistrationServiceCli {
     Path privateKeyFile;
     @CommandLine.Option(names = "--http-scheme", description = "Flag to create DID URLs with http instead of https scheme. Used for testing purposes.")
     boolean useHttpScheme;
+    @CommandLine.Option(names = { "--url", "-u" }, description = "Override for the registration service URL. Normally it would be taken from the Dataspace's DID document. Used for testing purposes")
+    String registrationServiceUrlOverride;
+
     RegistryApi registryApiClient;
     private EdcHttpClient edcHttpClient;
 
@@ -84,7 +87,12 @@ public class RegistrationServiceCli {
             throw new RuntimeException("Error reading file " + privateKeyFile, e);
         }
 
-        registryApiClient = new RegistryApi(createApiClient(registrationUrl(), clientDid, privateKeyData));
+        var apiClient = createApiClient(registrationUrl(), clientDid, privateKeyData);
+        if (registrationServiceUrlOverride != null) {
+            monitor.info("Overriding RegistrationService URL: " + registrationServiceUrlOverride);
+            apiClient.updateBaseUri(registrationServiceUrlOverride);
+        }
+        registryApiClient = new RegistryApi(apiClient);
     }
 
     private String registrationUrl() {
