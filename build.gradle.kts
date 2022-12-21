@@ -25,11 +25,6 @@ allprojects {
     apply(plugin = "${edcGroup}.edc-build")
 
 
-    // Specify config file excluding generated source files
-    System.setProperty(
-        "org.checkstyle.google.suppressionfilter.config",
-        file("${rootProject.projectDir.path}/resources/checkstyle-suppressions.xml").absolutePath
-    )
 
     // configure which version of the annotation processor to use. defaults to the same version as the plugin
     configure<org.eclipse.edc.plugins.autodoc.AutodocExtension> {
