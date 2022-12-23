@@ -60,7 +60,6 @@ public class RegistrationServiceCli {
     String registrationServiceUrlOverride;
 
     RegistryApi registryApiClient;
-    private EdcHttpClient edcHttpClient;
 
     public static void main(String... args) {
         CommandLine commandLine = getCommandLine();
@@ -115,6 +114,6 @@ public class RegistrationServiceCli {
         var retryPolicy = RetryPolicy.<Response>builder().withMaxRetries(3)
                 .withBackoff(Duration.ofSeconds(2), Duration.ofSeconds(5))
                 .build();
-        return new EdcHttpClientImpl(httpClient, retryPolicy);
+        return new EdcHttpClientImpl(httpClient, retryPolicy, new ConsoleMonitor("RegistrationService CLI", ConsoleMonitor.Level.INFO));
     }
 }
