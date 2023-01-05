@@ -21,7 +21,9 @@ import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.resolution.DidPublicKeyResolver;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.identityhub.client.IdentityHubClientImpl;
-import org.eclipse.edc.identityhub.spi.credentials.VerifiableCredentialsJwtServiceImpl;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelopeTransformer;
+import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
+import org.eclipse.edc.identityhub.verifier.jwt.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.edc.registration.api.RegistrationApiController;
 import org.eclipse.edc.registration.api.RegistrationService;
 import org.eclipse.edc.registration.auth.DidJwtAuthenticationFilter;
@@ -138,7 +140,9 @@ public class AuthorityExtension implements ServiceExtension {
         var mapper = context.getTypeManager().getMapper();
         var jwtService = new VerifiableCredentialsJwtServiceImpl(mapper, monitor);
 
-        var identityHubClient = new IdentityHubClientImpl(httpClient, mapper, monitor);
+        var credentialEnvelopeTransformerRegistry = new CredentialEnvelopeTransformerRegistryImpl();
+        credentialEnvelopeTransformerRegistry.register(new JwtCredentialEnvelopeTransformer(mapper));
+        var identityHubClient = new IdentityHubClientImpl(httpClient, mapper, monitor, credentialEnvelopeTransformerRegistry);
 
         var privateKeyWrapper = privateKeyResolver.resolvePrivateKey(context.getConnectorId(), PrivateKeyWrapper.class);
         Objects.requireNonNull(privateKeyWrapper, "Couldn't resolve private key from connector " + context.getConnectorId());

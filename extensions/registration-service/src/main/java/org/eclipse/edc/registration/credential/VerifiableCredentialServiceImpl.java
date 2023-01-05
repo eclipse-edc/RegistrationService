@@ -19,8 +19,9 @@ import org.eclipse.edc.iam.did.spi.document.DidDocument;
 import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.identityhub.client.spi.IdentityHubClient;
-import org.eclipse.edc.identityhub.spi.credentials.VerifiableCredentialsJwtService;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
 import org.eclipse.edc.identityhub.spi.credentials.model.VerifiableCredential;
+import org.eclipse.edc.identityhub.verifier.jwt.VerifiableCredentialsJwtService;
 import org.eclipse.edc.registration.authority.model.Participant;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.response.ResponseStatus;
@@ -81,7 +82,7 @@ public class VerifiableCredentialServiceImpl implements VerifiableCredentialServ
         String identityHubUrl = identityHubUrlResult.getContent();
 
         monitor.debug(() -> "Sending VC to identity hub " + identityHubUrl);
-        var addVcResult = identityHubClient.addVerifiableCredential(identityHubUrl, jwt);
+        var addVcResult = identityHubClient.addVerifiableCredential(identityHubUrl, new JwtCredentialEnvelope(jwt));
         if (addVcResult.failed()) {
             return failureResult(ERROR_RETRY, "Failed to send VC. " + addVcResult.getFailureDetail());
         }

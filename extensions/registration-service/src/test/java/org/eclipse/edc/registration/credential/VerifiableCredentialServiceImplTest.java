@@ -22,8 +22,10 @@ import org.eclipse.edc.iam.did.spi.document.Service;
 import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.identityhub.client.spi.IdentityHubClient;
-import org.eclipse.edc.identityhub.spi.credentials.VerifiableCredentialsJwtService;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
+import org.eclipse.edc.identityhub.spi.credentials.model.CredentialEnvelope;
 import org.eclipse.edc.identityhub.spi.credentials.model.VerifiableCredential;
+import org.eclipse.edc.identityhub.verifier.jwt.VerifiableCredentialsJwtService;
 import org.eclipse.edc.registration.authority.model.Participant;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.response.ResponseStatus;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.edc.registration.authority.TestUtils.createParticipant;
 import static org.eclipse.edc.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.eclipse.edc.spi.response.ResponseStatus.FATAL_ERROR;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -50,94 +54,118 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class VerifiableCredentialServiceImplTest {
-    static final String IDENTITY_HUB_TYPE = "IdentityHub";
+    private static final String IDENTITY_HUB_TYPE = "IdentityHub";
+    private static final String DATASPACE_DID = "some.test/url";
+    private static final String PARTICIPANT_DID = "some.test/url";
+    private static final String IDENTITY_HUB_URL = "some.test/url";
+    private static final String FAILURE_MESSAGE = "Test Failure";
 
-    Monitor monitor = mock(Monitor.class);
-    VerifiableCredentialsJwtService jwtService = mock(VerifiableCredentialsJwtService.class);
-    PrivateKeyWrapper privateKeyWrapper = mock(PrivateKeyWrapper.class);
-    String dataspaceDid = "some.test/url";
-    String participantDid = "some.test/url";
-    DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
-    IdentityHubClient identityHubClient = mock(IdentityHubClient.class);
-    SignedJWT jwt = mock(SignedJWT.class);
-    String identityHubUrl = "some.test/url";
-    String failure = "Test Failure";
-    VerifiableCredentialServiceImpl service = new VerifiableCredentialServiceImpl(monitor, jwtService, privateKeyWrapper, dataspaceDid, resolverRegistry, identityHubClient);
-    Participant.Builder participantBuilder = createParticipant().did(participantDid);
-    ArgumentCaptor<VerifiableCredential> vc = ArgumentCaptor.forClass(VerifiableCredential.class);
+    private final Monitor monitor = mock(Monitor.class);
+    private final VerifiableCredentialsJwtService jwtService = mock(VerifiableCredentialsJwtService.class);
+    private final PrivateKeyWrapper privateKeyWrapper = mock(PrivateKeyWrapper.class);
+    private final DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
+    private final IdentityHubClient identityHubClient = mock(IdentityHubClient.class);
+    private final SignedJWT jwt = mock(SignedJWT.class);
+
+    private VerifiableCredentialServiceImpl service;
 
     @BeforeEach
-    void beforeEach() throws Exception {
-        when(resolverRegistry.resolve(participantDid))
+    void setUp() throws Exception {
+        when(resolverRegistry.resolve(PARTICIPANT_DID))
                 .thenReturn(Result.success(DidDocument.Builder.newInstance()
-                        .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, identityHubUrl)))
+                        .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, IDENTITY_HUB_URL)))
                         .build()));
-        when(jwtService.buildSignedJwt(any(), eq(dataspaceDid), eq(participantDid), eq(privateKeyWrapper)))
+        when(jwtService.buildSignedJwt(any(), eq(DATASPACE_DID), eq(PARTICIPANT_DID), eq(privateKeyWrapper)))
                 .thenReturn(jwt);
-        when(identityHubClient.addVerifiableCredential(identityHubUrl, jwt))
+        when(identityHubClient.addVerifiableCredential(eq(IDENTITY_HUB_URL), argThat(new JwtCredentialEnvelopeMatcher(jwt))))
                 .thenReturn(StatusResult.success());
+
+        service = new VerifiableCredentialServiceImpl(monitor, jwtService, privateKeyWrapper, DATASPACE_DID, resolverRegistry, identityHubClient);
     }
 
     @Test
     void pushVerifiableCredential_createsMembershipCredential() throws Exception {
-        var result = service.pushVerifiableCredential(participantBuilder.build());
+        var vc = ArgumentCaptor.forClass(VerifiableCredential.class);
+        var result = service.pushVerifiableCredential(participant());
         assertThat(result.succeeded()).isTrue();
 
-        verify(jwtService).buildSignedJwt(vc.capture(), eq(dataspaceDid), eq(participantDid), eq(privateKeyWrapper));
+        verify(jwtService).buildSignedJwt(vc.capture(), eq(DATASPACE_DID), eq(PARTICIPANT_DID), eq(privateKeyWrapper));
         assertThat(vc.getValue().getId()).satisfies(i -> assertThat(UUID.fromString(i)).isNotNull());
-        assertThat(vc.getValue().getCredentialSubject()).isEqualTo(Map.of("memberOfDataspace", dataspaceDid));
+        assertThat(vc.getValue().getCredentialSubject()).isEqualTo(Map.of("memberOfDataspace", DATASPACE_DID));
     }
 
     @Test
     void pushVerifiableCredential_pushesCredential() {
-        service.pushVerifiableCredential(participantBuilder.build());
+        service.pushVerifiableCredential(participant());
 
-        verify(identityHubClient).addVerifiableCredential(identityHubUrl, jwt);
+        verify(identityHubClient).addVerifiableCredential(eq(IDENTITY_HUB_URL), argThat(new JwtCredentialEnvelopeMatcher(jwt)));
     }
 
     @Test
     void pushVerifiableCredential_whenDidNotResolved_throws() {
-        when(resolverRegistry.resolve(participantDid))
-                .thenReturn(Result.failure(failure));
+        when(resolverRegistry.resolve(PARTICIPANT_DID))
+                .thenReturn(Result.failure(FAILURE_MESSAGE));
 
         assertThatCallFailsWith(ERROR_RETRY)
-                .isEqualTo(format("Failed to resolve DID %s. %s", participantDid, failure));
+                .isEqualTo(format("Failed to resolve DID %s. %s", PARTICIPANT_DID, FAILURE_MESSAGE));
     }
 
     @Test
     void pushVerifiableCredential_whenDidDocumentDoesNotContainHubUrl_throws() {
-        when(resolverRegistry.resolve(participantDid))
+        when(resolverRegistry.resolve(PARTICIPANT_DID))
                 .thenReturn(Result.success(DidDocument.Builder.newInstance()
-                        .service(List.of(new Service(UUID.randomUUID().toString(), "test-type", identityHubUrl)))
+                        .service(List.of(new Service(UUID.randomUUID().toString(), "test-type", IDENTITY_HUB_URL)))
                         .build()));
 
         assertThatCallFailsWith(FATAL_ERROR)
-                .isEqualTo(format("Failed to resolve Identity Hub URL from DID document for %s", participantDid));
+                .isEqualTo(format("Failed to resolve Identity Hub URL from DID document for %s", PARTICIPANT_DID));
     }
 
     @Test
     void pushVerifiableCredential_whenJwtCannotBeSigned_throws() throws Exception {
-        when(jwtService.buildSignedJwt(any(), eq(dataspaceDid), eq(participantDid), eq(privateKeyWrapper)))
-                .thenThrow(new JOSEException(failure));
+        when(jwtService.buildSignedJwt(any(), eq(DATASPACE_DID), eq(PARTICIPANT_DID), eq(privateKeyWrapper)))
+                .thenThrow(new JOSEException(FAILURE_MESSAGE));
 
         assertThatCallFailsWith(FATAL_ERROR)
-                .isEqualTo(format("%s: %s", JOSEException.class.getCanonicalName(), failure));
+                .isEqualTo(format("%s: %s", JOSEException.class.getCanonicalName(), FAILURE_MESSAGE));
     }
 
     @Test
     void pushVerifiableCredential_whenPushToIdentityHubFails_throws() {
-        when(identityHubClient.addVerifiableCredential(identityHubUrl, jwt))
-                .thenReturn(StatusResult.failure(FATAL_ERROR, failure));
+        when(identityHubClient.addVerifiableCredential(eq(IDENTITY_HUB_URL), argThat(new JwtCredentialEnvelopeMatcher(jwt))))
+                .thenReturn(StatusResult.failure(FATAL_ERROR, FAILURE_MESSAGE));
 
         assertThatCallFailsWith(ERROR_RETRY)
-                .isEqualTo(format("Failed to send VC. %s", failure));
+                .isEqualTo(format("Failed to send VC. %s", FAILURE_MESSAGE));
     }
 
     @NotNull
     private AbstractStringAssert<?> assertThatCallFailsWith(ResponseStatus status) {
-        StatusResult<Void> result = service.pushVerifiableCredential(participantBuilder.build());
+        StatusResult<Void> result = service.pushVerifiableCredential(participant());
         assertThat(result.failed()).isTrue();
         assertThat(result.getFailure().status()).isEqualTo(status);
         return assertThat(result.getFailureDetail());
+    }
+
+    private static Participant participant() {
+        return createParticipant().did(PARTICIPANT_DID).build();
+    }
+
+    private static final class JwtCredentialEnvelopeMatcher implements ArgumentMatcher<CredentialEnvelope> {
+
+        private final SignedJWT jwt;
+
+        private JwtCredentialEnvelopeMatcher(SignedJWT jwt) {
+            this.jwt = jwt;
+        }
+
+        @Override
+        public boolean matches(CredentialEnvelope argument) {
+            if (argument instanceof JwtCredentialEnvelope) {
+                var envelope = (JwtCredentialEnvelope) argument;
+                return envelope.getJwtVerifiableCredentials().equals(jwt);
+            }
+            return false;
+        }
     }
 }

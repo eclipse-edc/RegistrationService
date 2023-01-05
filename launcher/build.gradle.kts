@@ -32,7 +32,8 @@ dependencies {
     runtimeOnly(edc.ext.micrometer.jetty)
     runtimeOnly(edc.ext.micrometer.jersey)
     runtimeOnly(edc.ext.configuration.filesystem)
-    runtimeOnly(identityHub.ext.credentialsVerifier)
+    runtimeOnly(identityHub.core.verifier)
+    runtimeOnly(identityHub.ext.verifier.jwt)
 
     // JDK Logger
     runtimeOnly(edc.ext.jdklogger)
