@@ -22,6 +22,8 @@ dependencies {
     testImplementation(project(":client-cli"))
     testImplementation(libs.okhttp)
     testImplementation(identityHub.core.client)
+    testImplementation(identityHub.ext.verifier.jwt)
+    testImplementation(identityHub.ext.credentials.jwt)
     testImplementation(edc.spi.identity.did)
     testRuntimeOnly(project(":launcher"))
     testImplementation(libs.awaitility)

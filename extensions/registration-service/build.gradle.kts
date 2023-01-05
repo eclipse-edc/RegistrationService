@@ -11,6 +11,8 @@ dependencies {
     implementation(edc.ext.http)
     implementation(edc.ext.identity.did.crypto)
     implementation(identityHub.core.client)
+    implementation(identityHub.ext.verifier.jwt)
+    implementation(identityHub.ext.credentials.jwt)
 
     implementation(libs.opentelemetry.annotations)
     implementation(libs.okhttp)

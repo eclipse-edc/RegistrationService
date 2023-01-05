@@ -15,15 +15,19 @@
 package org.eclipse.edc.registration.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jwt.SignedJWT;
 import okhttp3.OkHttpClient;
+import org.assertj.core.api.ThrowingConsumer;
 import org.eclipse.edc.identityhub.client.IdentityHubClientImpl;
-import org.eclipse.edc.identityhub.spi.credentials.VerifiableCredentialsJwtServiceImpl;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelopeTransformer;
+import org.eclipse.edc.identityhub.spi.credentials.model.CredentialEnvelope;
 import org.eclipse.edc.identityhub.spi.credentials.model.VerifiableCredential;
+import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
+import org.eclipse.edc.identityhub.verifier.jwt.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.edc.registration.cli.CryptoUtils;
 import org.eclipse.edc.registration.client.api.RegistryApi;
-import org.eclipse.edc.spi.monitor.ConsoleMonitor;
 import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.edc.spi.types.TypeManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +37,6 @@ import org.mockserver.model.HttpStatusCode;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
@@ -48,6 +51,7 @@ import static org.eclipse.edc.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.mockito.Mockito.mock;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -55,26 +59,29 @@ import static org.mockserver.stop.Stop.stopQuietly;
 
 @IntegrationTest
 class RegistrationApiClientTest {
-    public static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
-    static final String API_URL = "http://localhost:8182/authority";
-    static final Monitor MONITOR = new ConsoleMonitor();
 
-    static IdentityHubClientImpl identityHubClient;
+    private static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
+    private static final String API_URL = "http://localhost:8182/authority";
+    private static final Monitor MONITOR = mock(Monitor.class);
 
-    ClientAndServer httpSourceClientAndServer;
-    int apiPort;
-    String did;
-    RegistryApi api;
+    private static IdentityHubClientImpl identityHubClient;
+
+    private ClientAndServer httpSourceClientAndServer;
+    private String did;
+    private RegistryApi api;
 
     @BeforeAll
     static void setUpClass() {
+        var mapper = new TypeManager().getMapper();
         var okHttpClient = new OkHttpClient.Builder().build();
-        identityHubClient = new IdentityHubClientImpl(okHttpClient, new ObjectMapper(), MONITOR);
+        var transformerRegistry = new CredentialEnvelopeTransformerRegistryImpl();
+        transformerRegistry.register(new JwtCredentialEnvelopeTransformer(mapper));
+        identityHubClient = new IdentityHubClientImpl(okHttpClient, mapper, MONITOR, transformerRegistry);
     }
 
     @BeforeEach
     void setUp() throws Exception {
-        apiPort = getFreePort();
+        var apiPort = getFreePort();
         httpSourceClientAndServer = startClientAndServer(apiPort);
         httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
                 .respond(response()
@@ -113,15 +120,15 @@ class RegistrationApiClientTest {
                 .build();
 
         // sanity check
-        assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
+        assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(vcRequirement(did, startTime));
 
         var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
-        identityHubClient.addVerifiableCredential(HUB_BASE_URL, jwt);
+        identityHubClient.addVerifiableCredential(HUB_BASE_URL, new JwtCredentialEnvelope(jwt));
 
         api.addParticipant();
 
         await().atMost(2, MINUTES).untilAsserted(() -> {
-            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(token -> assertIssuedVerifiableCredential(token, did, startTime));
+            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(vcRequirement(did, startTime));
         });
     }
 
@@ -144,15 +151,19 @@ class RegistrationApiClientTest {
                 .isEqualTo(404);
     }
 
-    private Collection<SignedJWT> getVerifiableCredentialsFromIdentityHub() {
+    private Collection<CredentialEnvelope> getVerifiableCredentialsFromIdentityHub() {
         var result = identityHubClient.getVerifiableCredentials(HUB_BASE_URL);
         assertThat(result.succeeded()).isTrue();
         return result.getContent();
     }
 
-    private void assertIssuedVerifiableCredential(SignedJWT jwt, String clientDid, Instant startTime) throws ParseException {
-        assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(clientDid);
-        assertThat(jwt.getJWTClaimsSet().getIssueTime().toInstant()).isAfter(startTime);
+    private ThrowingConsumer<CredentialEnvelope> vcRequirement(String clientDid, Instant startTime) {
+        return envelope -> {
+            assertThat(envelope).isInstanceOf(JwtCredentialEnvelope.class);
+            var jwt = ((JwtCredentialEnvelope) envelope).getJwtVerifiableCredentials();
+            assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(clientDid);
+            assertThat(jwt.getJWTClaimsSet().getIssueTime().toInstant()).isAfter(startTime);
+        };
     }
 
 }

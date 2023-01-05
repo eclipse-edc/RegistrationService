@@ -23,6 +23,7 @@ dependencies {
     runtimeOnly(edc.boot)
     runtimeOnly(identityHub.core)
     runtimeOnly(identityHub.core.api)
+    runtimeOnly(identityHub.ext.credentials.jwt)
 }
 
 application {

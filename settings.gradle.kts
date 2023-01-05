@@ -45,11 +45,13 @@ dependencyResolutionManagement {
             library("core", "org.eclipse.edc", "identity-hub").versionRef("ih")
             library("core-api", "org.eclipse.edc", "identity-hub-api").versionRef("ih")
             library("core-client", "org.eclipse.edc", "identity-hub-client").versionRef("ih")
+            library("core-verifier", "org.eclipse.edc", "identity-hub-credentials-verifier").versionRef("ih")
 
             library(
-                "ext-credentialsVerifier",
-                "org.eclipse.edc",
-                "identity-hub-credentials-verifier"
+                "ext-verifier-jwt", "org.eclipse.edc", "identity-hub-verifier-jwt"
+            ).versionRef("ih")
+            library(
+                "ext-credentials-jwt", "org.eclipse.edc", "identity-hub-credentials-jwt"
             ).versionRef("ih")
 
         }
