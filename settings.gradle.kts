@@ -27,7 +27,6 @@ dependencyResolutionManagement {
             version("openApiTools", "0.2.1")
             version("swaggerAnnotation", "1.5.22")
 
-
             library("picocli-core", "info.picocli", "picocli").versionRef("picocli")
             library("picocli-codegen", "info.picocli", "picocli-codegen").versionRef("picocli")
             library("google-findbugs-jsr305", "com.google.code.findbugs", "jsr305").versionRef("googleFindBugs")
@@ -92,15 +91,15 @@ dependencyResolutionManagement {
     }
 }
 
-include(":spi:participant-store-spi")
-include(":spi:dataspace-authority-spi")
-include(":launcher")
-include(":extensions:registration-service")
 include(":extensions:participant-verifier")
 include(":extensions:registration-policy-gaiax-member")
+include(":extensions:registration-service")
+include(":extensions:store:cosmos:participant-store-cosmos")
+include(":extensions:store:sql:participant-store-sql")
+include(":launcher")
+include(":registration-service-cli")
+include(":registration-service-client")
+include(":spi:dataspace-authority-spi")
+include(":spi:participant-store-spi")
 include(":system-tests")
 include(":system-tests:launchers:participant")
-include(":rest-client")
-include(":client-cli")
-include(":extensions:store:sql:participant-store-sql")
-include(":extensions:store:cosmos:participant-store-cosmos")

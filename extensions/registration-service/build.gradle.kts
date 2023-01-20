@@ -19,7 +19,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":spi:dataspace-authority-spi")))
     testImplementation(testFixtures(project(":spi:participant-store-spi")))
-    testImplementation(testFixtures(project(":rest-client")))
+    testImplementation(testFixtures(project(":registration-service-client")))
 }
 
 publishing {
