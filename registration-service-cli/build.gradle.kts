@@ -9,7 +9,7 @@ dependencies {
     api(libs.picocli.core)
     annotationProcessor(libs.picocli.codegen)
 
-    api(project(":rest-client"))
+    api(project(":registration-service-client"))
     implementation(libs.jackson.databind)
 
     implementation(edc.ext.identity.did.web)
@@ -17,7 +17,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(edc.core.connector)
 
-    testImplementation(testFixtures(project(":rest-client")))
+    testImplementation(testFixtures(project(":registration-service-client")))
 }
 
 application {
