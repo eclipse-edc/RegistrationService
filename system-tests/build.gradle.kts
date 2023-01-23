@@ -32,3 +32,7 @@ dependencies {
     testImplementation(libs.mockserver.client)
     testImplementation(edc.core.junit)
 }
+
+edcBuild {
+    publish.set(false)
+}
