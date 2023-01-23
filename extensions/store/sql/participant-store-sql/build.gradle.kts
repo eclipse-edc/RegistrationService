@@ -13,11 +13,3 @@ dependencies {
     testImplementation(testFixtures(project(":spi:registration-service-store-spi")))
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
 }
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
-}
