@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022 Microsoft Corporation
+ *  Copyright (c) 2023 Amadeus
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -8,14 +8,14 @@
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Contributors:
- *       Microsoft Corporation - initial API and implementation
+ *       Amadeus - initial API and implementation
  *
  */
 
 package org.eclipse.edc.registration.store.sql;
 
 import org.eclipse.edc.junit.annotations.PostgresqlDbIntegrationTest;
-import org.eclipse.edc.registration.authority.model.Participant;
+import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.registration.store.spi.ParticipantStoreTestBase;
 import org.eclipse.edc.registration.store.sql.schema.BaseSqlParticipantStatements;
@@ -31,25 +31,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.edc.registration.authority.TestUtils.createParticipant;
-import static org.eclipse.edc.registration.authority.model.ParticipantStatus.AUTHORIZED;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.edc.registration.ParticipantUtils.createParticipant;
+import static org.eclipse.edc.registration.spi.model.ParticipantStatus.AUTHORIZED;
 
 
 @PostgresqlDbIntegrationTest
 @ExtendWith(PostgresqlStoreSetupExtension.class)
-public class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
+class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
 
     private SqlParticipantStore store;
 
-    private BaseSqlParticipantStatements statements;
-
 
     @BeforeEach
-    void setUp(PostgresqlStoreSetupExtension extension) throws SQLException, IOException {
-        statements = new PostgresSqlParticipantStatements();
+    void setUp(PostgresqlStoreSetupExtension extension) throws IOException {
+        BaseSqlParticipantStatements statements = new PostgresSqlParticipantStatements();
 
         TypeManager manager = new TypeManager();
         manager.registerTypes(Participant.class);
@@ -67,13 +64,12 @@ public class PostgresParticipantStoreTest extends ParticipantStoreTestBase {
         Participant participant2 = createParticipant().did("some.test/url/2").status(AUTHORIZED).build();
         getStore().save(participant1);
 
-        assertThatThrownBy(() -> getStore().save(participant2))
-                .isInstanceOf(EdcPersistenceException.class)
-                .hasMessageStartingWith(String.format("Failed to update Participant with did %s", participant2.getDid()));
+        assertThatExceptionOfType(EdcPersistenceException.class).isThrownBy(() -> getStore().save(participant2))
+                .withMessageStartingWith(String.format("Failed to update Participant with did %s", participant2.getDid()));
     }
 
     @AfterEach
-    void tearDown(PostgresqlStoreSetupExtension extension) throws Exception {
+    void tearDown(PostgresqlStoreSetupExtension extension) {
         var dialect = new PostgresSqlParticipantStatements();
         extension.runQuery("DROP TABLE " + dialect.getParticipantTable());
     }

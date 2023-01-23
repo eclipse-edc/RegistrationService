@@ -16,8 +16,8 @@ package org.eclipse.edc.registration.store.sql;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.edc.registration.authority.model.Participant;
-import org.eclipse.edc.registration.authority.model.ParticipantStatus;
+import org.eclipse.edc.registration.spi.model.Participant;
+import org.eclipse.edc.registration.spi.model.ParticipantStatus;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.registration.store.sql.schema.ParticipantStatements;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;

@@ -17,8 +17,8 @@ plugins {
 }
 
 dependencies {
-    testImplementation(testFixtures(project(":registration-service-client")))
-    testImplementation(project(":registration-service-client"))
+    testImplementation(testFixtures(project(":core:registration-service-client")))
+    testImplementation(project(":core:registration-service-client"))
     testImplementation(project(":registration-service-cli"))
     testImplementation(libs.okhttp)
     testImplementation(identityHub.core.client)

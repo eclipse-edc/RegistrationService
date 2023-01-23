@@ -14,8 +14,8 @@
 
 package org.eclipse.edc.registration.store.cosmos.model;
 
-import org.eclipse.edc.registration.authority.model.Participant;
-import org.eclipse.edc.registration.authority.model.ParticipantStatus;
+import org.eclipse.edc.registration.spi.model.Participant;
+import org.eclipse.edc.registration.spi.model.ParticipantStatus;
 import org.eclipse.edc.spi.types.TypeManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

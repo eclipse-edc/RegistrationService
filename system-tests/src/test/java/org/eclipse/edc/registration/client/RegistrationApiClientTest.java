@@ -14,16 +14,16 @@
 
 package org.eclipse.edc.registration.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import org.assertj.core.api.ThrowingConsumer;
 import org.eclipse.edc.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
 import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelopeTransformer;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialFactory;
+import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialEnvelope;
-import org.eclipse.edc.identityhub.spi.credentials.model.VerifiableCredential;
+import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
 import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
-import org.eclipse.edc.identityhub.verifier.jwt.VerifiableCredentialsJwtServiceImpl;
 import org.eclipse.edc.registration.cli.CryptoUtils;
 import org.eclipse.edc.registration.client.api.RegistryApi;
 import org.eclipse.edc.spi.monitor.Monitor;
@@ -37,9 +37,9 @@ import org.mockserver.model.HttpStatusCode;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Date;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.edc.junit.testfixtures.TestUtils.getFreePort;
+import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.MAPPER;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.didDocument;
@@ -113,23 +114,28 @@ class RegistrationApiClientTest {
         var startTime = Instant.now().truncatedTo(SECONDS).minus(1, SECONDS);
         var key = Files.readString(Path.of("resources/vault/private-key.pem"));
         var authorityPrivateKey = CryptoUtils.parseFromPemEncodedObjects(key);
-        var jwtService = new VerifiableCredentialsJwtServiceImpl(new ObjectMapper(), MONITOR);
-        var vc = VerifiableCredential.Builder.newInstance()
+        var issuer = "did:web:localhost%3A8080:test-dataspace-authority";
+        var credential = Credential.Builder.newInstance()
                 .id(UUID.randomUUID().toString())
-                .credentialSubject(Map.of("gaiaXMember", "true"))
+                .issuer(issuer)
+                .issuanceDate(Date.from(Instant.now().truncatedTo(SECONDS)))
+                .context("test")
+                .type("test")
+                .credentialSubject(CredentialSubject.Builder.newInstance()
+                        .id(did)
+                        .claim("gaiaXMember", "true")
+                        .build())
                 .build();
 
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(vcRequirement(did, startTime));
 
-        var jwt = jwtService.buildSignedJwt(vc, "did:web:localhost%3A8080:test-dataspace-authority", did, authorityPrivateKey);
+        var jwt = JwtCredentialFactory.buildSignedJwt(credential, issuer, did, authorityPrivateKey, MAPPER);
         identityHubClient.addVerifiableCredential(HUB_BASE_URL, new JwtCredentialEnvelope(jwt));
 
         api.addParticipant();
 
-        await().atMost(2, MINUTES).untilAsserted(() -> {
-            assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(vcRequirement(did, startTime));
-        });
+        await().atMost(2, MINUTES).untilAsserted(() -> assertThat(getVerifiableCredentialsFromIdentityHub()).anySatisfy(vcRequirement(did, startTime)));
     }
 
     @Test
@@ -160,7 +166,7 @@ class RegistrationApiClientTest {
     private ThrowingConsumer<CredentialEnvelope> vcRequirement(String clientDid, Instant startTime) {
         return envelope -> {
             assertThat(envelope).isInstanceOf(JwtCredentialEnvelope.class);
-            var jwt = ((JwtCredentialEnvelope) envelope).getJwtVerifiableCredentials();
+            var jwt = ((JwtCredentialEnvelope) envelope).getJwt();
             assertThat(jwt.getJWTClaimsSet().getSubject()).isEqualTo(clientDid);
             assertThat(jwt.getJWTClaimsSet().getIssueTime().toInstant()).isAfter(startTime);
         };
