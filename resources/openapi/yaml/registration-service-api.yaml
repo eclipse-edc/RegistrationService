@@ -1,0 +1,62 @@
+openapi: 3.0.1
+info:
+  title: Eclipse Dataspace Connector Registration Service
+  version: 0.0.1
+paths:
+  /registry/participant:
+    get:
+      description: Get a participant by caller DID.
+      operationId: getParticipant
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantDto'
+          description: Dataspace participant.
+        "404":
+          description: Dataspace participant not found.
+      tags:
+      - Registry
+    post:
+      description: Asynchronously request to add a dataspace participant.
+      operationId: addParticipant
+      responses:
+        "204":
+          description: No content
+      tags:
+      - Registry
+  /registry/participants:
+    get:
+      description: Gets all dataspace participants.
+      operationId: listParticipants
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                example: null
+                items:
+                  $ref: '#/components/schemas/ParticipantDto'
+          description: Dataspace participants.
+      tags:
+      - Registry
+components:
+  schemas:
+    ParticipantDto:
+      type: object
+      description: Dataspace Participant DTO
+      example: null
+      properties:
+        did:
+          type: string
+          example: null
+        status:
+          type: string
+          description: Participant onboarding status DTO
+          enum:
+          - ONBOARDING_IN_PROGRESS
+          - ONBOARDED
+          - DENIED
+          example: null

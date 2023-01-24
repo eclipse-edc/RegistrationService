@@ -18,41 +18,37 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
-val edcVersion: String by project
-val edcGroup: String by project
-val identityHubVersion: String by project
-val identityHubGroup: String by project
-
 dependencies {
-    implementation(project(":extensions:registration-service"))
-    implementation(project(":extensions:participant-verifier"))
-    implementation(project(":extensions:registration-policy-gaiax-member"))
-    implementation("${edcGroup}:identity-did-web:${edcVersion}")
-    implementation("${edcGroup}:identity-did-core:${edcVersion}")
-    implementation("${edcGroup}:core-base:${edcVersion}")
-    runtimeOnly("${edcGroup}:core-boot:${edcVersion}")
-    implementation("${edcGroup}:control-plane-core:${edcVersion}")
-    implementation("${edcGroup}:observability-api:${edcVersion}")
-    implementation("${edcGroup}:core-micrometer:${edcVersion}")
-    runtimeOnly("${edcGroup}:jetty-micrometer:${edcVersion}")
-    runtimeOnly("${edcGroup}:jersey-micrometer:${edcVersion}")
-    implementation("${edcGroup}:filesystem-configuration:${edcVersion}")
-    implementation("${identityHubGroup}:identity-hub-credentials-verifier:${identityHubVersion}")
+    runtimeOnly(project(":core:registration-service"))
+    runtimeOnly(project(":core:registration-service-credential-service"))
+    runtimeOnly(project(":extensions:registration-service-api"))
+    runtimeOnly(edc.ext.identity.did.web)
+    runtimeOnly(edc.ext.identity.did.core)
+    runtimeOnly(edc.core.connector)
+    runtimeOnly(edc.boot)
+    runtimeOnly(edc.core.controlPlane)
+    runtimeOnly(edc.ext.observability)
+    runtimeOnly(edc.core.micrometer)
+    runtimeOnly(edc.ext.micrometer.jetty)
+    runtimeOnly(edc.ext.micrometer.jersey)
+    runtimeOnly(edc.ext.configuration.filesystem)
+    runtimeOnly(identityHub.core.verifier)
+    runtimeOnly(identityHub.ext.verifier.jwt)
 
     // JDK Logger
-    implementation("${edcGroup}:jdk-logger-monitor:${edcVersion}")
+    runtimeOnly(edc.ext.jdklogger)
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
     if (useFsVault) {
-        implementation("${edcGroup}:filesystem-vault:${edcVersion}")
+        runtimeOnly(edc.ext.vault.filesystem)
     } else {
-        implementation("${edcGroup}:azure-vault:${edcVersion}")
+        runtimeOnly(edc.ext.vault.azure)
     }
 }
 
 application {
-    mainClass.set("org.eclipse.dataspaceconnector.boot.system.runtime.BaseRuntime")
+    mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
