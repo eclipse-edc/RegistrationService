@@ -23,7 +23,6 @@ import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
-import org.eclipse.edc.runtime.metamodel.annotation.Provides;
 import org.eclipse.edc.spi.security.Vault;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
@@ -33,7 +32,6 @@ import org.eclipse.edc.spi.system.health.HealthCheckService;
  * Extension that provides a {@link ParticipantStore} with CosmosDB as backend storage
  */
 @Extension(value = CosmosParticipantStoreExtension.NAME)
-@Provides(ParticipantStore.class)
 public class CosmosParticipantStoreExtension implements ServiceExtension {
 
     public static final String NAME = "Cosmos Participant Store";
@@ -57,7 +55,6 @@ public class CosmosParticipantStoreExtension implements ServiceExtension {
         context.getService(HealthCheckService.class).addReadinessProvider(() -> cosmosDbApi.get().forComponent(name()));
         context.getTypeManager().registerTypes(ParticipantDocument.class);
     }
-
 
     @Provider
     public ParticipantStore participantStore(ServiceExtensionContext context) {

@@ -19,9 +19,9 @@ plugins {
 }
 
 dependencies {
-    runtimeOnly(project(":extensions:registration-service"))
-    runtimeOnly(project(":extensions:participant-verifier"))
-    runtimeOnly(project(":extensions:registration-policy-gaiax-member"))
+    runtimeOnly(project(":core:registration-service"))
+    runtimeOnly(project(":core:registration-service-credential-service"))
+    runtimeOnly(project(":extensions:registration-service-api"))
     runtimeOnly(edc.ext.identity.did.web)
     runtimeOnly(edc.ext.identity.did.core)
     runtimeOnly(edc.core.connector)

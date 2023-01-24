@@ -22,7 +22,7 @@ import dev.failsafe.RetryPolicy;
 import org.eclipse.edc.azure.cosmos.CosmosDbApiImpl;
 import org.eclipse.edc.azure.testfixtures.CosmosTestClient;
 import org.eclipse.edc.azure.testfixtures.annotations.AzureCosmosDbIntegrationTest;
-import org.eclipse.edc.registration.authority.model.Participant;
+import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.store.cosmos.model.ParticipantDocument;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.registration.store.spi.ParticipantStoreTestBase;

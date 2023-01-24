@@ -17,13 +17,13 @@ plugins {
 }
 
 dependencies {
-    api(project(":spi:participant-store-spi"))
+    api(project(":spi:registration-service-store-spi"))
     api(edc.ext.azure.cosmos.core)
 
     implementation(libs.failsafe.core)
     implementation(libs.azure.cosmos)
-    
-    testImplementation(testFixtures(project(":spi:participant-store-spi")))
+
+    testImplementation(testFixtures(project(":spi:registration-service-store-spi")))
     testImplementation(testFixtures(edc.ext.azure.test))
 
 }

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.eclipse.edc.azure.cosmos.CosmosDocument;
-import org.eclipse.edc.registration.authority.model.Participant;
+import org.eclipse.edc.registration.spi.model.Participant;
 
 
 @JsonTypeName("dataspaceconnector:participantdocument")

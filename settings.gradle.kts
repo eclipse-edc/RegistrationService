@@ -64,6 +64,8 @@ dependencyResolutionManagement {
             library("spi-transaction", "org.eclipse.edc", "transaction-spi").versionRef("edc")
             library("spi-transaction-datasource", "org.eclipse.edc", "transaction-datasource-spi").versionRef("edc")
             library("spi-identity-did", "org.eclipse.edc", "identity-did-spi").versionRef("edc")
+            library("spi-aggregate-service", "org.eclipse.edc", "aggregate-service-spi").versionRef("edc")
+            library("spi-transaction", "org.eclipse.edc", "transaction-spi").versionRef("edc")
 
             library("core-connector", "org.eclipse.edc", "connector-core").versionRef("edc")
             library("core-controlPlane", "org.eclipse.edc", "control-plane-core").versionRef("edc")
@@ -91,15 +93,23 @@ dependencyResolutionManagement {
     }
 }
 
-include(":extensions:participant-verifier")
-include(":extensions:registration-policy-gaiax-member")
-include(":extensions:registration-service")
+include(":core:registration-service")
+include(":core:registration-service-credential-service")
+include(":core:registration-service-onboarding-policy-verifier")
+include(":core:registration-service-client")
+
+include(":extensions:registration-service-api")
 include(":extensions:store:cosmos:participant-store-cosmos")
 include(":extensions:store:sql:participant-store-sql")
-include(":launcher")
-include(":registration-service-cli")
-include(":registration-service-client")
-include(":spi:dataspace-authority-spi")
-include(":spi:participant-store-spi")
+
+include(":spi:registration-service-spi")
+include(":spi:registration-service-store-spi")
+
 include(":system-tests")
 include(":system-tests:launchers:participant")
+
+include(":registration-service-cli")
+
+include(":launcher")
+
+
