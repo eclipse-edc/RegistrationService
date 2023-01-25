@@ -16,23 +16,18 @@ package org.eclipse.edc.registration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jwt.SignedJWT;
 import org.assertj.core.api.AbstractStringAssert;
-import org.eclipse.edc.iam.did.crypto.key.EcPrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.document.DidDocument;
 import org.eclipse.edc.iam.did.spi.document.Service;
 import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.identityhub.client.spi.IdentityHubClient;
 import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialFactory;
 import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialEnvelope;
-import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
 import org.eclipse.edc.registration.spi.model.Participant;
-import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.response.ResponseStatus;
 import org.eclipse.edc.spi.response.StatusResult;
@@ -42,10 +37,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,8 +49,10 @@ import static org.eclipse.edc.registration.ParticipantUtils.createParticipant;
 import static org.eclipse.edc.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.eclipse.edc.spi.response.ResponseStatus.FATAL_ERROR;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class VerifiableCredentialServiceImplTest {
@@ -72,48 +68,37 @@ class VerifiableCredentialServiceImplTest {
     private final Monitor monitor = mock(Monitor.class);
     private final DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
     private final IdentityHubClient identityHubClient = mock(IdentityHubClient.class);
-    private final Credential credential = Credential.Builder.newInstance()
-            .id("id")
-            .context("context")
-            .issuer(DATASPACE_DID)
-            .type("type")
-            .credentialSubject(CredentialSubject.Builder.newInstance()
-                    .id("test")
-                    .claim("foo", "bar")
-                    .build())
-            .issuanceDate(Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS)))
-            .build();
+    private final JwtCredentialFactory jwtCredentialFactory = mock(JwtCredentialFactory.class);
+    private final SignedJWT jwt = mock(SignedJWT.class);
+    private final PrivateKeyWrapper privateKeyWrapper = mock(PrivateKeyWrapper.class);
+    private final Credential credential = mock(Credential.class);
 
     private VerifiableCredentialServiceImpl service;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ParseException, JOSEException {
         when(resolverRegistry.resolve(PARTICIPANT_DID))
                 .thenReturn(Result.success(DidDocument.Builder.newInstance()
                         .service(List.of(new Service(UUID.randomUUID().toString(), IDENTITY_HUB_TYPE, IDENTITY_HUB_URL)))
                         .build()));
 
-        var keypair = generateKeyPair();
-        var wrapper = new EcPrivateKeyWrapper(keypair);
+        when(jwtCredentialFactory.buildSignedJwt(credential, privateKeyWrapper)).thenReturn(jwt);
 
-        service = new VerifiableCredentialServiceImpl(monitor, wrapper, DATASPACE_DID, resolverRegistry, identityHubClient, p -> Result.success(credential), MAPPER);
+        service = new VerifiableCredentialServiceImpl(monitor, privateKeyWrapper, resolverRegistry, identityHubClient, p -> Result.success(credential), jwtCredentialFactory);
     }
 
     @Test
-    void pushVerifiableCredential_createsMembershipCredential() {
+    void pushVerifiableCredential() throws ParseException, JOSEException {
         var captor = ArgumentCaptor.forClass(CredentialEnvelope.class);
         when(identityHubClient.addVerifiableCredential(eq(IDENTITY_HUB_URL), captor.capture()))
-                .thenReturn(StatusResult.success());
+                .thenReturn(Result.success());
 
         var result = service.pushVerifiableCredential(participant());
 
         assertThat(result.succeeded()).isTrue();
-        var captured = captor.getValue();
-        assertThat(captured).isNotNull().isInstanceOf(JwtCredentialEnvelope.class);
-        var jwtEnvelope = (JwtCredentialEnvelope) captured;
-        var vcResult = jwtEnvelope.toVerifiableCredential(MAPPER);
-        assertThat(vcResult.succeeded()).isTrue();
-        assertThat(vcResult.getContent().getItem()).usingRecursiveComparison().isEqualTo(credential);
+
+        verify(jwtCredentialFactory).buildSignedJwt(credential, privateKeyWrapper);
+        verify(identityHubClient).addVerifiableCredential(eq(IDENTITY_HUB_URL), argThat(new JwtCredentialEnvelopeMatcher(jwt)));
     }
 
     @Test
@@ -136,16 +121,18 @@ class VerifiableCredentialServiceImplTest {
     }
 
     @Test
-    void pushVerifiableCredential_whenJwtCannotBeSigned_throws() {
-        service = new VerifiableCredentialServiceImpl(monitor, mock(PrivateKeyWrapper.class), DATASPACE_DID, resolverRegistry, identityHubClient, p -> Result.success(credential), MAPPER);
+    void pushVerifiableCredential_whenJwtCannotBeSigned_throws() throws ParseException, JOSEException {
+        when(jwtCredentialFactory.buildSignedJwt(credential, privateKeyWrapper))
+                .thenThrow(new JOSEException(FAILURE_MESSAGE));
 
-        assertThatCallFailsWith(FATAL_ERROR).isEqualTo(NullPointerException.class.getCanonicalName());
+        assertThatCallFailsWith(FATAL_ERROR)
+                .isEqualTo(format("%s: %s", JOSEException.class.getCanonicalName(), FAILURE_MESSAGE));
     }
 
     @Test
     void pushVerifiableCredential_whenPushToIdentityHubFails_throws() {
         when(identityHubClient.addVerifiableCredential(eq(IDENTITY_HUB_URL), any(CredentialEnvelope.class)))
-                .thenReturn(StatusResult.failure(FATAL_ERROR, FAILURE_MESSAGE));
+                .thenReturn(Result.failure(FAILURE_MESSAGE));
 
         assertThatCallFailsWith(ERROR_RETRY).isEqualTo(format("Failed to send VC. %s", FAILURE_MESSAGE));
     }
@@ -162,14 +149,21 @@ class VerifiableCredentialServiceImplTest {
         return createParticipant().did(PARTICIPANT_DID).build();
     }
 
-    private static ECKey generateKeyPair() {
-        try {
-            return new ECKeyGenerator(Curve.P_256)
-                    .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-                    .keyID(UUID.randomUUID().toString()) // give the key a unique ID
-                    .generate();
-        } catch (JOSEException e) {
-            throw new EdcException(e);
+    private static final class JwtCredentialEnvelopeMatcher implements ArgumentMatcher<CredentialEnvelope> {
+
+        private final SignedJWT jwt;
+
+        private JwtCredentialEnvelopeMatcher(SignedJWT jwt) {
+            this.jwt = jwt;
+        }
+
+        @Override
+        public boolean matches(CredentialEnvelope argument) {
+            if (argument instanceof JwtCredentialEnvelope) {
+                var envelope = (JwtCredentialEnvelope) argument;
+                return envelope.getJwt().equals(jwt);
+            }
+            return false;
         }
     }
 }
