@@ -14,7 +14,6 @@
 
 package org.eclipse.edc.registration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.edc.iam.did.spi.document.DidDocument;
 import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
@@ -30,8 +29,6 @@ import org.eclipse.edc.spi.response.ResponseStatus;
 import org.eclipse.edc.spi.response.StatusResult;
 import org.eclipse.edc.spi.result.Result;
 
-import java.util.Objects;
-
 import static org.eclipse.edc.spi.response.ResponseStatus.ERROR_RETRY;
 import static org.eclipse.edc.spi.response.ResponseStatus.FATAL_ERROR;
 
@@ -41,22 +38,19 @@ public class VerifiableCredentialServiceImpl implements VerifiableCredentialServ
 
     private final Monitor monitor;
     private final PrivateKeyWrapper privateKeyWrapper;
-    private final String dataspaceDid;
     private final DidResolverRegistry resolverRegistry;
     private final IdentityHubClient identityHubClient;
     private final OnboardedParticipantCredentialProvider credentialProvider;
-    private final ObjectMapper mapper;
+    private final JwtCredentialFactory jwtCredentialFactory;
 
-    public VerifiableCredentialServiceImpl(Monitor monitor, PrivateKeyWrapper privateKeyWrapper, String dataspaceDid, DidResolverRegistry resolverRegistry, IdentityHubClient identityHubClient,
-                                           OnboardedParticipantCredentialProvider credentialProvider,
-                                           ObjectMapper mapper) {
+    public VerifiableCredentialServiceImpl(Monitor monitor, PrivateKeyWrapper privateKeyWrapper, DidResolverRegistry resolverRegistry, IdentityHubClient identityHubClient,
+                                           OnboardedParticipantCredentialProvider credentialProvider, JwtCredentialFactory jwtCredentialFactory) {
         this.monitor = monitor;
         this.privateKeyWrapper = privateKeyWrapper;
-        this.dataspaceDid = dataspaceDid;
         this.resolverRegistry = resolverRegistry;
         this.identityHubClient = identityHubClient;
         this.credentialProvider = credentialProvider;
-        this.mapper = mapper;
+        this.jwtCredentialFactory = jwtCredentialFactory;
     }
 
     @Override
@@ -71,9 +65,9 @@ public class VerifiableCredentialServiceImpl implements VerifiableCredentialServ
         monitor.debug("Building VC JWT");
         SignedJWT jwt;
         try {
-            jwt = JwtCredentialFactory.buildSignedJwt(credentialResult.getContent(), dataspaceDid, did, privateKeyWrapper, mapper);
+            jwt = jwtCredentialFactory.buildSignedJwt(credentialResult.getContent(), privateKeyWrapper);
         } catch (Exception e) {
-            return failureResult(FATAL_ERROR, Objects.requireNonNullElse(e.getMessage(), e.toString()));
+            return failureResult(FATAL_ERROR, e.toString());
         }
 
         monitor.debug(() -> "Resolving DID Document for " + did);
