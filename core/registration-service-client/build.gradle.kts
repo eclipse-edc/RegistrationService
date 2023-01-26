@@ -69,11 +69,3 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.openapi.jackson.databind.nullable)
 }
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
-}

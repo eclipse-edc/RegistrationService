@@ -28,12 +28,3 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
     archiveFileName.set("registration-service-cli.jar")
 }
-
-publishing {
-    publications {
-        create<MavenPublication>("registration-service-cli") {
-            artifactId = "registration-service-cli"
-            from(components["java"])
-        }
-    }
-}
