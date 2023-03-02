@@ -17,6 +17,7 @@
 // https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/java.md
 
 plugins {
+    id("java")
     `java-library`
     id("org.openapi.generator") version "5.4.0"
     `maven-publish`
@@ -40,11 +41,15 @@ tasks.withType(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::clas
     )
 }
 
-// Ensure compileJava depends on openApiGenerate
-val compileJava: JavaCompile by tasks
-val openApiGenerate: org.openapitools.generator.gradle.plugin.tasks.GenerateTask by tasks
-compileJava.apply {
-    dependsOn(openApiGenerate)
+// make sure the relevant tasks depend on the openapi generator task.
+// some may only exist after the evaluation phase, such as sourcesJar
+val apiGenTask: Task = tasks.getByName("openApiGenerate")
+afterEvaluate {
+    tasks.matching {
+        listOf("sourcesJar", "compileJava").contains(it.name)
+    }.asIterable().forEach { t ->
+        t.dependsOn(apiGenTask)
+    }
 }
 
 // Add generated sources
