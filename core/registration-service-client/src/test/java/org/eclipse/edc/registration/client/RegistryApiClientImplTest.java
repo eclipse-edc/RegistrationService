@@ -42,7 +42,7 @@ class RegistryApiClientImplTest {
         assertThat(result.succeeded()).isTrue();
 
         var rs = mockServer.takeRequest();
-        assertThat(rs.getPath()).isEqualTo("/api/v1/participant");
+        assertThat(rs.getPath()).isEqualTo("/api/v1/registry/participant");
         assertThat(rs.getMethod()).isEqualTo("POST");
         assertThat(result.succeeded()).isTrue();
     }
@@ -57,7 +57,7 @@ class RegistryApiClientImplTest {
         assertThat(result.getContent()).hasSize(1).usingRecursiveFieldByFieldElementComparator().containsOnly(dto);
 
         var rs = mockServer.takeRequest();
-        assertThat(rs.getPath()).isEqualTo("/api/v1/participants");
+        assertThat(rs.getPath()).isEqualTo("/api/v1/registry/participants");
         assertThat(rs.getMethod()).isEqualTo("GET");
     }
 
@@ -70,7 +70,7 @@ class RegistryApiClientImplTest {
         assertThat(result.getContent()).usingRecursiveComparison().isEqualTo(dto);
 
         var rs = mockServer.takeRequest();
-        assertThat(rs.getPath()).isEqualTo("/api/v1/participant");
+        assertThat(rs.getPath()).isEqualTo("/api/v1/registry/participant");
         assertThat(rs.getMethod()).isEqualTo("GET");
     }
 }

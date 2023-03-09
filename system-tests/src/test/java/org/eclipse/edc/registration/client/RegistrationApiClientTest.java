@@ -48,7 +48,7 @@ import static org.eclipse.edc.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.didDocument;
-import static org.eclipse.edc.registration.client.response.ApiFailure.BAD_REQUEST;
+import static org.eclipse.edc.registration.client.response.ApiFailure.NOT_FOUND;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -139,18 +139,19 @@ class RegistrationApiClientTest {
     void getParticipant() {
         api.addParticipant();
 
-        var response = api.getParticipant();
+        var result = api.getParticipant();
 
-        assertThat(response.succeeded()).isTrue();
-        assertThat(response.getContent().getDid()).isEqualTo(did);
+        assertThat(result.succeeded()).isTrue();
+        assertThat(result.getContent().getDid()).isEqualTo(did);
     }
 
     @Test
     void getParticipant_notFound() {
 
-        var result = api.listParticipants();
+        var result = api.getParticipant();
         assertThat(result.succeeded()).isFalse();
-        assertThat(result.reason()).isEqualTo(BAD_REQUEST.code());
+        assertThat(result.getContent()).isNull();
+        assertThat(result.reason()).isEqualTo(NOT_FOUND.code());
     }
 
     private Collection<CredentialEnvelope> getVerifiableCredentialsFromIdentityHub() {

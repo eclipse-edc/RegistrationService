@@ -28,7 +28,7 @@ class RegistryApiClientImpl implements RegistryApiClient {
 
     @Override
     public ApiResult<Void> addParticipant() {
-        var url = URI.create(baseUrl + "/participant");
+        var url = URI.create(baseUrl + "/registry/participant");
         var request = new Request.Builder()
                 .post(RequestBody.create(new byte[0]))
                 .url(url.toString())
@@ -40,7 +40,7 @@ class RegistryApiClientImpl implements RegistryApiClient {
     @Override
     public ApiResult<List<ParticipantDto>> listParticipants() {
 
-        var url = URI.create(baseUrl + "/participants");
+        var url = URI.create(baseUrl + "/registry/participants");
         var request = new Request.Builder()
                 .url(url.toString())
                 .get()
@@ -53,7 +53,7 @@ class RegistryApiClientImpl implements RegistryApiClient {
 
     @Override
     public ApiResult<ParticipantDto> getParticipant() {
-        var url = URI.create(baseUrl + "/participant");
+        var url = URI.create(baseUrl + "/registry/participant");
         var request = new Request.Builder()
                 .url(url.toString())
                 .get()
