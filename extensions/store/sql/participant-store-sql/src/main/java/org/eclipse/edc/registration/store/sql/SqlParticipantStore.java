@@ -21,6 +21,7 @@ import org.eclipse.edc.registration.spi.model.ParticipantStatus;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.registration.store.sql.schema.ParticipantStatements;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
+import org.eclipse.edc.spi.result.StoreResult;
 import org.eclipse.edc.sql.store.AbstractSqlStore;
 import org.eclipse.edc.transaction.datasource.spi.DataSourceRegistry;
 import org.eclipse.edc.transaction.spi.TransactionContext;
@@ -84,7 +85,7 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     }
 
     @Override
-    public void save(Participant participant) {
+    public StoreResult<Participant> save(Participant participant) {
 
         transactionContext.execute(() -> {
             try (var connection = getConnection()) {
@@ -102,6 +103,7 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
             }
         });
 
+        return null;
     }
 
     @Override

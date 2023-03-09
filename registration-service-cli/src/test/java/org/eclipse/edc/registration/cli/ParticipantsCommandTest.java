@@ -17,9 +17,10 @@ package org.eclipse.edc.registration.cli;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.edc.registration.client.RegistryApiClient;
 import org.eclipse.edc.registration.client.TestKeyData;
-import org.eclipse.edc.registration.client.api.RegistryApi;
-import org.eclipse.edc.registration.client.models.ParticipantDto;
+import org.eclipse.edc.registration.client.model.ParticipantDto;
+import org.eclipse.edc.registration.client.response.ApiResult;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ class ParticipantsCommandTest {
 
     @BeforeEach
     void setUp() {
-        app.registryApiClient = mock(RegistryApi.class);
+        app.registryApiClient = mock(RegistryApiClient.class);
         cmd.setOut(new PrintWriter(sw));
     }
 
@@ -69,7 +70,7 @@ class ParticipantsCommandTest {
     void list() throws Exception {
         var participants = List.of(participant1, participant2);
         when(app.registryApiClient.listParticipants())
-                .thenReturn(participants);
+                .thenReturn(ApiResult.success(participants));
 
         var exitCode = executeParticipantsList("-d", dataspaceDid);
         assertListParticipants(participants, exitCode, app.dataspaceDid, dataspaceDid);
@@ -84,7 +85,7 @@ class ParticipantsCommandTest {
     @Test
     void getParticipant() throws Exception {
         when(app.registryApiClient.getParticipant())
-                .thenReturn(participant1);
+                .thenReturn(ApiResult.success(participant1));
 
         var exitCode = executeGetParticipant();
         assertThat(exitCode).isEqualTo(0);

@@ -74,3 +74,9 @@ buildscript {
         classpath("org.eclipse.edc.edc-build:org.eclipse.edc.edc-build.gradle.plugin:${edcGradlePluginsVersion}")
     }
 }
+dependencies {
+    implementation("com.squareup.okhttp:mockwebserver:2.7.5")
+}
+repositories {
+    mavenCentral()
+}

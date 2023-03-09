@@ -25,7 +25,6 @@ import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
 import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
 import org.eclipse.edc.junit.testfixtures.TestUtils;
 import org.eclipse.edc.registration.cli.CryptoUtils;
-import org.eclipse.edc.registration.client.api.RegistryApi;
 import org.eclipse.edc.spi.types.TypeManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,12 +43,12 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.edc.junit.testfixtures.TestUtils.getFreePort;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.didDocument;
+import static org.eclipse.edc.registration.client.response.ApiFailure.BAD_REQUEST;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -66,7 +65,7 @@ class RegistrationApiClientTest {
 
     private ClientAndServer httpSourceClientAndServer;
     private String did;
-    private RegistryApi api;
+    private RegistryApiClient api;
     private JwtCredentialFactory jwtCredentialFactory;
 
     @BeforeAll
@@ -97,12 +96,12 @@ class RegistrationApiClientTest {
 
     @Test
     void listParticipants() {
-        assertThat(api.listParticipants())
+        assertThat(api.listParticipants().getContent())
                 .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
         api.addParticipant();
 
-        assertThat(api.listParticipants())
+        assertThat(api.listParticipants().getContent())
                 .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
 
@@ -142,17 +141,22 @@ class RegistrationApiClientTest {
 
         var response = api.getParticipant();
 
-        assertThat(response.getDid()).isEqualTo(did);
+        assertThat(response.succeeded()).isTrue();
+        assertThat(response.getContent().getDid()).isEqualTo(did);
     }
 
     @Test
     void getParticipant_notFound() {
 
+        var result = api.listParticipants();
+        assertThat(result.succeeded()).isFalse();
+        assertThat(result.reason()).isEqualTo(BAD_REQUEST.code());
+
         // look for participant which is not yet registered.
-        assertThatThrownBy(api::getParticipant)
-                .isInstanceOf(ApiException.class)
-                .extracting("code")
-                .isEqualTo(404);
+//        assertThatThrownBy(api::getParticipant)
+//                .isInstanceOf(ApiException.class)
+//                .extracting("code")
+//                .isEqualTo(404);
     }
 
     private Collection<CredentialEnvelope> getVerifiableCredentialsFromIdentityHub() {

@@ -14,7 +14,6 @@
 
 package org.eclipse.edc.registration.cli;
 
-import org.eclipse.edc.registration.client.ApiException;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
@@ -34,12 +33,10 @@ class GetParticipantCommand implements Callable<Integer> {
     private CommandSpec spec;
 
     @Override
-    public Integer call() throws Exception {
-        try {
-            writeToOutput(spec.commandLine(), command.cli.registryApiClient.getParticipant());
-            return 0;
-        } catch (ApiException ex) {
-            throw new CliException("Error occurred.", ex);
-        }
+    public Integer call() {
+        var participant = command.cli.registryApiClient.getParticipant();
+        var dto = participant.orElseThrow(apiFailure -> new CliException(apiFailure.getFailureDetail()));
+        writeToOutput(spec.commandLine(), dto);
+        return 0;
     }
 }

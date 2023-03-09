@@ -16,6 +16,7 @@ package org.eclipse.edc.registration.store.spi;
 
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.spi.model.ParticipantStatus;
+import org.eclipse.edc.spi.result.StoreResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -27,7 +28,7 @@ public interface ParticipantStore {
 
     List<Participant> listParticipants();
 
-    void save(Participant participant);
+    StoreResult<Participant> save(Participant participant);
 
     Collection<Participant> listParticipantsWithStatus(ParticipantStatus state);
 }

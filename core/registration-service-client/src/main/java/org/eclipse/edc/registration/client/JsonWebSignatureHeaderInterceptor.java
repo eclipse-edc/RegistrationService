@@ -14,15 +14,21 @@
 
 package org.eclipse.edc.registration.client;
 
+import okhttp3.Interceptor;
+import okhttp3.Response;
 import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.Result;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class JsonWebSignatureHeaderInterceptor implements Consumer<HttpRequest.Builder> {
+import static java.lang.String.format;
+
+public class JsonWebSignatureHeaderInterceptor implements Consumer<HttpRequest.Builder>, Interceptor {
 
     private final Function<TokenParameters, Result<TokenRepresentation>> credentialsProvider;
     private final String audience;
@@ -34,12 +40,29 @@ public class JsonWebSignatureHeaderInterceptor implements Consumer<HttpRequest.B
 
     @Override
     public void accept(HttpRequest.Builder b) {
+        var credentialResult = createCredential();
+        b.header("Authorization", format("Bearer %s", credentialResult.getToken()));
+    }
+
+    @NotNull
+    @Override
+    public Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
+        var request = chain.request();
+        var credential = createCredential();
+
+        var newRequest = request.newBuilder()
+                .addHeader("Authorization", format("Bearer %s", credential.getToken()))
+                .build();
+        return chain.proceed(newRequest);
+    }
+
+    private TokenRepresentation createCredential() {
         var credentialResult = credentialsProvider.apply(TokenParameters.Builder.newInstance()
                 .audience(audience)
                 .build());
         if (credentialResult.failed()) {
             throw new RuntimeException("Error creating client credentials: " + credentialResult.getFailureMessages());
         }
-        b.header("Authorization", String.format("Bearer %s", credentialResult.getContent().getToken()));
+        return credentialResult.getContent();
     }
 }

@@ -57,15 +57,16 @@ dependencyResolutionManagement {
         create("edc") {
             version("edc", "0.0.1-SNAPSHOT")
             library("util", "org.eclipse.edc", "util").versionRef("edc")
+            library("junit", "org.eclipse.edc", "junit").versionRef("edc")
             library("boot", "org.eclipse.edc", "boot").versionRef("edc")
 
             library("spi-core", "org.eclipse.edc", "core-spi").versionRef("edc")
+            library("spi-http", "org.eclipse.edc", "http-spi").versionRef("edc")
             library("spi-policy-engine", "org.eclipse.edc", "policy-engine-spi").versionRef("edc")
             library("spi-transaction", "org.eclipse.edc", "transaction-spi").versionRef("edc")
             library("spi-transaction-datasource", "org.eclipse.edc", "transaction-datasource-spi").versionRef("edc")
             library("spi-identity-did", "org.eclipse.edc", "identity-did-spi").versionRef("edc")
             library("spi-aggregate-service", "org.eclipse.edc", "aggregate-service-spi").versionRef("edc")
-            library("spi-transaction", "org.eclipse.edc", "transaction-spi").versionRef("edc")
 
             library("core-connector", "org.eclipse.edc", "connector-core").versionRef("edc")
             library("core-controlPlane", "org.eclipse.edc", "control-plane-core").versionRef("edc")
