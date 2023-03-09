@@ -54,10 +54,7 @@ class ClientUtilsTest {
 
         var requestBuilder = HttpRequest.newBuilder().uri(URI.create(randomUrl()));
 
-
         var apiClient = ClientUtils.createApiClient(apiUrl, issuer, privateKeyData);
-
-//        apiClient.getRequestInterceptor().accept(requestBuilder);
 
         var httpHeaders = requestBuilder.build().headers();
         assertThat(httpHeaders.map())

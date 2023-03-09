@@ -20,7 +20,7 @@ class RegistryApiClientImpl implements RegistryApiClient {
     private final ObjectMapper objectMapper;
     private String baseUrl;
 
-    public RegistryApiClientImpl(EdcHttpClient httpClient, String baseUrl, ObjectMapper objectMapper) {
+    RegistryApiClientImpl(EdcHttpClient httpClient, String baseUrl, ObjectMapper objectMapper) {
         this.baseUrl = baseUrl;
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;

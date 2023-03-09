@@ -68,7 +68,6 @@ public class ClientUtils {
      *
      * @param commandLine {@link CommandLine}
      * @param response    object to be written on output.
-     * @throws IOException if fails to serialize response value as JSON output.
      */
     public static void writeToOutput(CommandLine commandLine, Object response) {
         var out = commandLine.getOut();

@@ -50,7 +50,6 @@ public class ApiClientFactory {
      *
      * @param baseUri             API base URL.
      * @param credentialsProvider Provider for client credential.
-     * @param objectMapper
      * @return API client.
      */
     public static RegistryApiClient createApiClient(String baseUri, Function<TokenParameters, Result<TokenRepresentation>> credentialsProvider, Monitor monitor, ObjectMapper objectMapper) {

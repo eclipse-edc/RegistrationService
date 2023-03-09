@@ -151,12 +151,6 @@ class RegistrationApiClientTest {
         var result = api.listParticipants();
         assertThat(result.succeeded()).isFalse();
         assertThat(result.reason()).isEqualTo(BAD_REQUEST.code());
-
-        // look for participant which is not yet registered.
-//        assertThatThrownBy(api::getParticipant)
-//                .isInstanceOf(ApiException.class)
-//                .extracting("code")
-//                .isEqualTo(404);
     }
 
     private Collection<CredentialEnvelope> getVerifiableCredentialsFromIdentityHub() {
