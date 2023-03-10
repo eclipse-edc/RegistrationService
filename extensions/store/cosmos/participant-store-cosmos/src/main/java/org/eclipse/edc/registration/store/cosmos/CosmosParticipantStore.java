@@ -79,7 +79,11 @@ public class CosmosParticipantStore implements ParticipantStore {
     @Override
     public void save(Participant participant) {
         var document = new ParticipantDocument(participant, partitionKey);
-        participantDb.saveItem(document);
+        if (findByDid(participant.getDid()) == null) {
+            participantDb.createItem(document);
+        } else {
+            participantDb.updateItem(document);
+        }
     }
 
     @Override
