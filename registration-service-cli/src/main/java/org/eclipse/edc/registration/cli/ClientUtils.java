@@ -16,8 +16,8 @@ package org.eclipse.edc.registration.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.iam.did.crypto.JwtUtils;
-import org.eclipse.edc.registration.client.ApiClientFactory;
 import org.eclipse.edc.registration.client.RegistryApiClient;
+import org.eclipse.edc.registration.client.RegistryApiClientFactory;
 import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
@@ -59,7 +59,7 @@ public class ClientUtils {
             return Result.success(TokenRepresentation.Builder.newInstance().token(token).build());
         };
         // console monitor is fine here, since this is a CLI project
-        return ApiClientFactory.createApiClient(apiUrl, generatorFunction, new ConsoleMonitor(), new ObjectMapper());
+        return RegistryApiClientFactory.createApiClient(apiUrl, generatorFunction, new ConsoleMonitor(), new ObjectMapper());
 
     }
 

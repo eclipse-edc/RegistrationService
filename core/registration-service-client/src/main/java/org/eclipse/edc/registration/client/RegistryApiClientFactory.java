@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - refactoring
  *
  */
 
@@ -32,14 +33,14 @@ import static org.eclipse.edc.util.configuration.ConfigurationFunctions.propOrEn
 /**
  * Factory class for {@link RegistryApiClient}.
  */
-public class ApiClientFactory {
+public class RegistryApiClientFactory {
 
     @Setting(type = "integer", value = "Rest api client connect timeout")
     private static final String API_CLIENT_CONNECT_TIMEOUT = "api.client.connect.timeout";
     @Setting(type = "integer", value = "Rest api client read timeout")
     private static final String API_CLIENT_READ_TIMEOUT = "api.client.read.timeout";
 
-    private ApiClientFactory() {
+    private RegistryApiClientFactory() {
     }
 
     /**
