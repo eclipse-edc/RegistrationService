@@ -14,10 +14,10 @@
 
 package org.eclipse.edc.registration.store.cosmos;
 
-import com.azure.cosmos.implementation.ConflictException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.failsafe.RetryPolicy;
+import dev.failsafe.function.CheckedRunnable;
 import org.eclipse.edc.azure.cosmos.CosmosDbApi;
 import org.eclipse.edc.azure.cosmos.dialect.SqlStatement;
 import org.eclipse.edc.registration.spi.model.Participant;
@@ -81,11 +81,14 @@ public class CosmosParticipantStore implements ParticipantStore {
     @Override
     public StoreResult<Participant> save(Participant participant) {
         var document = new ParticipantDocument(participant, partitionKey);
+        CheckedRunnable action;
         if (findByDid(participant.getDid()) == null) {
-            participantDb.createItem(document);
+            action = () -> participantDb.createItem(document);
         } else {
-            participantDb.updateItem(document);
+            action = () -> participantDb.updateItem(document);
         }
+        with(retryPolicy).run(action);
+        return StoreResult.success(participant);
     }
 
     @Override
