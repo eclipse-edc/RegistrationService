@@ -34,7 +34,9 @@ class ListParticipantsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        writeToOutput(spec.commandLine(), command.cli.registryApiClient.listParticipants());
+        var result = command.cli.registryApiClient.listParticipants();
+        var dto = result.orElseThrow(apiFailure -> new CliException(apiFailure.getFailureDetail()));
+        writeToOutput(spec.commandLine(), dto);
         return 0;
     }
 }

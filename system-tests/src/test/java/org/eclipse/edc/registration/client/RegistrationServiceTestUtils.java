@@ -22,7 +22,6 @@ import org.eclipse.edc.iam.did.spi.document.EllipticCurvePublicKey;
 import org.eclipse.edc.iam.did.spi.document.Service;
 import org.eclipse.edc.iam.did.spi.document.VerificationMethod;
 import org.eclipse.edc.registration.cli.ClientUtils;
-import org.eclipse.edc.registration.client.api.RegistryApi;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -63,9 +62,8 @@ class RegistrationServiceTestUtils {
     }
 
     @NotNull
-    static RegistryApi createApi(String did, String apiUrl) {
-        var apiClient = ClientUtils.createApiClient(apiUrl, did, TestKeyData.PRIVATE_KEY_P256);
-        return new RegistryApi(apiClient);
+    static RegistryApiClient createApi(String did, String apiUrl) {
+        return ClientUtils.createApiClient(apiUrl, did, TestKeyData.PRIVATE_KEY_P256);
     }
 
     @NotNull

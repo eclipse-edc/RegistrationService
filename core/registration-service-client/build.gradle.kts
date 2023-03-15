@@ -19,58 +19,18 @@
 plugins {
     id("java")
     `java-library`
-    id("org.openapi.generator") version "5.4.0"
     `maven-publish`
     `java-test-fixtures`
-}
-
-// Configure OpenAPI Generator
-tasks.withType(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class.java) {
-    generatorName.value("java")
-    inputSpec.value(file("$rootDir/resources/openapi/yaml/registration-service-api.yaml").absolutePath)
-    validateSpec.value(false)
-    configOptions.set(
-        mapOf(
-            "library" to "native",
-            "dateLibrary" to "legacy",
-            "useRuntimeException" to "true",
-            "invokerPackage" to "org.eclipse.edc.registration.client",
-            "apiPackage" to "org.eclipse.edc.registration.client.api",
-            "modelPackage" to "org.eclipse.edc.registration.client.models",
-        )
-    )
-}
-
-// make sure the relevant tasks depend on the openapi generator task.
-// some may only exist after the evaluation phase, such as sourcesJar
-val apiGenTask: Task = tasks.getByName("openApiGenerate")
-afterEvaluate {
-    tasks.matching {
-        listOf("sourcesJar", "compileJava").contains(it.name)
-    }.asIterable().forEach { t ->
-        t.dependsOn(apiGenTask)
-    }
-}
-
-// Add generated sources
-sourceSets {
-    main {
-        java {
-            srcDirs(
-                "$buildDir/generate-resources/main/src/main/java"
-            )
-        }
-    }
 }
 
 dependencies {
     implementation(edc.ext.identity.did.crypto)
     implementation(edc.util)
-
-    // Dependencies copied from build/generate-resources/main/build.gradle
-    api(libs.swagger.annotations)
-    api(libs.google.findbugs.jsr305)
+    implementation(edc.spi.http)
+    implementation(edc.core.connector)
     implementation(libs.jackson.core)
     implementation(libs.bundles.jackson)
     implementation(libs.openapi.jackson.databind.nullable)
+
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
 }

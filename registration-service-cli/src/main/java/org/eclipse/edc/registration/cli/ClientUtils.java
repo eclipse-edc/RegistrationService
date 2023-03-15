@@ -14,10 +14,13 @@
 
 package org.eclipse.edc.registration.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.iam.did.crypto.JwtUtils;
-import org.eclipse.edc.registration.client.ApiClient;
-import org.eclipse.edc.registration.client.ApiClientFactory;
+import org.eclipse.edc.registration.client.RegistryApiClient;
+import org.eclipse.edc.registration.client.RegistryApiClientFactory;
+import org.eclipse.edc.spi.iam.TokenParameters;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
+import org.eclipse.edc.spi.monitor.ConsoleMonitor;
 import org.eclipse.edc.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
@@ -25,6 +28,7 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static org.eclipse.edc.registration.cli.RegistrationServiceCli.MAPPER;
 
@@ -42,10 +46,10 @@ public class ClientUtils {
      * @return configured API client.
      */
     @NotNull
-    public static ApiClient createApiClient(String apiUrl, String issuer, String privateKeyData) {
+    public static RegistryApiClient createApiClient(String apiUrl, String issuer, String privateKeyData) {
         var privateKey = CryptoUtils.parseFromPemEncodedObjects(privateKeyData);
 
-        return ApiClientFactory.createApiClient(apiUrl, parameters -> {
+        Function<TokenParameters, Result<TokenRepresentation>> generatorFunction = parameters -> {
             var token = JwtUtils.create(
                     privateKey,
                     issuer,
@@ -53,7 +57,10 @@ public class ClientUtils {
                     Objects.requireNonNull(parameters.getAudience(), "audience"),
                     Clock.systemUTC()).serialize();
             return Result.success(TokenRepresentation.Builder.newInstance().token(token).build());
-        });
+        };
+        // console monitor is fine here, since this is a CLI project
+        return RegistryApiClientFactory.createApiClient(apiUrl, generatorFunction, new ConsoleMonitor(), new ObjectMapper());
+
     }
 
     /**
@@ -61,11 +68,14 @@ public class ClientUtils {
      *
      * @param commandLine {@link CommandLine}
      * @param response    object to be written on output.
-     * @throws IOException if fails to serialize response value as JSON output.
      */
-    public static void writeToOutput(CommandLine commandLine, Object response) throws IOException {
+    public static void writeToOutput(CommandLine commandLine, Object response) {
         var out = commandLine.getOut();
-        MAPPER.writeValue(out, response);
+        try {
+            MAPPER.writeValue(out, response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         out.println();
     }
 }
