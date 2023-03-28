@@ -3,7 +3,6 @@ plugins {
     `java-library`
 }
 
-val edcGroup: String by project
 val annotationProcessorVersion: String by project
 val javaVersion: String by project
 val metaModelVersion: String by project
@@ -13,17 +12,9 @@ val edcScmConnection: String by project
 val edcWebsiteUrl: String by project
 val edcScmUrl: String by project
 
-val defaultVersion: String by project
-// makes the project version overridable using the "-PregSrvVersion=..." flag. Useful for CI builds
-var actualVersion: String = (project.findProperty("version") ?: defaultVersion) as String
-if (actualVersion == "unspecified") {
-    actualVersion = defaultVersion
-}
-
 allprojects {
 
-    apply(plugin = "${edcGroup}.edc-build")
-
+    apply(plugin = "${group}.edc-build")
 
     // configure which version of the annotation processor to use. defaults to the same version as the plugin
     configure<org.eclipse.edc.plugins.autodoc.AutodocExtension> {
@@ -34,9 +25,7 @@ allprojects {
     configure<org.eclipse.edc.plugins.edcbuild.extensions.BuildExtension> {
         versions {
             // override default dependency versions here
-            projectVersion.set(actualVersion)
             metaModel.set(metaModelVersion)
-
         }
         pom {
             projectName.set(project.name)
