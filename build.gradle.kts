@@ -1,8 +1,6 @@
 plugins {
     java
     `java-library`
-    `maven-publish`
-    `version-catalog`
 }
 
 val annotationProcessorVersion: String by project
@@ -57,7 +55,6 @@ allprojects {
         configDirectory.set(rootProject.file("resources"))
     }
 
-
     // EdcRuntimeExtension uses this to determine the runtime classpath of the module to run.
     tasks.register("printClasspath") {
         doLast {
@@ -65,13 +62,3 @@ allprojects {
         }
     }
 }
-
-publishing {
-    publications {
-        create<MavenPublication>("registration-service-version-catalog") {
-            from(components["versionCatalog"])
-            artifactId = "registration-service-versions"
-        }
-    }
-}
-
