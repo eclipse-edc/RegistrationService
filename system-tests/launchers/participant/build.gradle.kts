@@ -15,15 +15,15 @@
 plugins {
     `java-library`
     id("application")
-    id("com.github.johnrengelman.shadow") version "8.0.0"
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
-    runtimeOnly(edc.core.connector)
-    runtimeOnly(edc.boot)
-    runtimeOnly(identityHub.core)
-    runtimeOnly(identityHub.core.api)
-    runtimeOnly(identityHub.ext.credentials.jwt)
+    runtimeOnly(libs.edc.core.connector)
+    runtimeOnly(libs.edc.boot)
+    runtimeOnly(libs.ih.core)
+    runtimeOnly(libs.ih.core.api)
+    runtimeOnly(libs.ih.ext.credentials.jwt)
 }
 
 application {

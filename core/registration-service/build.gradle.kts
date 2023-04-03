@@ -4,16 +4,16 @@ plugins {
 
 dependencies {
     api(project(":spi:registration-service-store-spi"))
-    api(edc.spi.transaction)
+    api(libs.edc.spi.transaction)
 
-    implementation(edc.core.stateMachine)
-    implementation(edc.ext.http)
-    implementation(edc.ext.identity.did.crypto)
-    implementation(identityHub.ext.verifier.jwt)
-    implementation(identityHub.ext.credentials.jwt)
+    implementation(libs.edc.core.stateMachine)
+    implementation(libs.edc.ext.http)
+    implementation(libs.edc.ext.identity.did.crypto)
+    implementation(libs.ih.ext.verifier.jwt)
+    implementation(libs.ih.ext.credentials.jwt)
 
-    implementation(libs.opentelemetry.annotations)
-    implementation(libs.okhttp)
+    implementation(root.opentelemetry.annotations)
+    implementation(root.okhttp)
 
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
     testImplementation(testFixtures(project(":spi:registration-service-store-spi")))

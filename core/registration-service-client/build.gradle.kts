@@ -24,12 +24,12 @@ plugins {
 }
 
 dependencies {
-    implementation(edc.ext.identity.did.crypto)
-    implementation(edc.util)
-    implementation(edc.spi.http)
-    implementation(edc.core.connector)
-    implementation(libs.jackson.core)
-    implementation(libs.bundles.jackson)
+    implementation(libs.edc.ext.identity.did.crypto)
+    implementation(libs.edc.util)
+    implementation(libs.edc.spi.http)
+    implementation(libs.edc.core.connector)
+    implementation(root.jackson.core)
+    implementation(root.bundles.jackson)
     implementation(libs.openapi.jackson.databind.nullable)
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
