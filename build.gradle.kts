@@ -1,6 +1,8 @@
 plugins {
     java
     `java-library`
+    `maven-publish`
+    `version-catalog`
 }
 
 val annotationProcessorVersion: String by project
@@ -11,6 +13,13 @@ val metaModelVersion: String by project
 val edcScmConnection: String by project
 val edcWebsiteUrl: String by project
 val edcScmUrl: String by project
+
+buildscript {
+    dependencies {
+        val edcGradlePluginsVersion: String by project
+        classpath("org.eclipse.edc.edc-build:org.eclipse.edc.edc-build.gradle.plugin:${edcGradlePluginsVersion}")
+    }
+}
 
 allprojects {
 
@@ -56,12 +65,13 @@ allprojects {
         }
     }
 }
-buildscript {
-    dependencies {
-        val edcGradlePluginsVersion: String by project
-        classpath("org.eclipse.edc.edc-build:org.eclipse.edc.edc-build.gradle.plugin:${edcGradlePluginsVersion}")
+
+publishing {
+    publications {
+        create<MavenPublication>("registration-service-version-catalog") {
+            from(components["versionCatalog"])
+            artifactId = "registration-service-versions"
+        }
     }
 }
-repositories {
-    mavenCentral()
-}
+
