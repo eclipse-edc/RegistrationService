@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 
 
-public class ApiResult<T> extends AbstractResult<T, ApiFailure> {
+public class ApiResult<T> extends AbstractResult<T, ApiFailure, ApiResult<T>> {
 
     protected ApiResult(T content, ApiFailure failure) {
         super(content, failure);
