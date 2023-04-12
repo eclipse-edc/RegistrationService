@@ -12,14 +12,9 @@
  *
  */
 
-// REST client using OpenAPI Generator. See:
-// https://github.com/OpenAPITools/openapi-generator/tree/master/modules/openapi-generator-gradle-plugin
-// https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/java.md
-
 plugins {
     id("java")
     `java-library`
-    `maven-publish`
     `java-test-fixtures`
 }
 
@@ -28,9 +23,10 @@ dependencies {
     implementation(libs.edc.util)
     implementation(libs.edc.spi.http)
     implementation(libs.edc.core.connector)
-    implementation(root.jackson.core)
-    implementation(root.bundles.jackson)
+    implementation(libs.jackson.databind)
     implementation(libs.openapi.jackson.databind.nullable)
 
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
+    testImplementation(libs.okhttp.mockwebserver)
+
+    testFixturesImplementation(libs.jetbrains.annotations)
 }
