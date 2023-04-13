@@ -2,13 +2,25 @@
 format.version = "1.1"
 
 [versions]
+assertj = "3.23.1"
+awaitility = "4.2.0"
 edc = "0.0.1-SNAPSHOT"
-googleFindBugs = "3.0.2"
+failsafe = "3.3.1"
+httpMockServer = "5.15.0"
+jackson = "2.14.2"
+jetbrains-annotations = "24.0.1"
+jupiter = "5.9.2"
+okhttp = "4.10.0"
 openApiTools = "0.2.1"
+openTelemetry = "1.18.0"
 picocli = "4.6.3"
 swaggerAnnotation = "1.5.22"
 
 [libraries]
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
+azure-cosmos = { group = "com.azure", name = "azure-cosmos", version = "4.42.0" }
+failsafe-core = { module = "dev.failsafe:failsafe", version.ref = "failsafe" }
 ih-spi-core = { module = "org.eclipse.edc:identity-hub-spi", version.ref = "edc" }
 ih-core = { module = "org.eclipse.edc:identity-hub", version.ref = "edc" }
 ih-core-api = { module = "org.eclipse.edc:identity-hub-api", version.ref = "edc" }
@@ -46,11 +58,17 @@ edc-ext-vault-azure = { module = "org.eclipse.edc:vault-azure", version.ref = "e
 edc-ext-azure-cosmos-core = { module = "org.eclipse.edc:azure-cosmos-core", version.ref = "edc" }
 edc-ext-azure-test = { module = "org.eclipse.edc:azure-test", version.ref = "edc" }
 edc-ext-jdklogger = { module = "org.eclipse.edc:monitor-jdk-logger", version.ref = "edc" }
-
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter" }
 picocli-core = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
-google-findbugs-jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "googleFindBugs" }
+mockserver-netty = { module = "org.mock-server:mockserver-netty", version.ref = "httpMockServer" }
+mockserver-client = { module = "org.mock-server:mockserver-client-java", version.ref = "httpMockServer" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp"}
 openapi-jackson-databind-nullable = { module = "org.openapitools:jackson-databind-nullable", version.ref = "openApiTools" }
+opentelemetry-annotations = { module = "io.opentelemetry:opentelemetry-extension-annotations", version.ref = "openTelemetry" }
 swagger-annotations = { module = "io.swagger:swagger-annotations", version.ref = "swaggerAnnotation" }
 
 [bundles]

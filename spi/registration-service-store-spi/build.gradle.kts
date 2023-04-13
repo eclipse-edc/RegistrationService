@@ -6,10 +6,10 @@ plugins {
 dependencies {
     api(project(":spi:registration-service-spi"))
 
-    implementation(root.jackson.databind)
+    implementation(libs.jackson.databind)
 
-    testFixturesImplementation(root.junit.jupiter.api)
-    testFixturesImplementation(root.junit.jupiter.params)
-    testFixturesImplementation(root.assertj)
+    testFixturesImplementation(libs.junit.jupiter.api)
+    testFixturesImplementation(libs.junit.jupiter.params)
+    testFixturesImplementation(libs.assertj)
 
 }

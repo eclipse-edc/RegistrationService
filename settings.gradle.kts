@@ -20,11 +20,6 @@ dependencyResolutionManagement {
         mavenCentral()
         mavenLocal()
     }
-    versionCatalogs {
-        create("root") {
-            from("org.eclipse.edc:edc-versions:0.0.1-SNAPSHOT")
-        }
-    }
 }
 
 include(":core:registration-service")

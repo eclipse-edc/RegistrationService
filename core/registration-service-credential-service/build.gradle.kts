@@ -11,8 +11,6 @@ dependencies {
     implementation(libs.ih.ext.verifier.jwt)
     implementation(libs.ih.ext.credentials.jwt)
 
-    implementation(root.okhttp)
-
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
     testImplementation(testFixtures(project(":core:registration-service-client")))
 }

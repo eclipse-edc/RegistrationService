@@ -9,11 +9,10 @@ dependencies {
     annotationProcessor(libs.picocli.codegen)
 
     api(project(":core:registration-service-client"))
-    implementation(root.jackson.databind)
+    implementation(libs.jackson.databind)
 
     implementation(libs.edc.ext.identity.did.web)
     implementation(libs.edc.ext.identity.did.crypto)
-    implementation(root.okhttp)
     implementation(libs.edc.core.connector)
 
     testImplementation(testFixtures(project(":core:registration-service-client")))

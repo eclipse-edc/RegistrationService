@@ -12,8 +12,7 @@ dependencies {
     implementation(libs.ih.ext.verifier.jwt)
     implementation(libs.ih.ext.credentials.jwt)
 
-    implementation(root.opentelemetry.annotations)
-    implementation(root.okhttp)
+    implementation(libs.opentelemetry.annotations)
 
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
     testImplementation(testFixtures(project(":spi:registration-service-store-spi")))
