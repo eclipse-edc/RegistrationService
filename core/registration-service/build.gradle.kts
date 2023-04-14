@@ -12,18 +12,10 @@ dependencies {
     implementation(libs.ih.ext.verifier.jwt)
     implementation(libs.ih.ext.credentials.jwt)
 
-    implementation(libs.opentelemetry.annotations)
+    implementation(libs.opentelemetry.instrumentation.annotations)
 
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
     testImplementation(testFixtures(project(":spi:registration-service-store-spi")))
     testImplementation(testFixtures(project(":core:registration-service-client")))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
 }
 

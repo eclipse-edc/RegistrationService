@@ -15,11 +15,3 @@ dependencies {
     testImplementation(testFixtures(project(":core:registration-service-client")))
 }
 
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
-}
-

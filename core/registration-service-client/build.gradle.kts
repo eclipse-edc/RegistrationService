@@ -23,7 +23,6 @@ dependencies {
     implementation(libs.edc.util)
     implementation(libs.edc.spi.http)
     implementation(libs.edc.core.connector)
-    implementation(libs.jackson.databind)
     implementation(libs.openapi.jackson.databind.nullable)
 
     testImplementation(libs.okhttp.mockwebserver)
