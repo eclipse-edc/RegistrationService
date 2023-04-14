@@ -15,9 +15,10 @@
 package org.eclipse.edc.registration.client.response;
 
 import org.eclipse.edc.spi.result.AbstractResult;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 
 
 public class ApiResult<T> extends AbstractResult<T, ApiFailure, ApiResult<T>> {
@@ -54,12 +55,10 @@ public class ApiResult<T> extends AbstractResult<T, ApiFailure, ApiResult<T>> {
         return new ApiResult<>(null, new ApiFailure(List.of(message), code));
     }
 
-    public <R> ApiResult<R> map(Function<T, R> mapFunction) {
-        if (succeeded()) {
-            return ApiResult.success(mapFunction.apply(getContent()));
-        } else {
-            return ApiResult.failure(reason(), getFailureDetail());
-        }
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <R1 extends AbstractResult<C1, ApiFailure, R1>, C1> @NotNull R1 newInstance(@Nullable C1 content, @Nullable ApiFailure failure) {
+        return (R1) new ApiResult<>(content, failure);
     }
 
     public int reason() {

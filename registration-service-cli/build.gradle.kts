@@ -5,11 +5,9 @@ plugins {
 }
 
 dependencies {
+    api(project(":core:registration-service-client"))
     api(libs.picocli.core)
     annotationProcessor(libs.picocli.codegen)
-
-    api(project(":core:registration-service-client"))
-    implementation(libs.jackson.databind)
 
     implementation(libs.edc.ext.identity.did.web)
     implementation(libs.edc.ext.identity.did.crypto)

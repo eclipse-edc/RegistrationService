@@ -26,7 +26,6 @@ dependencies {
     testImplementation(libs.edc.spi.identity.did)
     testRuntimeOnly(project(":launcher"))
     testImplementation(libs.awaitility)
-    testImplementation(libs.jackson.databind)
     testImplementation(libs.mockserver.netty)
     testImplementation(libs.mockserver.client)
     testImplementation(libs.edc.core.junit)
