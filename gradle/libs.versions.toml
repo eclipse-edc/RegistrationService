@@ -36,7 +36,6 @@ edc-spi-transaction-datasource = { module = "org.eclipse.edc:transaction-datasou
 edc-spi-identity-did = { module = "org.eclipse.edc:identity-did-spi", version.ref = "edc" }
 edc-spi-aggregate-service = { module = "org.eclipse.edc:aggregate-service-spi", version.ref = "edc" }
 edc-core-connector = { module = "org.eclipse.edc:connector-core", version.ref = "edc" }
-edc-core-controlPlane = { module = "org.eclipse.edc:control-plane-core", version.ref = "edc" }
 edc-core-micrometer = { module = "org.eclipse.edc:micrometer-core", version.ref = "edc" }
 edc-core-api = { module = "org.eclipse.edc:api-core", version.ref = "edc" }
 edc-core-stateMachine = { module = "org.eclipse.edc:state-machine", version.ref = "edc" }

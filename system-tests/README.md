@@ -13,7 +13,7 @@ Build the application launchers:
 Run the application using Docker compose:
 
 ```bash
-docker-compose -f system-tests/docker-compose.yml up --build
+docker compose -f system-tests/docker-compose.yml up --build
 ```
 
 Run tests:
