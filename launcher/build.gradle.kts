@@ -26,7 +26,6 @@ dependencies {
     runtimeOnly(libs.edc.ext.identity.did.core)
     runtimeOnly(libs.edc.core.connector)
     runtimeOnly(libs.edc.boot)
-    runtimeOnly(libs.edc.core.controlPlane)
     runtimeOnly(libs.edc.ext.observability)
     runtimeOnly(libs.edc.core.micrometer)
     runtimeOnly(libs.edc.ext.micrometer.jetty)

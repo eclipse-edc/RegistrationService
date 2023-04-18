@@ -54,7 +54,7 @@ jobs:
 
       - name: 'Upgrade docker-compose (for --wait option)'
         run: |
-          sudo curl -L https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo curl -L https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
       - name: 'Run application in docker-compose'
@@ -69,12 +69,6 @@ jobs:
         env:
           INTEGRATION_TEST: true
           JACOCO: "true"
-
-      #      - name: 'Publish Test Results'
-      #        uses: EnricoMi/publish-unit-test-result-action@v1
-      #        if: always()
-      #        with:
-      #          files: "**/test-results/**/*.xml"
 
       - name: 'docker-compose logs'
         run: docker-compose -f system-tests/docker-compose.yml logs
