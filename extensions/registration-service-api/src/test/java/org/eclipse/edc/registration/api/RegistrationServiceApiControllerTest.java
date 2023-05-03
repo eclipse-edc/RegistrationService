@@ -15,10 +15,10 @@
 package org.eclipse.edc.registration.api;
 
 import jakarta.ws.rs.core.HttpHeaders;
-import org.eclipse.edc.api.transformer.DtoTransformerRegistry;
 import org.eclipse.edc.registration.model.ParticipantDto;
 import org.eclipse.edc.registration.spi.registration.RegistrationService;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.spi.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,18 +36,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+
 class RegistrationServiceApiControllerTest {
 
     private static final String DID = "some.test/url";
 
     private final RegistrationService registrationService = mock(RegistrationService.class);
-    private final DtoTransformerRegistry dtoTransformerRegistry = mock(DtoTransformerRegistry.class);
+    private final TypeTransformerRegistry transformerRegistry = mock(TypeTransformerRegistry.class);
 
     private RegistrationServiceApiController controller;
 
     @BeforeEach
     public void setUp() {
-        controller = new RegistrationServiceApiController(registrationService, dtoTransformerRegistry);
+        controller = new RegistrationServiceApiController(registrationService, transformerRegistry);
     }
 
     @Test
@@ -64,13 +65,13 @@ class RegistrationServiceApiControllerTest {
         var participant = createParticipant().build();
         var participantDto = createParticipantDto().build();
         when(registrationService.listParticipants()).thenReturn(List.of(participant));
-        when(dtoTransformerRegistry.transform(participant, ParticipantDto.class))
+        when(transformerRegistry.transform(participant, ParticipantDto.class))
                 .thenReturn(success(participantDto));
 
         var result = controller.listParticipants();
 
         assertThat(result).containsExactly(participantDto);
-        verify(dtoTransformerRegistry).transform(participant, ParticipantDto.class);
+        verify(transformerRegistry).transform(participant, ParticipantDto.class);
     }
 
     @Test
@@ -81,17 +82,17 @@ class RegistrationServiceApiControllerTest {
 
         when(registrationService.listParticipants()).thenReturn(List.of(participant1, participant2));
         // Transform for participant1 returns success.
-        when(dtoTransformerRegistry.transform(participant1, ParticipantDto.class))
+        when(transformerRegistry.transform(participant1, ParticipantDto.class))
                 .thenReturn(success(participantDto1));
         // Transform for participant2 returns failure.
-        when(dtoTransformerRegistry.transform(participant2, ParticipantDto.class))
+        when(transformerRegistry.transform(participant2, ParticipantDto.class))
                 .thenReturn(failure("error"));
 
         var result = controller.listParticipants();
 
         assertThat(result).containsExactly(participantDto1);
-        verify(dtoTransformerRegistry).transform(participant1, ParticipantDto.class);
-        verify(dtoTransformerRegistry).transform(participant2, ParticipantDto.class);
+        verify(transformerRegistry).transform(participant1, ParticipantDto.class);
+        verify(transformerRegistry).transform(participant2, ParticipantDto.class);
     }
 
     @Test
@@ -113,13 +114,13 @@ class RegistrationServiceApiControllerTest {
         var participantDto = createParticipantDto().build();
         when(registrationService.findByDid(participant.getDid()))
                 .thenReturn(participant);
-        when(dtoTransformerRegistry.transform(participant, ParticipantDto.class))
+        when(transformerRegistry.transform(participant, ParticipantDto.class))
                 .thenReturn(success(participantDto));
 
         var found = controller.getParticipant(header);
 
         assertThat(found).usingRecursiveComparison().isEqualTo(participantDto);
-        verify(dtoTransformerRegistry).transform(participant, ParticipantDto.class);
+        verify(transformerRegistry).transform(participant, ParticipantDto.class);
     }
 
     @Test
@@ -128,13 +129,13 @@ class RegistrationServiceApiControllerTest {
         var header = mock(HttpHeaders.class);
         when(header.getHeaderString("CallerDid")).thenReturn(participant.getDid());
         when(registrationService.findByDid(participant.getDid())).thenReturn(participant);
-        when(dtoTransformerRegistry.transform(participant, ParticipantDto.class))
+        when(transformerRegistry.transform(participant, ParticipantDto.class))
                 .thenReturn(failure("error"));
 
         assertThatExceptionOfType(EdcException.class).isThrownBy(() -> controller.getParticipant(header))
                 .withMessage("error");
 
-        verify(dtoTransformerRegistry).transform(participant, ParticipantDto.class);
+        verify(transformerRegistry).transform(participant, ParticipantDto.class);
     }
 
     @Test
@@ -146,6 +147,6 @@ class RegistrationServiceApiControllerTest {
 
         assertThatExceptionOfType(ObjectNotFoundException.class).isThrownBy(() -> controller.getParticipant(header));
 
-        verifyNoInteractions(dtoTransformerRegistry);
+        verifyNoInteractions(transformerRegistry);
     }
 }

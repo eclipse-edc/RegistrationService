@@ -14,7 +14,6 @@
 
 package org.eclipse.edc.registration;
 
-import org.eclipse.edc.api.transformer.DtoTransformerRegistry;
 import org.eclipse.edc.iam.did.spi.resolution.DidPublicKeyResolver;
 import org.eclipse.edc.registration.api.RegistrationServiceApiController;
 import org.eclipse.edc.registration.auth.DidJwtAuthenticationFilter;
@@ -26,6 +25,7 @@ import org.eclipse.edc.runtime.metamodel.annotation.Setting;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
+import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.jersey.mapper.EdcApiExceptionMapper;
 import org.eclipse.edc.web.spi.WebService;
 
@@ -53,7 +53,7 @@ public class RegistrationServiceApiExtension implements ServiceExtension {
     private WebService webService;
 
     @Inject
-    private DtoTransformerRegistry transformerRegistry;
+    private TypeTransformerRegistry transformerRegistry;
 
     @Inject
     private RegistrationService registrationService;

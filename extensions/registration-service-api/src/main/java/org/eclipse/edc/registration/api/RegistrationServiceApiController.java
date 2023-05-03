@@ -29,12 +29,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.edc.api.transformer.DtoTransformerRegistry;
 import org.eclipse.edc.registration.model.ParticipantDto;
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.spi.registration.RegistrationService;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.result.Result;
+import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
 import org.eclipse.edc.web.spi.exception.ObjectNotFoundException;
 
 import java.util.List;
@@ -55,7 +55,7 @@ import static org.eclipse.edc.registration.auth.DidJwtAuthenticationFilter.CALLE
 public class RegistrationServiceApiController {
 
     private final RegistrationService service;
-    private final DtoTransformerRegistry transformerRegistry;
+    private final TypeTransformerRegistry transformerRegistry;
 
     /**
      * Constructs an instance of {@link RegistrationServiceApiController}
@@ -63,7 +63,7 @@ public class RegistrationServiceApiController {
      * @param service             service handling the registration service logic.
      * @param transformerRegistry dto transformer registry
      */
-    public RegistrationServiceApiController(RegistrationService service, DtoTransformerRegistry transformerRegistry) {
+    public RegistrationServiceApiController(RegistrationService service, TypeTransformerRegistry transformerRegistry) {
         this.service = service;
         this.transformerRegistry = transformerRegistry;
     }
