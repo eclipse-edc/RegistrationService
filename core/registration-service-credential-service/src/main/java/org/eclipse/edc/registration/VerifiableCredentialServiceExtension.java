@@ -14,11 +14,11 @@
 
 package org.eclipse.edc.registration;
 
-import okhttp3.OkHttpClient;
 import org.eclipse.edc.iam.did.spi.key.PrivateKeyWrapper;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelopeTransformer;
+import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialFactory;
 import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
 import org.eclipse.edc.registration.credential.DefaultOnboardedParticipantCredentialProvider;
 import org.eclipse.edc.registration.service.VerifiableCredentialServiceImpl;
@@ -28,6 +28,7 @@ import org.eclipse.edc.runtime.metamodel.annotation.Extension;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
 import org.eclipse.edc.runtime.metamodel.annotation.Provider;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.http.EdcHttpClient;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.security.PrivateKeyResolver;
 import org.eclipse.edc.spi.system.ServiceExtension;
@@ -47,7 +48,7 @@ public class VerifiableCredentialServiceExtension implements ServiceExtension {
     private Monitor monitor;
 
     @Inject
-    private OkHttpClient httpClient;
+    private EdcHttpClient httpClient;
 
     @Inject
     private DidResolverRegistry didResolverRegistry;
@@ -65,31 +66,26 @@ public class VerifiableCredentialServiceExtension implements ServiceExtension {
 
     @Provider
     public VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
-        var dataspaceDid = getDataspaceDid(context);
-
         var mapper = context.getTypeManager().getMapper();
 
         var credentialEnvelopeTransformerRegistry = new CredentialEnvelopeTransformerRegistryImpl();
         credentialEnvelopeTransformerRegistry.register(new JwtCredentialEnvelopeTransformer(mapper));
-        var identityHubClient = new IdentityHubClientImpl(httpClient, mapper, monitor, credentialEnvelopeTransformerRegistry);
+        var identityHubClient = new IdentityHubClientImpl(httpClient, context.getTypeManager(), credentialEnvelopeTransformerRegistry);
 
         var privateKeyWrapper = privateKeyResolver.resolvePrivateKey(context.getConnectorId(), PrivateKeyWrapper.class);
         Objects.requireNonNull(privateKeyWrapper, "Couldn't resolve private key from connector " + context.getConnectorId());
 
-        return new VerifiableCredentialServiceImpl(monitor, privateKeyWrapper, dataspaceDid, didResolverRegistry, identityHubClient, credentialProvider, mapper);
+        var jwtCredentialFactory = new JwtCredentialFactory(mapper);
+
+        return new VerifiableCredentialServiceImpl(monitor, privateKeyWrapper, didResolverRegistry, identityHubClient, credentialProvider, jwtCredentialFactory);
     }
 
     @Provider(isDefault = true)
     public OnboardedParticipantCredentialProvider onboardedParticipantCredentialProvider(ServiceExtensionContext context) {
-        var dataspaceDid = getDataspaceDid(context);
-        return new DefaultOnboardedParticipantCredentialProvider(dataspaceDid);
-    }
-
-    private static String getDataspaceDid(ServiceExtensionContext context) {
-        var did = context.getSetting(DID_URL_SETTING, null);
-        if (did == null) {
+        var dataspaceDid = context.getSetting(DID_URL_SETTING, null);
+        if (dataspaceDid == null) {
             throw new EdcException(format("The DID Url setting '(%s)' was null!", DID_URL_SETTING));
         }
-        return did;
+        return new DefaultOnboardedParticipantCredentialProvider(dataspaceDid);
     }
 }

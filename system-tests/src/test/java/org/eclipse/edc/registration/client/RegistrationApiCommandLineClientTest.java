@@ -18,7 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.registration.cli.RegistrationServiceCli;
-import org.eclipse.edc.registration.client.models.ParticipantDto;
+import org.eclipse.edc.registration.client.model.ParticipantDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,22 +45,20 @@ import static org.mockserver.stop.Stop.stopQuietly;
 @IntegrationTest
 class RegistrationApiCommandLineClientTest {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
-    static Path privateKeyFile;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static Path privateKeyFile;
 
-    int apiPort;
-    String did;
-    /*
-    host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
-     */
-    ClientAndServer httpSourceClientAndServer;
+    private String did;
+
+    // host.docker.internal is used in docker-compose file to connect from Registration Service container to a mock-service on the host
+    private ClientAndServer httpSourceClientAndServer;
 
     @BeforeEach
     void setUpClass() throws Exception {
         privateKeyFile = Files.createTempFile("test", ".pem");
         privateKeyFile.toFile().deleteOnExit();
         Files.writeString(privateKeyFile, TestKeyData.PRIVATE_KEY_P256);
-        apiPort = getFreePort();
+        var apiPort = getFreePort();
         httpSourceClientAndServer = startClientAndServer(apiPort);
         httpSourceClientAndServer.when(request().withPath("/.well-known/did.json"))
                 .respond(response()

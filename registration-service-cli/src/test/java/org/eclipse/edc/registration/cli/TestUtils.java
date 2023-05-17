@@ -14,8 +14,8 @@
 
 package org.eclipse.edc.registration.cli;
 
-import org.eclipse.edc.registration.client.models.ParticipantDto;
-import org.eclipse.edc.registration.client.models.ParticipantDto.StatusEnum;
+
+import org.eclipse.edc.registration.client.model.ParticipantDto;
 
 import static java.lang.String.format;
 
@@ -25,8 +25,6 @@ public class TestUtils {
     }
 
     public static ParticipantDto createParticipantDto() {
-        return new ParticipantDto()
-                .did(format("did:web:%s", "test-domain"))
-                .status(StatusEnum.ONBOARDED);
+        return new ParticipantDto(format("did:web:%s", "test-domain"), ParticipantDto.OnboardingStatus.ONBOARDED);
     }
 }

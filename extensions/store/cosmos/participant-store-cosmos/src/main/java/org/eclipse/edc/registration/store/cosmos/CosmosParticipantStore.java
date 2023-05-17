@@ -17,6 +17,7 @@ package org.eclipse.edc.registration.store.cosmos;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.failsafe.RetryPolicy;
+import dev.failsafe.function.CheckedRunnable;
 import org.eclipse.edc.azure.cosmos.CosmosDbApi;
 import org.eclipse.edc.azure.cosmos.dialect.SqlStatement;
 import org.eclipse.edc.registration.spi.model.Participant;
@@ -25,6 +26,7 @@ import org.eclipse.edc.registration.store.cosmos.model.ParticipantDocument;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.query.Criterion;
+import org.eclipse.edc.spi.result.StoreResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -77,9 +79,16 @@ public class CosmosParticipantStore implements ParticipantStore {
     }
 
     @Override
-    public void save(Participant participant) {
+    public StoreResult<Participant> save(Participant participant) {
         var document = new ParticipantDocument(participant, partitionKey);
-        participantDb.saveItem(document);
+        CheckedRunnable action;
+        if (findByDid(participant.getDid()) == null) {
+            action = () -> participantDb.createItem(document);
+        } else {
+            action = () -> participantDb.updateItem(document);
+        }
+        with(retryPolicy).run(action);
+        return StoreResult.success(participant);
     }
 
     @Override

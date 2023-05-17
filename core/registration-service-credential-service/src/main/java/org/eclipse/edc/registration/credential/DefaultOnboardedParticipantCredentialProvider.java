@@ -16,6 +16,7 @@ package org.eclipse.edc.registration.credential;
 
 import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
+import org.eclipse.edc.identityhub.spi.credentials.model.VerifiableCredential;
 import org.eclipse.edc.registration.spi.credential.OnboardedParticipantCredentialProvider;
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.spi.result.Result;
@@ -40,8 +41,8 @@ public class DefaultOnboardedParticipantCredentialProvider implements OnboardedP
     public Result<Credential> createCredential(Participant participant) {
         return Result.success(Credential.Builder.newInstance()
                 .id(UUID.randomUUID().toString())
-                .context("https://www.w3.org/2018/credentials/v1")
-                .type("VerifiableCredential")
+                .context(VerifiableCredential.DEFAULT_CONTEXT)
+                .type(VerifiableCredential.DEFAULT_TYPE)
                 .issuer(dataspaceDid)
                 .credentialSubject(CredentialSubject.Builder.newInstance()
                         .id(participant.getDid())

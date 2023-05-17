@@ -14,7 +14,6 @@
 
 package org.eclipse.edc.registration.client;
 
-import okhttp3.OkHttpClient;
 import org.assertj.core.api.ThrowingConsumer;
 import org.eclipse.edc.identityhub.client.IdentityHubClientImpl;
 import org.eclipse.edc.identityhub.credentials.jwt.JwtCredentialEnvelope;
@@ -24,9 +23,8 @@ import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialEnvelope;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
 import org.eclipse.edc.identityhub.spi.credentials.transformer.CredentialEnvelopeTransformerRegistryImpl;
+import org.eclipse.edc.junit.testfixtures.TestUtils;
 import org.eclipse.edc.registration.cli.CryptoUtils;
-import org.eclipse.edc.registration.client.api.RegistryApi;
-import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.types.TypeManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,14 +43,12 @@ import java.util.UUID;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.edc.junit.testfixtures.TestUtils.getFreePort;
-import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.MAPPER;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createApi;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.createDid;
 import static org.eclipse.edc.registration.client.RegistrationServiceTestUtils.didDocument;
-import static org.mockito.Mockito.mock;
+import static org.eclipse.edc.registration.client.response.ApiFailure.NOT_FOUND;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -63,21 +59,21 @@ class RegistrationApiClientTest {
 
     private static final String HUB_BASE_URL = "http://localhost:8181/api/identity-hub";
     private static final String API_URL = "http://localhost:8182/authority";
-    private static final Monitor MONITOR = mock(Monitor.class);
+    private static final TypeManager TYPE_MANAGER = new TypeManager();
 
     private static IdentityHubClientImpl identityHubClient;
 
     private ClientAndServer httpSourceClientAndServer;
     private String did;
-    private RegistryApi api;
+    private RegistryApiClient api;
+    private JwtCredentialFactory jwtCredentialFactory;
 
     @BeforeAll
     static void setUpClass() {
-        var mapper = new TypeManager().getMapper();
-        var okHttpClient = new OkHttpClient.Builder().build();
+        var okHttpClient = TestUtils.testHttpClient();
         var transformerRegistry = new CredentialEnvelopeTransformerRegistryImpl();
-        transformerRegistry.register(new JwtCredentialEnvelopeTransformer(mapper));
-        identityHubClient = new IdentityHubClientImpl(okHttpClient, mapper, MONITOR, transformerRegistry);
+        transformerRegistry.register(new JwtCredentialEnvelopeTransformer(TYPE_MANAGER.getMapper()));
+        identityHubClient = new IdentityHubClientImpl(okHttpClient, TYPE_MANAGER, transformerRegistry);
     }
 
     @BeforeEach
@@ -90,6 +86,7 @@ class RegistrationApiClientTest {
                         .withStatusCode(HttpStatusCode.OK_200.code()));
         did = createDid(apiPort);
         api = createApi(did, API_URL);
+        jwtCredentialFactory = new JwtCredentialFactory(TYPE_MANAGER.getMapper());
     }
 
     @AfterEach
@@ -99,12 +96,12 @@ class RegistrationApiClientTest {
 
     @Test
     void listParticipants() {
-        assertThat(api.listParticipants())
+        assertThat(api.listParticipants().getContent())
                 .noneSatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
 
         api.addParticipant();
 
-        assertThat(api.listParticipants())
+        assertThat(api.listParticipants().getContent())
                 .anySatisfy(p -> assertThat(p.getDid()).isEqualTo(did));
     }
 
@@ -130,7 +127,7 @@ class RegistrationApiClientTest {
         // sanity check
         assertThat(getVerifiableCredentialsFromIdentityHub()).noneSatisfy(vcRequirement(did, startTime));
 
-        var jwt = JwtCredentialFactory.buildSignedJwt(credential, issuer, did, authorityPrivateKey, MAPPER);
+        var jwt = jwtCredentialFactory.buildSignedJwt(credential, authorityPrivateKey);
         identityHubClient.addVerifiableCredential(HUB_BASE_URL, new JwtCredentialEnvelope(jwt));
 
         api.addParticipant();
@@ -142,19 +139,19 @@ class RegistrationApiClientTest {
     void getParticipant() {
         api.addParticipant();
 
-        var response = api.getParticipant();
+        var result = api.getParticipant();
 
-        assertThat(response.getDid()).isEqualTo(did);
+        assertThat(result.succeeded()).isTrue();
+        assertThat(result.getContent().getDid()).isEqualTo(did);
     }
 
     @Test
     void getParticipant_notFound() {
 
-        // look for participant which is not yet registered.
-        assertThatThrownBy(api::getParticipant)
-                .isInstanceOf(ApiException.class)
-                .extracting("code")
-                .isEqualTo(404);
+        var result = api.getParticipant();
+        assertThat(result.succeeded()).isFalse();
+        assertThat(result.getContent()).isNull();
+        assertThat(result.reason()).isEqualTo(NOT_FOUND.code());
     }
 
     private Collection<CredentialEnvelope> getVerifiableCredentialsFromIdentityHub() {

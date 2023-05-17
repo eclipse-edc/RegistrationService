@@ -20,15 +20,17 @@ dependencies {
     testImplementation(testFixtures(project(":core:registration-service-client")))
     testImplementation(project(":core:registration-service-client"))
     testImplementation(project(":registration-service-cli"))
-    testImplementation(libs.okhttp)
-    testImplementation(identityHub.core.client)
-    testImplementation(identityHub.ext.verifier.jwt)
-    testImplementation(identityHub.ext.credentials.jwt)
-    testImplementation(edc.spi.identity.did)
+    testImplementation(libs.ih.core.client)
+    testImplementation(libs.ih.ext.verifier.jwt)
+    testImplementation(libs.ih.ext.credentials.jwt)
+    testImplementation(libs.edc.spi.identity.did)
     testRuntimeOnly(project(":launcher"))
     testImplementation(libs.awaitility)
-    testImplementation(libs.jackson.databind)
     testImplementation(libs.mockserver.netty)
     testImplementation(libs.mockserver.client)
-    testImplementation(edc.core.junit)
+    testImplementation(libs.edc.core.junit)
+}
+
+edcBuild {
+    publish.set(false)
 }

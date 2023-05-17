@@ -4,17 +4,8 @@ plugins {
 }
 
 dependencies {
-    api(edc.spi.core)
-    api(edc.spi.policy.engine)
-    api(edc.spi.aggregate.service)
-    api(identityHub.spi.core)
-    implementation(libs.jackson.databind)
-}
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
+    api(libs.edc.spi.core)
+    api(libs.edc.spi.policy.engine)
+    api(libs.edc.spi.aggregate.service)
+    api(libs.ih.spi.core)
 }

@@ -17,6 +17,7 @@ package org.eclipse.edc.registration.store;
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.spi.model.ParticipantStatus;
 import org.eclipse.edc.registration.store.spi.ParticipantStore;
+import org.eclipse.edc.spi.result.StoreResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -44,8 +45,9 @@ public class InMemoryParticipantStore implements ParticipantStore {
     }
 
     @Override
-    public void save(Participant participant) {
+    public StoreResult<Participant> save(Participant participant) {
         storage.put(participant.getDid(), participant);
+        return null;
     }
 
     @Override

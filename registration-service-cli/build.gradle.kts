@@ -1,21 +1,17 @@
 plugins {
     `java-library`
     id("application")
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    `maven-publish`
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
+    api(project(":core:registration-service-client"))
     api(libs.picocli.core)
     annotationProcessor(libs.picocli.codegen)
 
-    api(project(":core:registration-service-client"))
-    implementation(libs.jackson.databind)
-
-    implementation(edc.ext.identity.did.web)
-    implementation(edc.ext.identity.did.crypto)
-    implementation(libs.okhttp)
-    implementation(edc.core.connector)
+    implementation(libs.edc.ext.identity.did.web)
+    implementation(libs.edc.ext.identity.did.crypto)
+    implementation(libs.edc.core.connector)
 
     testImplementation(testFixtures(project(":core:registration-service-client")))
 }
@@ -27,13 +23,4 @@ application {
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
     archiveFileName.set("registration-service-cli.jar")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("registration-service-cli") {
-            artifactId = "registration-service-cli"
-            from(components["java"])
-        }
-    }
 }

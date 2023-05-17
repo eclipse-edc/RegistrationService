@@ -3,15 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(edc.spi.core)
-    api(edc.spi.identity.did)
+    api(libs.edc.spi.core)
+    api(libs.edc.spi.identity.did)
     api(project(":spi:registration-service-spi"))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
 }

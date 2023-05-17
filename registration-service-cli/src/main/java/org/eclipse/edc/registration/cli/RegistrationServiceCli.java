@@ -22,7 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.eclipse.edc.connector.core.base.EdcHttpClientImpl;
 import org.eclipse.edc.iam.did.web.resolution.WebDidResolver;
-import org.eclipse.edc.registration.client.api.RegistryApi;
+import org.eclipse.edc.registration.client.RegistryApiClient;
 import org.eclipse.edc.spi.http.EdcHttpClient;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +59,7 @@ public class RegistrationServiceCli {
     @CommandLine.Option(names = { "--url", "-u" }, description = "Override for the registration service URL. Normally it would be taken from the Dataspace's DID document. Used for testing purposes")
     String registrationServiceUrlOverride;
 
-    RegistryApi registryApiClient;
+    RegistryApiClient registryApiClient;
 
     public static void main(String... args) {
         CommandLine commandLine = getCommandLine();
@@ -86,12 +86,11 @@ public class RegistrationServiceCli {
             throw new RuntimeException("Error reading file " + privateKeyFile, e);
         }
 
-        var apiClient = createApiClient(registrationUrl(), clientDid, privateKeyData);
+        registryApiClient = createApiClient(registrationUrl(), clientDid, privateKeyData);
         if (registrationServiceUrlOverride != null) {
             monitor.info("Overriding RegistrationService URL: " + registrationServiceUrlOverride);
-            apiClient.updateBaseUri(registrationServiceUrlOverride);
+            registryApiClient.updateBaseUri(registrationServiceUrlOverride);
         }
-        registryApiClient = new RegistryApi(apiClient);
     }
 
     private String registrationUrl() {

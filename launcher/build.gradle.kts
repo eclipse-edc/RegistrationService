@@ -15,35 +15,34 @@
 plugins {
     `java-library`
     id("application")
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
     runtimeOnly(project(":core:registration-service"))
     runtimeOnly(project(":core:registration-service-credential-service"))
     runtimeOnly(project(":extensions:registration-service-api"))
-    runtimeOnly(edc.ext.identity.did.web)
-    runtimeOnly(edc.ext.identity.did.core)
-    runtimeOnly(edc.core.connector)
-    runtimeOnly(edc.boot)
-    runtimeOnly(edc.core.controlPlane)
-    runtimeOnly(edc.ext.observability)
-    runtimeOnly(edc.core.micrometer)
-    runtimeOnly(edc.ext.micrometer.jetty)
-    runtimeOnly(edc.ext.micrometer.jersey)
-    runtimeOnly(edc.ext.configuration.filesystem)
-    runtimeOnly(identityHub.core.verifier)
-    runtimeOnly(identityHub.ext.verifier.jwt)
+    runtimeOnly(libs.edc.ext.identity.did.web)
+    runtimeOnly(libs.edc.ext.identity.did.core)
+    runtimeOnly(libs.edc.core.connector)
+    runtimeOnly(libs.edc.boot)
+    runtimeOnly(libs.edc.ext.observability)
+    runtimeOnly(libs.edc.core.micrometer)
+    runtimeOnly(libs.edc.ext.micrometer.jetty)
+    runtimeOnly(libs.edc.ext.micrometer.jersey)
+    runtimeOnly(libs.edc.ext.configuration.filesystem)
+    runtimeOnly(libs.ih.core.verifier)
+    runtimeOnly(libs.ih.ext.verifier.jwt)
 
     // JDK Logger
-    runtimeOnly(edc.ext.jdklogger)
+    runtimeOnly(libs.edc.ext.jdklogger)
 
     // To use FileSystem vault e.g. -DuseFsVault="true".Only for non-production usages.
     val useFsVault: Boolean = System.getProperty("useFsVault", "false").toBoolean()
     if (useFsVault) {
-        runtimeOnly(edc.ext.vault.filesystem)
+        runtimeOnly(libs.edc.ext.vault.filesystem)
     } else {
-        runtimeOnly(edc.ext.vault.azure)
+        runtimeOnly(libs.edc.ext.vault.azure)
     }
 }
 
@@ -54,4 +53,8 @@ application {
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
     archiveFileName.set("app.jar")
+}
+
+edcBuild {
+    publish.set(false)
 }

@@ -14,7 +14,7 @@
 
 package org.eclipse.edc.registration.manager;
 
-import io.opentelemetry.extension.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.spi.model.ParticipantStatus;
 import org.eclipse.edc.registration.spi.service.VerifiableCredentialService;

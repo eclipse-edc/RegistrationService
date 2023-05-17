@@ -4,20 +4,12 @@ plugins {
 
 dependencies {
     api(project(":spi:registration-service-store-spi"))
-    api(edc.spi.transaction)
-    api(edc.spi.transaction.datasource)
-    api(edc.core.sql)
+    api(libs.edc.spi.transaction)
+    api(libs.edc.spi.transaction.datasource)
+    api(libs.edc.core.sql)
 
-    testImplementation(edc.core.junit)
-    testImplementation(testFixtures(edc.core.sql))
+    testImplementation(libs.edc.core.junit)
+    testImplementation(testFixtures(libs.edc.core.sql))
     testImplementation(testFixtures(project(":spi:registration-service-store-spi")))
     testImplementation(testFixtures(project(":spi:registration-service-spi")))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            from(components["java"])
-        }
-    }
 }
