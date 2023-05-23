@@ -4,12 +4,10 @@ plugins {
 }
 
 val annotationProcessorVersion: String by project
-val javaVersion: String by project
 val metaModelVersion: String by project
 
 // these values are required for the project POM (for publishing)
 val edcScmConnection: String by project
-val edcWebsiteUrl: String by project
 val edcScmUrl: String by project
 
 buildscript {
@@ -35,9 +33,6 @@ allprojects {
             metaModel.set(metaModelVersion)
         }
         pom {
-            projectName.set(project.name)
-            description.set("edc :: ${project.name}")
-            projectUrl.set(edcWebsiteUrl)
             scmConnection.set(edcScmConnection)
             scmUrl.set(edcScmUrl)
         }
@@ -47,7 +42,6 @@ allprojects {
             outputFilename.set(project.name)
             outputDirectory.set(file("${rootProject.projectDir.path}/resources/openapi/yaml"))
         }
-        javaLanguageVersion.set(JavaLanguageVersion.of(javaVersion))
     }
 
     configure<CheckstyleExtension> {
