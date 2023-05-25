@@ -39,11 +39,11 @@ jobs:
           commit_message_template: 'Merge commit for release of version v${{ env.REGISTRATION_SERVICE_VERSION }}'
 
     outputs:
-      ih-version: ${{ env.REGISTRATION_SERVICE_VERSION }}
+      rs-version: ${{ env.REGISTRATION_SERVICE_VERSION }}
 
   Github-Release:
     # cannot use the workflow-level env yet as it does not yet exist, must take output from previous job
-    if: ${{ !endsWith( needs.Prepare-Release.outputs.ih-version, '-SNAPSHOT') }}
+    if: ${{ !endsWith( needs.Prepare-Release.outputs.rs-version, '-SNAPSHOT') }}
     needs:
       - Prepare-Release
     runs-on: ubuntu-latest
@@ -60,3 +60,15 @@ jobs:
           tag: "v${{ env.REGISTRATION_SERVICE_VERSION }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           removeArtifacts: true
+
+    Bump-Version:
+    name: 'Update release version'
+    # cannot use the workflow-level env yet as it does not yet exist, must take output from previous job
+    if: ${{ !endsWith( needs.Prepare-Release.outputs.rs-version, '-SNAPSHOT') }}
+    needs: [ Prepare-Release, Github-Release ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/bump-version
+        with:
+          target_branch: "main"
