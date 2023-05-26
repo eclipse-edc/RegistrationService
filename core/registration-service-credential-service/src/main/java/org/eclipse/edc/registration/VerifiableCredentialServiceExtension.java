@@ -33,6 +33,7 @@ import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.security.PrivateKeyResolver;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
+import org.eclipse.edc.spi.types.TypeManager;
 
 import java.util.Objects;
 
@@ -59,6 +60,9 @@ public class VerifiableCredentialServiceExtension implements ServiceExtension {
     @Inject
     private OnboardedParticipantCredentialProvider credentialProvider;
 
+    @Inject
+    private TypeManager typeManager;
+
     @Override
     public String name() {
         return NAME;
@@ -66,11 +70,11 @@ public class VerifiableCredentialServiceExtension implements ServiceExtension {
 
     @Provider
     public VerifiableCredentialService verifiableCredentialService(ServiceExtensionContext context) {
-        var mapper = context.getTypeManager().getMapper();
+        var mapper = typeManager.getMapper();
 
         var credentialEnvelopeTransformerRegistry = new CredentialEnvelopeTransformerRegistryImpl();
         credentialEnvelopeTransformerRegistry.register(new JwtCredentialEnvelopeTransformer(mapper));
-        var identityHubClient = new IdentityHubClientImpl(httpClient, context.getTypeManager(), credentialEnvelopeTransformerRegistry);
+        var identityHubClient = new IdentityHubClientImpl(httpClient, typeManager, credentialEnvelopeTransformerRegistry);
 
         var privateKeyWrapper = privateKeyResolver.resolvePrivateKey(context.getConnectorId(), PrivateKeyWrapper.class);
         Objects.requireNonNull(privateKeyWrapper, "Couldn't resolve private key from connector " + context.getConnectorId());
