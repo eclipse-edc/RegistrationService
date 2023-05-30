@@ -27,6 +27,7 @@ import org.eclipse.edc.spi.security.Vault;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.system.health.HealthCheckService;
+import org.eclipse.edc.spi.types.TypeManager;
 
 /**
  * Extension that provides a {@link ParticipantStore} with CosmosDB as backend storage
@@ -43,6 +44,9 @@ public class CosmosParticipantStoreExtension implements ServiceExtension {
     @Inject
     private CosmosClientProvider clientProvider;
 
+    @Inject
+    private TypeManager typeManager;
+
     private CosmosDbApi cosmosDbApi;
 
     @Override
@@ -53,7 +57,7 @@ public class CosmosParticipantStoreExtension implements ServiceExtension {
     @Override
     public void initialize(ServiceExtensionContext context) {
         context.getService(HealthCheckService.class).addReadinessProvider(() -> cosmosDbApi.get().forComponent(name()));
-        context.getTypeManager().registerTypes(ParticipantDocument.class);
+        typeManager.registerTypes(ParticipantDocument.class);
     }
 
     @Provider
@@ -61,6 +65,6 @@ public class CosmosParticipantStoreExtension implements ServiceExtension {
         var configuration = new ParticipantStoreCosmosConfig(context);
         var client = clientProvider.createClient(vault, configuration);
         cosmosDbApi = new CosmosDbApiImpl(configuration, client);
-        return new CosmosParticipantStore(cosmosDbApi, configuration.getPartitionKey(), context.getTypeManager().getMapper(), retryPolicy);
+        return new CosmosParticipantStore(cosmosDbApi, configuration.getPartitionKey(), typeManager.getMapper(), retryPolicy);
     }
 }
