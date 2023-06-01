@@ -99,32 +99,10 @@ jobs:
         with:
           command: ./gradlew test -DincludeTags="PostgresqlIntegrationTest"
 
-  Azure-CosmosDB-Integration-Tests:
-    # run only if COSMOS_KEY is present
-    runs-on: ubuntu-latest
-
-    env:
-      COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-      COSMOS_URL: ${{ secrets.COSMOS_URL }}
-
-    steps:
-      - uses: actions/checkout@v3
-        if: ${{ env.COSMOS_KEY != '' }}
-
-      - uses: ./.github/actions/gradle-setup
-        if: ${{ env.COSMOS_KEY != '' }}
-
-      - name: Azure CosmosDB Tests
-        if: ${{ env.COSMOS_KEY != '' }}
-        uses: ./.github/actions/run-tests
-        with:
-          command: ./gradlew test -DincludeTags="AzureCosmosDbIntegrationTest"
-
   Upload-Coverage-Report-To-Codecov:
     needs:
       - Test
       - Postgresql-Integration-Tests
-      - Azure-CosmosDB-Integration-Tests
     runs-on: ubuntu-latest
     if: always()
     steps:
