@@ -44,6 +44,7 @@ edc-ext-identity-did-crypto = { module = "org.eclipse.edc:identity-did-crypto", 
 edc-ext-identity-did-core = { module = "org.eclipse.edc:identity-did-core", version.ref = "edc" }
 edc-ext-identity-did-web = { module = "org.eclipse.edc:identity-did-web", version.ref = "edc" }
 edc-ext-http = { module = "org.eclipse.edc:http", version.ref = "edc" }
+edc-ext-json-ld = { module = "org.eclipse.edc:json-ld", version.ref = "edc" }
 edc-ext-micrometer-jetty = { module = "org.eclipse.edc:jetty-micrometer", version.ref = "edc" }
 edc-ext-micrometer-jersey = { module = "org.eclipse.edc:jersey-micrometer", version.ref = "edc" }
 edc-ext-observability = { module = "org.eclipse.edc:api-observability", version.ref = "edc" }

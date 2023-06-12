@@ -27,6 +27,7 @@ dependencies {
     runtimeOnly(libs.edc.core.connector)
     runtimeOnly(libs.edc.boot)
     runtimeOnly(libs.edc.ext.observability)
+    runtimeOnly(libs.edc.ext.json.ld)
     runtimeOnly(libs.edc.core.micrometer)
     runtimeOnly(libs.edc.ext.micrometer.jetty)
     runtimeOnly(libs.edc.ext.micrometer.jersey)
