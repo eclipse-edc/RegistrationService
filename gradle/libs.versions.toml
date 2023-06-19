@@ -4,7 +4,7 @@ format.version = "1.1"
 [versions]
 assertj = "3.23.1"
 awaitility = "4.2.0"
-edc = "0.1.0-SNAPSHOT"
+edc = "0.1.1-SNAPSHOT"
 failsafe = "3.3.1"
 httpMockServer = "5.15.0"
 jetbrains-annotations = "24.0.1"
@@ -16,7 +16,6 @@ picocli = "4.6.3"
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
-azure-cosmos = { group = "com.azure", name = "azure-cosmos", version = "4.42.0" }
 failsafe-core = { module = "dev.failsafe:failsafe", version.ref = "failsafe" }
 ih-spi-core = { module = "org.eclipse.edc:identity-hub-spi", version.ref = "edc" }
 ih-core = { module = "org.eclipse.edc:identity-hub", version.ref = "edc" }
@@ -45,14 +44,12 @@ edc-ext-identity-did-crypto = { module = "org.eclipse.edc:identity-did-crypto", 
 edc-ext-identity-did-core = { module = "org.eclipse.edc:identity-did-core", version.ref = "edc" }
 edc-ext-identity-did-web = { module = "org.eclipse.edc:identity-did-web", version.ref = "edc" }
 edc-ext-http = { module = "org.eclipse.edc:http", version.ref = "edc" }
+edc-ext-json-ld = { module = "org.eclipse.edc:json-ld", version.ref = "edc" }
 edc-ext-micrometer-jetty = { module = "org.eclipse.edc:jetty-micrometer", version.ref = "edc" }
 edc-ext-micrometer-jersey = { module = "org.eclipse.edc:jersey-micrometer", version.ref = "edc" }
 edc-ext-observability = { module = "org.eclipse.edc:api-observability", version.ref = "edc" }
 edc-ext-configuration-filesystem = { module = "org.eclipse.edc:configuration-filesystem", version.ref = "edc" }
 edc-ext-vault-filesystem = { module = "org.eclipse.edc:vault-filesystem", version.ref = "edc" }
-edc-ext-vault-azure = { module = "org.eclipse.edc:vault-azure", version.ref = "edc" }
-edc-ext-azure-cosmos-core = { module = "org.eclipse.edc:azure-cosmos-core", version.ref = "edc" }
-edc-ext-azure-test = { module = "org.eclipse.edc:azure-test", version.ref = "edc" }
 edc-ext-jdklogger = { module = "org.eclipse.edc:monitor-jdk-logger", version.ref = "edc" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
@@ -61,7 +58,7 @@ picocli-core = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 mockserver-netty = { module = "org.mock-server:mockserver-netty", version.ref = "httpMockServer" }
 mockserver-client = { module = "org.mock-server:mockserver-client-java", version.ref = "httpMockServer" }
-okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp"}
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 openapi-jackson-databind-nullable = { module = "org.openapitools:jackson-databind-nullable", version.ref = "openApiTools" }
 opentelemetry-instrumentation-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version = "1.24.0" }
 

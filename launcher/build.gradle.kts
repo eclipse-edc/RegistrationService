@@ -27,6 +27,7 @@ dependencies {
     runtimeOnly(libs.edc.core.connector)
     runtimeOnly(libs.edc.boot)
     runtimeOnly(libs.edc.ext.observability)
+    runtimeOnly(libs.edc.ext.json.ld)
     runtimeOnly(libs.edc.core.micrometer)
     runtimeOnly(libs.edc.ext.micrometer.jetty)
     runtimeOnly(libs.edc.ext.micrometer.jersey)
@@ -42,7 +43,7 @@ dependencies {
     if (useFsVault) {
         runtimeOnly(libs.edc.ext.vault.filesystem)
     } else {
-        runtimeOnly(libs.edc.ext.vault.azure)
+        logger.lifecycle("The system property 'useFsVault' was either not specified, or was set to 'false'. The runtime will use the InMemoryVault!")
     }
 }
 
