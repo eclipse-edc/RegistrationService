@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.ECKey;
 import org.eclipse.edc.iam.did.spi.document.DidConstants;
 import org.eclipse.edc.iam.did.spi.document.DidDocument;
-import org.eclipse.edc.iam.did.spi.document.EllipticCurvePublicKey;
 import org.eclipse.edc.iam.did.spi.document.Service;
 import org.eclipse.edc.iam.did.spi.document.VerificationMethod;
 import org.eclipse.edc.registration.cli.ClientUtils;
@@ -47,7 +46,7 @@ class RegistrationServiceTestUtils {
                 .id("#my-key-1")
                 .type(DidConstants.ECDSA_SECP_256_K_1_VERIFICATION_KEY_2019)
                 .controller("")
-                .publicKeyJwk(new EllipticCurvePublicKey(publicKey.getCurve().getName(), publicKey.getKeyType().getValue(), publicKey.getX().toString(), publicKey.getY().toString()))
+                .publicKeyJwk(publicKey.toJSONObject())
                 .build();
         var didDocument = DidDocument.Builder.newInstance()
                 .verificationMethod(List.of(vm))

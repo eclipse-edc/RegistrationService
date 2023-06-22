@@ -22,6 +22,7 @@ import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.registration.spi.registration.DataspaceRegistrationPolicy;
+import org.eclipse.edc.spi.agent.ParticipantAgent;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.response.ResponseStatus;
 import org.eclipse.edc.spi.result.Result;
@@ -74,9 +75,8 @@ class OnboardingPolicyVerifierImplTest {
 
     @Test
     void isOnboardingAllowed_success() {
-        when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), argThat(a ->
-                verifiableCredentials.equals(a.getClaims()) &&
-                        Map.of().equals(a.getAttributes()))))
+        when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), (argThat((ParticipantAgent a) -> verifiableCredentials.equals(a.getClaims()) &&
+                Map.of().equals(a.getAttributes())))))
                 .thenReturn(Result.success(policyResult));
 
         var result = verifier.isOnboardingAllowed(participantDid);
@@ -105,7 +105,7 @@ class OnboardingPolicyVerifierImplTest {
 
     @Test
     void isOnboardingAllowed_whenNotAllowedByPolicy_returnsFalse() {
-        when(policyEngine.evaluate(any(), any(), any()))
+        when(policyEngine.evaluate(any(), any(), any(ParticipantAgent.class)))
                 .thenReturn(Result.failure(failure));
 
         var result = verifier.isOnboardingAllowed(participantDid);
