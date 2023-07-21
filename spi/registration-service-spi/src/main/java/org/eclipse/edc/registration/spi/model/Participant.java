@@ -59,6 +59,11 @@ public class Participant extends StatefulEntity<Participant> {
         return copy(builder);
     }
 
+    @Override
+    public String stateAsString() {
+        return ParticipantStatus.from(state).name();
+    }
+
     public void transitionAuthorizing() {
         transition(AUTHORIZING, ONBOARDING_INITIATED);
     }
