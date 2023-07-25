@@ -14,19 +14,16 @@
 
 package org.eclipse.edc.registration.transform;
 
-import org.eclipse.edc.api.transformer.DtoTransformer;
 import org.eclipse.edc.registration.model.ParticipantDto;
 import org.eclipse.edc.registration.model.ParticipantStatusDto;
 import org.eclipse.edc.registration.spi.model.Participant;
 import org.eclipse.edc.registration.spi.model.ParticipantStatus;
-import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.transform.spi.TransformerContext;
+import org.eclipse.edc.transform.spi.TypeTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static java.lang.String.format;
-
-public class ParticipantToParticipantDtoTransformer implements DtoTransformer<Participant, ParticipantDto> {
+public class ParticipantToParticipantDtoTransformer implements TypeTransformer<Participant, ParticipantDto> {
 
     @Override
     public Class<Participant> getInputType() {
@@ -55,18 +52,10 @@ public class ParticipantToParticipantDtoTransformer implements DtoTransformer<Pa
      * @return {@link ParticipantStatusDto}
      */
     private ParticipantStatusDto mapToDtoStatus(ParticipantStatus status) {
-        switch (status) {
-            case ONBOARDING_INITIATED:
-            case AUTHORIZING:
-            case AUTHORIZED:
-                return ParticipantStatusDto.ONBOARDING_IN_PROGRESS;
-            case ONBOARDED:
-                return ParticipantStatusDto.ONBOARDED;
-            case DENIED:
-            case FAILED:
-                return ParticipantStatusDto.DENIED;
-            default:
-                throw new EdcException(format("Unknown ParticipantStatus value: %s", status));
-        }
+        return switch (status) {
+            case ONBOARDING_INITIATED, AUTHORIZING, AUTHORIZED -> ParticipantStatusDto.ONBOARDING_IN_PROGRESS;
+            case ONBOARDED -> ParticipantStatusDto.ONBOARDED;
+            case DENIED, FAILED -> ParticipantStatusDto.DENIED;
+        };
     }
 }

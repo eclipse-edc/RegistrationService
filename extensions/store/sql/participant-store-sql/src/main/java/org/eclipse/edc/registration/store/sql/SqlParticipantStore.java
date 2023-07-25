@@ -22,6 +22,7 @@ import org.eclipse.edc.registration.store.spi.ParticipantStore;
 import org.eclipse.edc.registration.store.sql.schema.ParticipantStatements;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.spi.result.StoreResult;
+import org.eclipse.edc.sql.QueryExecutor;
 import org.eclipse.edc.sql.store.AbstractSqlStore;
 import org.eclipse.edc.transaction.datasource.spi.DataSourceRegistry;
 import org.eclipse.edc.transaction.spi.TransactionContext;
@@ -36,8 +37,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuery;
-import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuerySingle;
 
 /**
  * SQL implementation for {@link ParticipantStore}
@@ -45,12 +44,12 @@ import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuerySingle;
 
 public class SqlParticipantStore extends AbstractSqlStore implements ParticipantStore {
 
-
     private final ParticipantStatements participantStatements;
 
 
-    public SqlParticipantStore(DataSourceRegistry dataSourceRegistry, String dataSourceName, TransactionContext transactionContext, ObjectMapper objectMapper, ParticipantStatements participantStatements) {
-        super(dataSourceRegistry, dataSourceName, transactionContext, objectMapper);
+    public SqlParticipantStore(DataSourceRegistry dataSourceRegistry, String dataSourceName, TransactionContext transactionContext,
+                               ObjectMapper objectMapper, ParticipantStatements participantStatements, QueryExecutor queryExecutor) {
+        super(dataSourceRegistry, dataSourceName, transactionContext, objectMapper, queryExecutor);
         this.participantStatements = Objects.requireNonNull(participantStatements);
     }
 
@@ -73,7 +72,7 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     public List<Participant> listParticipants() {
         return transactionContext.execute(() -> {
             try (var connection = getConnection()) {
-                try (var stream = executeQuery(connection, true, this::participantMapper, participantStatements.getSelectParticipantTemplate())) {
+                try (var stream = queryExecutor.query(connection, true, this::participantMapper, participantStatements.getSelectParticipantTemplate())) {
                     return stream.collect(Collectors.toList());
                 }
             } catch (EdcPersistenceException e) {
@@ -86,7 +85,6 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
 
     @Override
     public StoreResult<Participant> save(Participant participant) {
-
         transactionContext.execute(() -> {
             try (var connection = getConnection()) {
                 var existingParticipant = findByDidInternal(connection, participant.getDid());
@@ -110,7 +108,7 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     public Collection<Participant> listParticipantsWithStatus(ParticipantStatus state) {
         return transactionContext.execute(() -> {
             try (var connection = getConnection()) {
-                try (var stream = executeQuery(connection, true, this::participantMapper, participantStatements.getSelectParticipantByStateTemplate(), state.code())) {
+                try (var stream = queryExecutor.query(connection, true, this::participantMapper, participantStatements.getSelectParticipantByStateTemplate(), state.code())) {
                     return stream.collect(Collectors.toList());
                 }
             } catch (EdcPersistenceException e) {
@@ -122,11 +120,10 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     }
 
     private void update(Connection connection, Participant oldParticipant, Participant participant) {
-
         if (!oldParticipant.getId().equals(participant.getId())) {
             throw new EdcPersistenceException(format("Failed to update Participant with did %s: participant id didn't match", participant.getDid()));
         }
-        executeQuery(connection, participantStatements.getUpdateParticipantTemplate(),
+        queryExecutor.execute(connection, participantStatements.getUpdateParticipantTemplate(),
                 participant.getState(),
                 participant.getStateCount(),
                 participant.getStateTimestamp(),
@@ -139,7 +136,7 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     }
 
     private void insert(Connection connection, Participant participant) {
-        executeQuery(connection, participantStatements.getInsertParticipantsTemplate(),
+        queryExecutor.execute(connection, participantStatements.getInsertParticipantsTemplate(),
                 participant.getId(),
                 participant.getDid(),
                 participant.getState(),
@@ -166,8 +163,9 @@ public class SqlParticipantStore extends AbstractSqlStore implements Participant
     }
 
     private Participant findByDidInternal(Connection connection, String did) {
-        return executeQuerySingle(connection, false, this::participantMapper, participantStatements.getSelectParticipantByDidTemplate(), did);
+        try (var stream = queryExecutor.query(connection, false, this::participantMapper, participantStatements.getSelectParticipantByDidTemplate(), did)) {
+            return stream.findFirst().orElse(null);
+        }
     }
-
 
 }

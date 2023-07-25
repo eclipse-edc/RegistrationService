@@ -77,32 +77,24 @@ jobs:
         if: always()
 
 
-  Postgresql-Integration-Tests:
+  Component-Tests:
     runs-on: ubuntu-latest
     env:
       JACOCO: true
-
-    services:
-      postgres:
-        image: postgres:14.2
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: password
 
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/gradle-setup
 
-      - name: Postgresql Tests
+      - name: Component Tests
         uses: ./.github/actions/run-tests
         with:
-          command: ./gradlew test -DincludeTags="PostgresqlIntegrationTest"
+          command: ./gradlew test -DincludeTags="ComponentTest"
 
   Upload-Coverage-Report-To-Codecov:
     needs:
       - Test
-      - Postgresql-Integration-Tests
+      - Component-Tests
     runs-on: ubuntu-latest
     if: always()
     steps:
