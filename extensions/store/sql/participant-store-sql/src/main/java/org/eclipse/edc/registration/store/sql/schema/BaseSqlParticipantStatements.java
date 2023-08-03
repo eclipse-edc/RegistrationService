@@ -14,7 +14,8 @@
 
 package org.eclipse.edc.registration.store.sql.schema;
 
-import org.eclipse.edc.sql.dialect.BaseSqlDialect;
+
+import org.eclipse.edc.sql.dialect.PostgresDialect;
 
 import static java.lang.String.format;
 
@@ -55,7 +56,7 @@ public class BaseSqlParticipantStatements implements ParticipantStatements {
     }
 
     protected String getFormatJsonOperator() {
-        return BaseSqlDialect.getJsonCastOperator();
+        return PostgresDialect.getJsonCastOperator();
     }
 
 }
