@@ -72,9 +72,8 @@ maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.28, Apache-2.0, approved, clea
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.31, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.puppycrawl.tools/checkstyle/10.0, LGPL-2.1-or-later, approved, #7936
 maven/mavencentral/com.samskivert/jmustache/1.15, BSD-2-Clause, approved, clearlydefined
-maven/mavencentral/com.squareup.okhttp3/mockwebserver/4.10.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.squareup.okhttp3/mockwebserver/4.11.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.squareup.okhttp3/okhttp-dnsoverhttps/4.11.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.squareup.okhttp3/okhttp/4.10.0, Apache-2.0 AND MPL-2.0, approved, #3057
 maven/mavencentral/com.squareup.okhttp3/okhttp/4.11.0, Apache-2.0, approved, #9240
 maven/mavencentral/com.squareup.okhttp3/okhttp/4.9.3, Apache-2.0 AND MPL-2.0, approved, #3225
 maven/mavencentral/com.squareup.okio/okio-jvm/3.2.0, Apache-2.0, approved, clearlydefined
