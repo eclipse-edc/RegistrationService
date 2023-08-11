@@ -10,7 +10,7 @@ httpMockServer = "5.15.0"
 jetbrains-annotations = "24.0.1"
 jupiter = "5.9.2"
 okhttp = "4.10.0"
-openApiTools = "0.2.1"
+openApiTools = "0.2.6"
 picocli = "4.6.3"
 
 [libraries]
