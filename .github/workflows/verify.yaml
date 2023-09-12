@@ -21,7 +21,7 @@ jobs:
   Checkstyle:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/gradle-setup
 
       - name: Run Checkstyle
@@ -30,7 +30,7 @@ jobs:
   OpenAPI-Definitions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/gradle-setup
 
       - name: Generate OpenAPI definition from code
@@ -45,7 +45,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ./.github/actions/gradle-setup
 
@@ -83,7 +83,7 @@ jobs:
       JACOCO: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/gradle-setup
 
       - name: Component Tests
@@ -99,7 +99,7 @@ jobs:
     if: always()
     steps:
       # Sources are needed for Codecov report
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
