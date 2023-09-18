@@ -36,7 +36,6 @@ paths:
             application/json:
               schema:
                 type: array
-                example: null
                 items:
                   $ref: '#/components/schemas/ParticipantDto'
           description: Dataspace participants.
@@ -47,11 +46,9 @@ components:
     ParticipantDto:
       type: object
       description: Dataspace Participant DTO
-      example: null
       properties:
         did:
           type: string
-          example: null
         status:
           type: string
           description: Participant onboarding status DTO
@@ -59,4 +56,3 @@ components:
           - ONBOARDING_IN_PROGRESS
           - ONBOARDED
           - DENIED
-          example: null
