@@ -19,6 +19,7 @@ import org.eclipse.edc.iam.did.spi.credentials.CredentialsVerifier;
 import org.eclipse.edc.iam.did.spi.document.DidDocument;
 import org.eclipse.edc.iam.did.spi.document.Service;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
+import org.eclipse.edc.policy.engine.spi.PolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.policy.model.Policy;
 import org.eclipse.edc.registration.spi.registration.DataspaceRegistrationPolicy;
@@ -29,6 +30,7 @@ import org.eclipse.edc.spi.result.Result;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,6 @@ class OnboardingPolicyVerifierImplTest {
     private final String participantDid = "some.test/url";
     private final PolicyEngine policyEngine = mock(PolicyEngine.class);
     private final Policy policy = mock(Policy.class);
-    private final Policy policyResult = mock(Policy.class);
     private final DataspaceRegistrationPolicy dataspaceRegistrationPolicy = () -> policy;
     private final DidResolverRegistry resolverRegistry = mock(DidResolverRegistry.class);
     private final CredentialsVerifier credentialsVerifier = mock(CredentialsVerifier.class);
@@ -75,9 +76,15 @@ class OnboardingPolicyVerifierImplTest {
 
     @Test
     void isOnboardingAllowed_success() {
-        when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), (argThat((ParticipantAgent a) -> verifiableCredentials.equals(a.getClaims()) &&
-                Map.of().equals(a.getAttributes())))))
-                .thenReturn(Result.success(policyResult));
+
+        ArgumentMatcher<PolicyContext> argumentMatcher = (PolicyContext c) -> {
+            var agent = c.getContextData(ParticipantAgent.class);
+            return verifiableCredentials.equals(agent.getClaims()) &&
+                    Map.of().equals(agent.getAttributes());
+        };
+        
+        when(policyEngine.evaluate(eq(PARTICIPANT_REGISTRATION_SCOPE), eq(policy), argThat(argumentMatcher)))
+                .thenReturn(Result.success());
 
         var result = verifier.isOnboardingAllowed(participantDid);
 
@@ -105,7 +112,7 @@ class OnboardingPolicyVerifierImplTest {
 
     @Test
     void isOnboardingAllowed_whenNotAllowedByPolicy_returnsFalse() {
-        when(policyEngine.evaluate(any(), any(), any(ParticipantAgent.class)))
+        when(policyEngine.evaluate(any(), any(), any(PolicyContext.class)))
                 .thenReturn(Result.failure(failure));
 
         var result = verifier.isOnboardingAllowed(participantDid);
