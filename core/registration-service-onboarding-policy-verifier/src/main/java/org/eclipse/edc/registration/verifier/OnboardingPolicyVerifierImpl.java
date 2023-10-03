@@ -16,6 +16,7 @@ package org.eclipse.edc.registration.verifier;
 
 import org.eclipse.edc.iam.did.spi.credentials.CredentialsVerifier;
 import org.eclipse.edc.iam.did.spi.resolution.DidResolverRegistry;
+import org.eclipse.edc.policy.engine.spi.PolicyContextImpl;
 import org.eclipse.edc.policy.engine.spi.PolicyEngine;
 import org.eclipse.edc.registration.spi.registration.DataspaceRegistrationPolicy;
 import org.eclipse.edc.registration.spi.verifier.OnboardingPolicyVerifier;
@@ -80,7 +81,11 @@ public class OnboardingPolicyVerifierImpl implements OnboardingPolicyVerifier {
 
         var agent = new ParticipantAgent(credentials, Collections.emptyMap());
 
-        var evaluationResult = policyEngine.evaluate(PARTICIPANT_REGISTRATION_SCOPE, dataspaceRegistrationPolicy.get(), agent);
+        var policyContext = PolicyContextImpl.Builder.newInstance()
+                .additional(ParticipantAgent.class, agent)
+                .build();
+
+        var evaluationResult = policyEngine.evaluate(PARTICIPANT_REGISTRATION_SCOPE, dataspaceRegistrationPolicy.get(), policyContext);
         var policyResult = evaluationResult.succeeded();
 
         monitor.debug(() -> "Policy evaluation result: " + policyResult);
