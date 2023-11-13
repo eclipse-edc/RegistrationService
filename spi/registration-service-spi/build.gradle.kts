@@ -6,6 +6,5 @@ plugins {
 dependencies {
     api(libs.edc.spi.core)
     api(libs.edc.spi.policy.engine)
-    api(libs.edc.spi.aggregate.service)
     api(libs.ih.spi.core)
 }

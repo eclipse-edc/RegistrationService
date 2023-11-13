@@ -37,7 +37,6 @@ edc-spi-policy-engine = { module = "org.eclipse.edc:policy-engine-spi", version.
 edc-spi-transaction = { module = "org.eclipse.edc:transaction-spi", version.ref = "edc" }
 edc-spi-transaction-datasource = { module = "org.eclipse.edc:transaction-datasource-spi", version.ref = "edc" }
 edc-spi-identity-did = { module = "org.eclipse.edc:identity-did-spi", version.ref = "edc" }
-edc-spi-aggregate-service = { module = "org.eclipse.edc:aggregate-service-spi", version.ref = "edc" }
 edc-core-connector = { module = "org.eclipse.edc:connector-core", version.ref = "edc" }
 edc-core-micrometer = { module = "org.eclipse.edc:micrometer-core", version.ref = "edc" }
 edc-core-api = { module = "org.eclipse.edc:api-core", version.ref = "edc" }
