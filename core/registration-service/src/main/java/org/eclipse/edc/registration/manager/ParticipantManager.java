@@ -24,8 +24,8 @@ import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.retry.WaitStrategy;
 import org.eclipse.edc.spi.system.ExecutorInstrumentation;
 import org.eclipse.edc.spi.telemetry.Telemetry;
+import org.eclipse.edc.statemachine.ProcessorImpl;
 import org.eclipse.edc.statemachine.StateMachineManager;
-import org.eclipse.edc.statemachine.StateProcessorImpl;
 
 import java.util.function.Function;
 
@@ -109,9 +109,11 @@ public class ParticipantManager {
         participantStore.save(participant);
         return true;
     }
+    
 
-    private StateProcessorImpl<Participant> processParticipantsInState(ParticipantStatus status, Function<Participant, Boolean> function) {
-        var functionWithTraceContext = telemetry.contextPropagationMiddleware(function);
-        return new StateProcessorImpl<>(() -> participantStore.listParticipantsWithStatus(status), functionWithTraceContext);
+    private ProcessorImpl<Participant> processParticipantsInState(ParticipantStatus status, Function<Participant, Boolean> function) {
+        return ProcessorImpl.Builder.newInstance(() -> participantStore.listParticipantsWithStatus(status))
+                .process(telemetry.contextPropagationMiddleware(function))
+                .build();
     }
 }
