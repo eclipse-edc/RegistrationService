@@ -31,7 +31,7 @@ import java.util.Objects;
 
 /**
  * Intercepts all requests sent to this resource and authenticates them using DID Web.
- *
+ * <p>
  * The resolved DID URL is injected as HTTP Header for use by the controller. The name of the header is defined by {@link #CALLER_DID_HEADER}.
  */
 public class DidJwtAuthenticationFilter implements ContainerRequestFilter {
@@ -52,10 +52,11 @@ public class DidJwtAuthenticationFilter implements ContainerRequestFilter {
         var headers = requestContext.getHeaders();
         Objects.requireNonNull(headers, "headers");
 
-        String credential = getCredential(headers);
-        SignedJWT jwt = parseJsonWebToken(credential);
-        String issuer = getIssuerClaim(jwt);
-        verifyTokenSignature(jwt, issuer);
+        var credential = getCredential(headers);
+        var jwt = parseJsonWebToken(credential);
+        var issuer = getIssuerClaim(jwt);
+        var kid = jwt.getHeader().getKeyID();
+        verifyTokenSignature(jwt, issuer, kid);
 
         monitor.debug("Valid JWT");
 
@@ -95,8 +96,8 @@ public class DidJwtAuthenticationFilter implements ContainerRequestFilter {
         return separatedAuthHeader[1];
     }
 
-    private void verifyTokenSignature(SignedJWT jwt, String issuer) {
-        var publicKey = didPublicKeyResolver.resolvePublicKey(issuer);
+    private void verifyTokenSignature(SignedJWT jwt, String issuer, String kid) {
+        var publicKey = didPublicKeyResolver.resolvePublicKey(issuer, kid);
 
         if (publicKey.failed()) {
             throw authenticationFailure("Failed obtaining public key for DID: " + issuer, publicKey.getFailureMessages());

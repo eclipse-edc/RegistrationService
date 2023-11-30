@@ -40,9 +40,14 @@ class RegistrationServiceTestUtils {
     private RegistrationServiceTestUtils() {
     }
 
+    @NotNull
+    private static Service identityHub() {
+        return new Service("#identity-hub", "IdentityHub", IDENTITY_HUB_URL);
+    }
+
     static String didDocument() throws Exception {
         var publicKey = (ECKey) ECKey.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256);
-        var vm = VerificationMethod.Builder.create()
+        var vm = VerificationMethod.Builder.newInstance()
                 .id("#my-key-1")
                 .type(DidConstants.ECDSA_SECP_256_K_1_VERIFICATION_KEY_2019)
                 .controller("")
@@ -63,10 +68,5 @@ class RegistrationServiceTestUtils {
     @NotNull
     static RegistryApiClient createApi(String did, String apiUrl) {
         return ClientUtils.createApiClient(apiUrl, did, TestKeyData.PRIVATE_KEY_P256);
-    }
-
-    @NotNull
-    private static Service identityHub() {
-        return new Service("#identity-hub", "IdentityHub", IDENTITY_HUB_URL);
     }
 }
