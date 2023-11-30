@@ -36,6 +36,8 @@ import java.time.Clock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.edc.registration.auth.DidJwtAuthenticationFilter.CALLER_DID_HEADER;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +61,7 @@ class DidJwtAuthenticationFilterTest {
         when(request.getHeaders()).thenReturn(headers);
         privateKey = new EcPrivateKeyWrapper(JWK.parseFromPEMEncodedObjects(TestKeyData.PRIVATE_KEY_P256).toECKey());
         var publicKey = new EcPublicKeyWrapper(JWK.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256).toECKey());
-        when(didPublicKeyResolver.resolvePublicKey(issuer))
+        when(didPublicKeyResolver.resolvePublicKey(eq(issuer), any()))
                 .thenReturn(Result.success(publicKey));
 
         authHeader = "Bearer " + getTokenFor(audience);
@@ -87,7 +89,7 @@ class DidJwtAuthenticationFilterTest {
             " ",
             "Bear ey",
             "Bearer ey f",
-            "Bearer" })
+            "Bearer"})
     void filter_onInvalidAuthHeader_fails(String header) {
         headers.putSingle(AUTHORIZATION, header);
         assertNotAuthenticated("Cannot authenticate request. Authorization header value is not a valid Bearer token");
@@ -102,7 +104,7 @@ class DidJwtAuthenticationFilterTest {
     @Test
     void filter_onUnresolvedDid_fails() {
         headers.putSingle(AUTHORIZATION, authHeader);
-        when(didPublicKeyResolver.resolvePublicKey(issuer))
+        when(didPublicKeyResolver.resolvePublicKey(eq(issuer), any()))
                 .thenReturn(Result.failure("Test Failure"));
 
         assertNotAuthenticated("Failed obtaining public key for DID: " + issuer);
