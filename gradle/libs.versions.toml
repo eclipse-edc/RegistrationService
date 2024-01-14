@@ -4,10 +4,11 @@ format.version = "1.1"
 [versions]
 assertj = "3.24.2"
 awaitility = "4.2.0"
-edc = "0.4.1"
-# we need to pin the version of IH, because this is the last version to contain the DWN implementation
+# we need to pin the version of EDC and IH, because these are the last version to contain the DWN implementation plus required
+# EDC classes.
 # current snapshot builds of IH don't have feature parity yet.
 # todo: remove this once IH supports credential presentation and issuance
+edc = "0.4.1"
 identityhub = "0.3.1"
 failsafe = "3.3.2"
 httpMockServer = "5.15.0"
