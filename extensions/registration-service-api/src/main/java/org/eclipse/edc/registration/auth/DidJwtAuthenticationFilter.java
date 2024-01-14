@@ -97,7 +97,7 @@ public class DidJwtAuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void verifyTokenSignature(SignedJWT jwt, String issuer, String kid) {
-        var publicKey = didPublicKeyResolver.resolvePublicKey(issuer, kid);
+        var publicKey = didPublicKeyResolver.resolvePublicKey(issuer + "#" + kid);
 
         if (publicKey.failed()) {
             throw authenticationFailure("Failed obtaining public key for DID: " + issuer, publicKey.getFailureMessages());
