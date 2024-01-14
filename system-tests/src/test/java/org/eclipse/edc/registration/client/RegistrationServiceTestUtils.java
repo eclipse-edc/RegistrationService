@@ -47,7 +47,7 @@ class RegistrationServiceTestUtils {
 
     static String didDocument() throws Exception {
         var publicKey = (ECKey) ECKey.parseFromPEMEncodedObjects(TestKeyData.PUBLIC_KEY_P256);
-        var vm = VerificationMethod.Builder.newInstance()
+        var vm = VerificationMethod.Builder.create()
                 .id("#my-key-1")
                 .type(DidConstants.ECDSA_SECP_256_K_1_VERIFICATION_KEY_2019)
                 .controller("")
