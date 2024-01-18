@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/gradle-setup
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest checkstyleTestFixtures
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/gradle-setup
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
 
       - name: Generate OpenAPI definition from code
         run: ./gradlew resolve
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./.github/actions/gradle-setup
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
 
       - name: 'Build package'
         run: ./gradlew -DuseFsVault="true" build
@@ -64,7 +64,7 @@ jobs:
         timeout-minutes: 10
 
       - name: 'Unit and system tests'
-        uses: ./.github/actions/run-tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
         with:
           command: ./gradlew test
         timeout-minutes: 10
@@ -84,10 +84,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/gradle-setup
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
 
       - name: Component Tests
-        uses: ./.github/actions/run-tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
         with:
           command: ./gradlew test -DincludeTags="ComponentTest"
 
