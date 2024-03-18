@@ -3,7 +3,7 @@ format.version = "1.1"
 
 [versions]
 assertj = "3.25.3"
-awaitility = "4.2.0"
+awaitility = "4.2.1"
 # we need to pin the version of EDC and IH, because these are the last version to contain the DWN implementation plus required
 # EDC classes.
 # current snapshot builds of IH don't have feature parity yet.
