@@ -16,7 +16,7 @@ jetbrains-annotations = "24.1.0"
 jupiter = "5.10.2"
 okhttp = "4.11.0"
 openApiTools = "0.2.6"
-picocli = "4.7.4"
+picocli = "4.7.6"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
