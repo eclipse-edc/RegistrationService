@@ -64,7 +64,7 @@ mockserver-netty = { module = "org.mock-server:mockserver-netty", version.ref = 
 mockserver-client = { module = "org.mock-server:mockserver-client-java", version.ref = "httpMockServer" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 openapi-jackson-databind-nullable = { module = "org.openapitools:jackson-databind-nullable", version.ref = "openApiTools" }
-opentelemetry-instrumentation-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version = "1.32.0" }
+opentelemetry-instrumentation-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version = "2.4.0" }
 
 [bundles]
 
